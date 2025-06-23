@@ -6,9 +6,16 @@ export const usersTable = sqliteTable("users", {
 	email: text({ length: 255 }).notNull().unique(),
 	password: text({ length: 255 }).notNull(),
 
-	created_at: int({mode:"timestamp"}).defaultNow(),
-	updated_at: int({mode:"timestamp"}).defaultNow(),
+	created_at: int({mode:"timestamp_ms"}).defaultNow(),
+	updated_at: int({mode:"timestamp_ms"}),
 	is_activated: int({mode:"boolean"}).default(false)
-
-
 });
+
+
+
+export const TABLE_ACTIONS = {
+	created_by:int().references(()=>usersTable.id).notNull(),
+	updated_by:int().references(()=>usersTable.id),
+	created_at:int({mode:"timestamp_ms"}).defaultNow(),
+	updated_at:int({mode:"timestamp_ms"}),
+}
