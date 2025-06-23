@@ -9,6 +9,7 @@ export const TestController = new Elysia({
 	name: "test.controller.ts",
 	prefix: "/test",
 	tags: ["dev"],
+	detail:{hide:true}
 })
 	.group("/network_stuff", (app) =>
 		app.use(

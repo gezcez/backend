@@ -1,6 +1,7 @@
 import Elysia, { t } from "elysia"
 import { GezcezResponse } from "../common/Gezcez"
 import { NetworkService } from "../services/network/network.service"
+import { NetworkRepository } from "../services/network/network.repository"
 
 export const NetworkMiddleware = new Elysia({
 	name: "network.middleware.ts",
@@ -13,7 +14,7 @@ export const NetworkMiddleware = new Elysia({
 		}),
 	})
 	.resolve({ as: "scoped" }, async ({ params: { network_id } }) => {
-		const network = await NetworkService.getNetworkById(parseInt(network_id))
+		const network = await NetworkRepository.getNetworkById(parseInt(network_id))
 		return { network: network }
 	})
 	.guard({

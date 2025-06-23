@@ -13,6 +13,7 @@ import { AuthenticationMiddleware } from "../../middlewares/authentication.middl
 import { UserRepository } from "../user/user.repository"
 import { AuthorizationMiddleware } from "../../middlewares/authorization.middleware"
 import { usersTable } from "../../schema/users"
+import { AppsRepository } from "../apps/apps.repository"
 export const OAuthController = new Elysia({
 	prefix: "/oauth",
 	name: "oauth.controller.ts",
@@ -33,7 +34,7 @@ export const OAuthController = new Elysia({
 			if (!OAuthService.validate("email", email)) {
 				return GezcezValidationFailedError(c, "body:password", "invalid email!")
 			}
-			const [user, error] = await OAuthRepository.insertUser({
+			const [user, error] = await OAuthRepository.insert({
 				email: email,
 				username: username,
 				password: password,
@@ -56,11 +57,43 @@ export const OAuthController = new Elysia({
 						aud: "oauth",
 					})
 				)
+				.post(
+					"/authorize",
+					async ({ payload, query: { app_key } }) => {
+						const app_details = await AppsRepository.getAppByKey(app_key)
+						if (!app_details) return GezcezError("BAD_REQUEST", "app not found")
+						const user_permissions = await UserRepository.getUserPermissionsByAppKey(payload.sub, app_key)
+						const scope_payload = new Map()
+						for (const permission of user_permissions) {
+							const user_p = permission.user_permission
+							const details = permission.permission_details
+							const scope = details?.type==="scoped" ? user_p.scope.toString():"_"
+							const current_value = scope_payload.get(scope) || 0
+							if (user_p.status === true) {
+								scope_payload.set(scope, current_value + 2 ** user_p.permission_id)
+							}
+						}
+						const payload_o = Object.fromEntries(scope_payload.entries())
+						const access_token = await OAuthService.signJWT(
+							{
+								scopes: payload_o,
+								sub: payload.sub.toString(),
+								is_activated:payload.is_activated
+							},
+							"1h",
+							"system"
+						)
+						return GezcezResponse({ __message: "Logged in!", access_token: access_token,payload:payload_o}, 200)
+					},
+					{ query: t.Object({ app_key: t.String() }) }
+				)
 				.get("/me", async ({ payload }) => {
 					const user = await OAuthRepository.selectUserById(payload.sub, { get_raw_email: true })
+					const permissions = await UserRepository.getUserPermissions(payload.sub)
 					return GezcezResponse({
 						payload: payload,
 						user: user,
+						permissions: permissions,
 					})
 				})
 				.use(
@@ -91,7 +124,7 @@ export const OAuthController = new Elysia({
 			}
 			return GezcezResponse({
 				user: user,
-				access_token: await OAuthService.signJWT(
+				refresh_token: await OAuthService.signJWT(
 					{
 						sub: user.id.toString(),
 						is_activated: user.is_activated,

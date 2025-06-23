@@ -18,9 +18,9 @@ export const permissionsTable = sqliteTable("permissions", {
 
 export const userPermissionsTable = sqliteTable("user_permissions", {
 	user_id: int().references(() => usersTable.id).notNull(),
-	permission_id: int().references(() => permissionsTable.id),
+	permission_id: int().references(() => permissionsTable.id).notNull(),
 	status: int({ mode: "boolean" }).default(false).notNull(),
-	scope: int().references(()=>networksTable.id),
+	scope: int().references(()=>networksTable.id).notNull(),
 	...TABLE_ACTIONS
 }, (table) => [
 	index("user_permissions_idx").on(table.user_id, table.permission_id),

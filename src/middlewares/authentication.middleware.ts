@@ -20,6 +20,7 @@ export const AuthenticationMiddleware = (config: { aud: "oauth" | (string & {})}
 			try {
 				payload = await OAuthService.verifyJWT(access_token, config.aud)
 			} catch {}
+			console.log(payload)
 			if (!payload) return undefined as any
 			if (!payload.is_activated) return undefined as any
 			return { payload: payload }

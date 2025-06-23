@@ -13,7 +13,7 @@ export function GezcezError(error_type: ErrorType, error: any) {
 		} case "NOT_FOUND": {
 			return GezcezResponse({ __message: "Not Found!", error_key: error_type }, 404)
 		} case "UNAUTHORIZED": {
-			return GezcezResponse({ __message: "Unauthorized!", error_key: error_type }, 401)
+			return GezcezResponse({ __message: "Unauthorized!", error_key: error_type,...error }, 401)
 		} case "VALIDATION_FAILED" : {
 			return GezcezResponse({ __message: "Object validation failed!", error_key: error_type, ...error }, 400)
 		}

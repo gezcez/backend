@@ -5,6 +5,7 @@ import { GezcezError, GezcezValidationFailedError } from "./common/GezcezError"
 import { OAuthController } from "./services/oauth/oauth.controller"
 import { TestController } from "./services/test.controller"
 import { NetworkController } from "./services/network/network.controller"
+import { SystemController } from "./services/system/system.controller"
 const app = new Elysia()
 	.use(
 		swagger({
@@ -53,6 +54,7 @@ const app = new Elysia()
 		logger.log(c.path)
 	})
 	.use(OAuthController)
+	.use(SystemController)
 	.use(TestController)
 	.use(NetworkController)
 	.listen(

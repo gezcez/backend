@@ -4,6 +4,7 @@ import { AuthorizationMiddleware } from "../../middlewares/authorization.middlew
 export const NetworkController = new Elysia({
 	name: "network.controller.ts",
 	tags: ["network"],
+	prefix: "/networks",
 }).use(
 	NetworkMiddleware.get("/info", ({ network }) => {
 		network: network

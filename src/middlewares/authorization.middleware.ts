@@ -33,6 +33,8 @@ export const AuthorizationMiddleware = (config: { check_for_aud: "oauth" | (stri
 				if (check_pid && !nid) net_to_check = "_" //global permissions
 				const user_permissions = await OAuthService.getPermissionIDsFromPayload(payload, net_to_check)
 				console.log(user_permissions,nid,aud,pid)
+
+				// if permission checking is set
 				if (check_pid) {
 					if (!user_permissions.includes(pid)) {
 						set.status = 403
@@ -42,12 +44,13 @@ export const AuthorizationMiddleware = (config: { check_for_aud: "oauth" | (stri
 							check_for_network_authentication: config.check_for_network_authentication,
 						})
 					}
+				} else {
+					return GezcezError("UNAUTHORIZED", {
+						aud: config.check_for_aud,
+						required_permission: config.requires_permission_id,
+						user_permissions:user_permissions,
+						check_for_network_authentication: config.check_for_network_authentication,
+					})
 				}
-				return GezcezError("UNAUTHORIZED", {
-					aud: config.check_for_aud,
-					required_permission: config.requires_permission_id,
-					user_permissions:user_permissions,
-					check_for_network_authentication: config.check_for_network_authentication,
-				})
 			},
 		})

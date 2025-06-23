@@ -4,7 +4,7 @@ import { db } from "../../util"
 import { OAuthService } from "./oauth.service"
 import {password as Password} from "bun"
 export abstract class OAuthRepository {
-	static async insertUser(user: typeof usersTable.$inferInsert): Promise<[typeof usersTable.$inferSelect] | [false, string]> {
+	static async insert(user: typeof usersTable.$inferInsert): Promise<[typeof usersTable.$inferSelect] | [false, string]> {
 		const is_username_and_email_available = await OAuthService.isUsernameOrEmailTaken(user.username, user.email)
 		if (!is_username_and_email_available) return [false, "username or email is already in use"]
 		const [result] = await db
