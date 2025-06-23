@@ -1,4 +1,4 @@
-import { eq, or } from "drizzle-orm"
+import { and, eq, or } from "drizzle-orm"
 import { usersTable } from "../../schema/users"
 import { config, db } from "../../util"
 import { password } from "bun"
@@ -41,15 +41,9 @@ export abstract class OAuthService {
 		if (result) return false
 		return true
 	}
-	static async insertUser(user: typeof usersTable.$inferInsert): Promise<[typeof usersTable.$inferSelect] | [false, string]> {
-		const is_username_and_email_available = await this.isUsernameOrEmailTaken(user.username, user.email)
-		if (!is_username_and_email_available) return [false, "username or email is already in use"]
-		const [result] = await db.insert(usersTable).values({
-			...user,
-			password: await password.hash(user.password, {
-				algorithm: "bcrypt", cost: 14
-			})
-		}).returning()
-		return [result]
+	static async hashPassword(pwd: string) {
+		return await password.hash(pwd, {
+			algorithm: "bcrypt", cost: 14
+		})
 	}
 }

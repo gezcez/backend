@@ -3,6 +3,9 @@ import { swagger } from "@elysiajs/swagger"
 import { logger } from "./util";
 import { GezcezError, GezcezValidationFailedError } from "./common/GezcezError";
 import { OAuthController } from "./services/oauth/oauth.controller";
+import { NetworkMiddleware } from "./middlewares/network.middleware";
+import { GezcezResponse } from "./common/Gezcez";
+import { TestController } from "./services/test.controller";
 const app = new Elysia()
 	.use(swagger({
 		path: "/docs",
@@ -35,23 +38,20 @@ const app = new Elysia()
 				)
 			}
 			if (c.code == "PARSE") {
-				return GezcezError("BAD_REQUEST", c.error, c as any)
+				return GezcezError("BAD_REQUEST", c.error)
 			}
+			if (c.code == "NOT_FOUND") {
+				c.set.status = 404
+				return GezcezError("NOT_FOUND", undefined)
+			}
+			console.error(c.code, c.error)
 			return GezcezError("INTERNAL_SERVER_ERROR",
 				"hidden due to security",
-				c as any)
+			)
 		}
 	)
 	.use(OAuthController)
-	.get("/error", (c) => {
-		return GezcezValidationFailedError(c, "query:validation")
-		return
-	}, {
-		tags: ["dev"],
-		query: t.Optional(t.Object({
-			validation: t.String()
-		})),
-	})
+	.use(TestController)
 	.listen({
 		development: process.env.NODE_ENV === "dev",
 		port: process.env.PORT || 80,

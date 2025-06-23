@@ -36,7 +36,6 @@ export abstract class OAuthDTO {
 	)
 	static account_login = t.Omit(
 		OAuthDTO.account_create,
-		OAuthDTO.account_create.properties.tos,
-		OAuthDTO.account_create.properties.username
+		["tos", "username"]
 	)
 }

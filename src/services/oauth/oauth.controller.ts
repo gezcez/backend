@@ -1,15 +1,16 @@
 import { Elysia, t } from "elysia"
 import { OAuthDTO } from "./oauth.dto"
-import { GezcezValidationFailedError } from "../../common/GezcezError"
+import { GezcezError, GezcezValidationFailedError } from "../../common/GezcezError"
 import { OAuthService } from "./oauth.service"
 import { GezcezResponse } from "../../common/Gezcez"
+import { OAuthRepository } from "./oauth.repository"
 export const OAuthController = new Elysia({
 	prefix: "/oauth",
 	name: "oauth.controller.ts",
 	tags: ["OAuth Service"],
 
 }).group("/account",
-	(group) => group.post("create", async (c) => {
+	(group) => group.post("/create", async (c) => {
 		const { body } = c
 		const { email, password, tos, username } = body
 		if (!(tos === true)) return GezcezValidationFailedError(c, "body:tos", "user must accept tos!")
@@ -22,11 +23,21 @@ export const OAuthController = new Elysia({
 		if (!OAuthService.validate("email", email)) {
 			return GezcezValidationFailedError(c, "body:password", "invalid email!")
 		}
-		const [user, error] = await OAuthService.insertUser({
+		const [user, error] = await OAuthRepository.insertUser({
 			email: email, username: username, password: password
 		})
-		c.set.status=409
-		if (error) return GezcezResponse({ __message: error }, c, 409)
-		return GezcezResponse({ account: { ...user, password: undefined }, __message: "Account has been created successfully! [email verification needed]." }, c, 200)
+		c.set.status = 409
+		if (error) return GezcezResponse({ __message: error }, 409)
+
+		return GezcezResponse({ account: { ...user, password: undefined }, __message: "Account has been created successfully! [email verification needed]." }, 200)
 	}, { body: OAuthDTO.account_create })
+		.post("/login", async ({ body: { email, password }, set }) => {
+			const user = await OAuthRepository.selectUserByEmailAndPassword(email, password)
+			if (!user) {
+				set.status = 401
+				return GezcezResponse({ __message: "Invalid email or password!" }, 401)
+			}
+			return GezcezResponse({ user: user })
+		}, { body: OAuthDTO.account_login }
+		)
 )
