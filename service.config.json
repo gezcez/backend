@@ -1,0 +1,17 @@
+{
+	"validation": {
+		"password" : {
+			"min_length":8,
+			"max_length":128
+		},
+		
+		"username" : {
+			"min_length":4,
+			"max_length":20
+		},
+		"email" : {
+			"min_length":4,
+			"max_length":64
+		}
+	}
+}

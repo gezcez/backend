@@ -1,25 +1,38 @@
 import { Context } from "elysia"
 import { GezcezResponse } from "./Gezcez"
 
-export function GezcezError(error_type: ErrorType, error:any,ctx:Context) {
+export function GezcezError(error_type: ErrorType, error: any, ctx: Context) {
+	
 	switch (error_type) {
 		case "BAD_REQUEST": {
-			return GezcezResponse({ __message: "Bad Request!", error_key: error_type,error:error },ctx, 400)
+			return GezcezResponse({ __message: "Bad Request!", error_key: error_type, error: error }, ctx, 400)
 		} case "INTERNAL_SERVER_ERROR": {
-			return GezcezResponse({ __message: "Internal Server Error!", error_key: error_type,error:error },ctx, 500)
+			return GezcezResponse({ __message: "Internal Server Error!", error_key: error_type, error: error }, ctx, 500)
 		} case "NOT_AUTHENTICATED": {
-			return GezcezResponse({ __message: "Not Authenticated!", error_key: error_type },ctx, 401)
+			return GezcezResponse({ __message: "Not Authenticated!", error_key: error_type }, ctx, 401)
 		} case "NOT_FOUND": {
-			return GezcezResponse({ __message: "Not Found!", error_key: error_type },ctx,404)
+			return GezcezResponse({ __message: "Not Found!", error_key: error_type }, ctx, 404)
 		} case "UNAUTHORIZED": {
-			return GezcezResponse({ __message: "Unauthorized!", error_key: error_type },ctx,401)
+			return GezcezResponse({ __message: "Unauthorized!", error_key: error_type }, ctx, 401)
+		} case "VALIDATION_FAILED" : {
+			return GezcezResponse({ __message: "Object validation failed!", error_key: error_type, ...error }, ctx, 400)
 		}
 		default: {
-			return GezcezResponse({ __message: "Unknown Error!", error_key: error_type },ctx,500)
+			return GezcezResponse({ __message: "Unknown Error!", error_key: error_type }, ctx, 500)
 		}
 	}
 }
 
+export function GezcezValidationFailedError<T extends Context>(c:T,err:
+	| `query:${(keyof T["query"] extends string ? keyof T["query"] : never)}`
+	| `params:${(keyof T["params"] extends string ? keyof T["params"] : never)}`
+	| `headers:${(keyof T["headers"] extends string ? keyof T["headers"] : never)}`
+	| `body:${(keyof T["body"] extends string ? keyof T["body"] : never)}`
+	| string & {},
+	details?:string
+) {
+	return GezcezError("VALIDATION_FAILED",{error:`Object validation failed for '${err}'`,__message:details},c)
+}
 
 export type ErrorType =
 	| "UNAUTHORIZED"
@@ -27,3 +40,4 @@ export type ErrorType =
 	| "BAD_REQUEST"
 	| "INTERNAL_SERVER_ERROR"
 	| "NOT_FOUND"
+	| "VALIDATION_FAILED"

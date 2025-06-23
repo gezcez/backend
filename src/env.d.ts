@@ -7,5 +7,6 @@ declare module "bun" {
 		JWT_SECRET?: string
 		URL_DB?: string
 		CONFIG_PATH?: string
+		HOST?:(string | "localhost") & {}
 	}
 }
