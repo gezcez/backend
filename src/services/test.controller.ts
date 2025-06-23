@@ -30,8 +30,16 @@ export const TestController = new Elysia({
 			),
 		}
 	)
-	.group("/:network_id",(app)=>
-		app.use(AuthorizationMiddleware({check_for_aud:"oauth",requires_permission_id:1}).get("/network_and_jwt_auth", ({ network, payload }) => {
-			return {network,payload}
-		})
-	))
+
+	.group("/network/", (app) =>
+		app.use(
+			AuthorizationMiddleware({
+				check_for_aud: "oauth",
+				requires_permission_id: 1,
+			})
+				.get("/network_and_jwt_auth", ({ network, payload }) => {
+					return { network, payload }
+				})
+				.get("/me", ({network}) => network)
+		)
+	)

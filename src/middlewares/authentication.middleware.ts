@@ -1,9 +1,10 @@
 import Elysia, { t } from "elysia"
 import { GezcezError } from "../common/GezcezError"
 import { OAuthController } from "../services/oauth/oauth.controller"
-import { OAuthService } from "../services/oauth/oauth.service"
+import { GezcezJWTPayload, OAuthService } from "../services/oauth/oauth.service"
 
-export const AuthenticationMiddleware = (config: { check_for_aud:"oauth"|string&{} }) =>
+
+export const AuthenticationMiddleware = (config: { aud: "oauth" | (string & {})}) =>
 	new Elysia({
 		name: "authentication.middleware.ts",
 	})
@@ -13,14 +14,14 @@ export const AuthenticationMiddleware = (config: { check_for_aud:"oauth"|string&
 				access_token: t.String(),
 			}),
 		})
-		.derive({ as: "scoped" }, async ({ headers: { access_token } }) => {
-			if (!access_token) return
+		.resolve({ as: "scoped" }, async ({ headers: { access_token } }) : Promise<{payload:GezcezJWTPayload}> => {
+			if (!access_token) return undefined as any
 			let payload
 			try {
-				payload = await OAuthService.verifyJWT(access_token, config.check_for_aud)
+				payload = await OAuthService.verifyJWT(access_token, config.aud)
 			} catch {}
-			if (!payload) return
-			if (!payload.is_activated) return
+			if (!payload) return undefined as any
+			if (!payload.is_activated) return undefined as any
 			return { payload: payload }
 		})
 		.guard({

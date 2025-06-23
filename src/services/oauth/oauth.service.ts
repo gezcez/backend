@@ -60,16 +60,16 @@ export abstract class OAuthService {
 			.setExpirationTime(expiration)
 			.sign(secret)
 	}
-	static async verifyJWT<T extends string>(token: string, audience: T) {
-		const { payload }: { payload: GezcezJWTPayload<T> } = await jwtVerify(token, secret, {
+	static async verifyJWT(token: string, audience: string) {
+		const { payload } = await jwtVerify(token, secret, {
 			issuer: "oauth.gezcez.com",
 			audience: audience,
 		})
 		
-		return { ...payload}
+		return { ...payload,sub:parseInt(payload?.sub as string) as number} as GezcezJWTPayload
 	}
-	static async getPermissionsFromPayload<T>(payload: GezcezJWTPayload<T>,network:string) {
-		let user_scopes = payload.scopes
+	static async getPermissionIDsFromPayload(payload: GezcezJWTPayload,network:string) {
+		let user_scopes = payload.scopes || new Map()
 		const scope_number = user_scopes.get(network)
 		if (!scope_number) return []
 		const scopes_to_return = []
@@ -84,7 +84,8 @@ export abstract class OAuthService {
 		return scopes_to_return
 	}
 }
-interface GezcezJWTPayload<T> extends JWTPayload {
+export interface GezcezJWTPayload extends Omit<JWTPayload,"sub"> {
+	sub:number
 	scopes: Map<string,number>
 	is_activated: boolean
 }

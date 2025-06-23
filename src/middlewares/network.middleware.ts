@@ -8,7 +8,6 @@ export const NetworkMiddleware = new Elysia({
 })
 	.guard({
 		as: "scoped",
-
 		params: t.Object({
 			network_id: t.Integer({ minimum: 1, maximum: 999 }),
 		}),

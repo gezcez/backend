@@ -17,18 +17,19 @@ export abstract class OAuthRepository {
 		return [result]
 	}
 
-	static async selectUserById(user_id: number) {
+	static async selectUserById(user_id: number,config?:{get_raw_password?:boolean,get_raw_email?:boolean}) {
 		const [result] = await db
 			.select({
 				user: {
 					...usersTable,
-					password: "",
-					email: "",
+					password: config?.get_raw_password ? usersTable.password: "",
+					email: config?.get_raw_email ? usersTable.email: "",
 				},
 			})
 			.from(usersTable)
 			.where(eq(usersTable.id, user_id))
 			.limit(1)
+		return result
 	}
 	static async selectUserByEmailAndPassword(email: string, password: string) {
 		const [result] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1)
