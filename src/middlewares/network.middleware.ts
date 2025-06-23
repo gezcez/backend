@@ -2,15 +2,23 @@ import Elysia, { t } from "elysia"
 import { GezcezResponse } from "../common/Gezcez"
 import { NetworkService } from "../services/network/network.service"
 
-export const NetworkMiddleware = new Elysia({name: "network.middleware.ts" })
+export const NetworkMiddleware = new Elysia({
+	name: "network.middleware.ts",
+	prefix: "/:network_id",
+})
 	.guard({
-		params: t.Object({ network_id: t.Integer() }),
+		as: "scoped",
+
+		params: t.Object({
+			network_id: t.Integer({ minimum: 1, maximum: 999 }),
+		}),
 	})
-	.resolve({ as: "scoped" }, async ({ params }) => {
-		const network = await NetworkService.getNetworkById(params.network_id)
+	.resolve({ as: "scoped" }, async ({ params: { network_id } }) => {
+		const network = await NetworkService.getNetworkById(parseInt(network_id))
 		return { network: network }
 	})
 	.guard({
+		as: "scoped",
 		beforeHandle({ network, params, set }) {
 			if (!network) {
 				set.status = 400

@@ -8,14 +8,14 @@ export const usersTable = sqliteTable("users", {
 
 	created_at: int({mode:"timestamp_ms"}).defaultNow(),
 	updated_at: int({mode:"timestamp_ms"}),
-	is_activated: int({mode:"boolean"}).default(false)
+	is_activated: int({mode:"boolean"}).default(false).notNull()
 });
 
 
 
 export const TABLE_ACTIONS = {
-	created_by:int().references(()=>usersTable.id).notNull(),
-	updated_by:int().references(()=>usersTable.id),
+	created_by:int().notNull(),
+	updated_by:int(),
 	created_at:int({mode:"timestamp_ms"}).defaultNow(),
 	updated_at:int({mode:"timestamp_ms"}),
 }

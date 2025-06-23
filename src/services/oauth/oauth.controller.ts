@@ -4,40 +4,76 @@ import { GezcezError, GezcezValidationFailedError } from "../../common/GezcezErr
 import { OAuthService } from "./oauth.service"
 import { GezcezResponse } from "../../common/Gezcez"
 import { OAuthRepository } from "./oauth.repository"
+import { SignJWT } from "jose"
+
+import { appsTable } from "../../schema/apps"
+import { db } from "../../util"
+import { eq } from "drizzle-orm"
 export const OAuthController = new Elysia({
 	prefix: "/oauth",
 	name: "oauth.controller.ts",
 	tags: ["OAuth Service"],
+}).group("/account", (group) =>
+	group
+		.post(
+			"/create",
+			async (c) => {
+				const { body } = c
+				const { email, password, tos, username } = body
+				if (!(tos === true)) return GezcezValidationFailedError(c, "body:tos", "user must accept tos!")
+				if (!OAuthService.validate("username", username)) {
+					return GezcezValidationFailedError(c, "body:username", "Username must only contain numbers, lowercase and uppercase letters.")
+				}
+				if (!OAuthService.validate("password", password)) {
+					return GezcezValidationFailedError(c, "body:password", `Password must be between 6 and 128 characters long`)
+				}
+				if (!OAuthService.validate("email", email)) {
+					return GezcezValidationFailedError(c, "body:password", "invalid email!")
+				}
+				const [user, error] = await OAuthRepository.insertUser({
+					email: email,
+					username: username,
+					password: password,
+				})
+				c.set.status = 409
+				if (error) return GezcezResponse({ __message: error }, 409)
 
-}).group("/account",
-	(group) => group.post("/create", async (c) => {
-		const { body } = c
-		const { email, password, tos, username } = body
-		if (!(tos === true)) return GezcezValidationFailedError(c, "body:tos", "user must accept tos!")
-		if (!OAuthService.validate("username", username)) {
-			return GezcezValidationFailedError(c, "body:username", "Username must only contain numbers, lowercase and uppercase letters.")
-		}
-		if (!OAuthService.validate("password", password)) {
-			return GezcezValidationFailedError(c, "body:password", `Password must be between 6 and 128 characters long`)
-		}
-		if (!OAuthService.validate("email", email)) {
-			return GezcezValidationFailedError(c, "body:password", "invalid email!")
-		}
-		const [user, error] = await OAuthRepository.insertUser({
-			email: email, username: username, password: password
-		})
-		c.set.status = 409
-		if (error) return GezcezResponse({ __message: error }, 409)
-
-		return GezcezResponse({ account: { ...user, password: undefined }, __message: "Account has been created successfully! [email verification needed]." }, 200)
-	}, { body: OAuthDTO.account_create })
-		.post("/login", async ({ body: { email, password }, set }) => {
-			const user = await OAuthRepository.selectUserByEmailAndPassword(email, password)
-			if (!user) {
-				set.status = 401
-				return GezcezResponse({ __message: "Invalid email or password!" }, 401)
+				return GezcezResponse({ account: { ...user, password: undefined }, __message: "Account has been created successfully! [email verification needed]." }, 200)
+			},
+			{
+				body: OAuthDTO.account_create,
 			}
-			return GezcezResponse({ user: user })
-		}, { body: OAuthDTO.account_login }
+		)
+		.get(
+			"/hash",
+			async ({ query: { t } }) => {
+				return await OAuthService.hashPassword(t)
+			},
+			{ query: t.Object({ t: t.String() }) }
+		)
+		.post(
+			"/login",
+			async ({ body: { email, password }, set }) => {
+				const user = await OAuthRepository.selectUserByEmailAndPassword(email, password)
+				if (!user) {
+					set.status = 401
+					return GezcezResponse({ __message: "Invalid email or password!" }, 401)
+				}
+				return GezcezResponse({
+					user: user,
+					access_token: await OAuthService.signJWT(
+						{
+							sub: user.id.toString(),
+							is_activated: user.is_activated,
+							jti: crypto.randomUUID(),
+						},
+						"15d",
+						"oauth"
+					),
+				})
+			},
+			{
+				body: OAuthDTO.account_login,
+			}
 		)
 )

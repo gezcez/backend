@@ -3,14 +3,20 @@ import { NetworkMiddleware } from "../middlewares/network.middleware"
 import { GezcezResponse } from "../common/Gezcez"
 import { GezcezValidationFailedError } from "../common/GezcezError"
 import { AuthenticationMiddleware } from "../middlewares/authentication.middleware"
-import jwt from "@elysiajs/jwt"
+import { AuthorizationMiddleware } from "../middlewares/authorization.middleware"
 
 export const TestController = new Elysia({
 	name: "test.controller.ts",
 	prefix: "/test",
 	tags: ["dev"],
 })
-	.use(NetworkMiddleware.get("/info", ({ network }) => GezcezResponse({ network: network })))
+	.group("/network_stuff", (app) =>
+		app.use(
+			NetworkMiddleware.get("/info", ({ network }) => {
+				return GezcezResponse({ network: network })
+			})
+		)
+	)
 	.get(
 		"/error",
 		(c) => {
@@ -24,27 +30,8 @@ export const TestController = new Elysia({
 			),
 		}
 	)
-	.use(
-		jwt({
-			secret: "testing_jwt_secret",
-			name: "testing_jwt",
-		}).post(
-			"/sign",
-			({ testing_jwt, body }) => {
-				return testing_jwt.sign({ ...body, exp: Date.now() + 60 * 1000 })
-			},
-			{
-				body: t.Object({
-					hello: t.Literal("world"),
-				}),
-			}
-		)
-	)
-	.use(
-		AuthenticationMiddleware({ jwt_seret: "testing_jwt_secret" }).get("/auth", ({ payload }) =>
-			GezcezResponse({
-				__message: "Auth Successfull!",
-				payload: payload,
-			})
-		)
-	)
+	.group("/:network_id",(app)=>
+		app.use(AuthorizationMiddleware({check_for_aud:"oauth",requires_permission_id:1}).get("/network_and_jwt_auth", ({ network, payload }) => {
+			return {network,payload}
+		})
+	))
