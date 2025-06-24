@@ -17,12 +17,13 @@ export const permissionsTable = sqliteTable("permissions", {
 
 
 export const userPermissionsTable = sqliteTable("user_permissions", {
+	id:int().primaryKey({autoIncrement:true}),
 	user_id: int().references(() => usersTable.id).notNull(),
 	permission_id: int().references(() => permissionsTable.id).notNull(),
 	status: int({ mode: "boolean" }).default(false).notNull(),
-	scope: int().references(()=>networksTable.id).notNull(),
+	network_id: int().references(()=>networksTable.id).notNull(),
 	...TABLE_ACTIONS
 }, (table) => [
 	index("user_permissions_idx").on(table.user_id, table.permission_id),
-	uniqueIndex("user_permissions_unique_index").on(table.user_id,table.permission_id,table.scope)
+	uniqueIndex("user_permissions_unique_index").on(table.user_id,table.permission_id,table.network_id)
 ])

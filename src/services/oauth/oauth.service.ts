@@ -80,13 +80,20 @@ export abstract class OAuthService {
 		const scopes_to_return = []
 		let scope = scope_number
 		for (let index = 32; index > 0; index--) {
-			if (scope > 2 ** index) {
+			if (scope >= 2 ** index) {
 				scope = scope - 2 ** index
 				scopes_to_return.push(index)
 			}
 		}
-		console.log(scopes_to_return)
 		return scopes_to_return
+	}
+	static async listUserPermissionsOnGlobalScope(user_id:number) {
+		
+	}
+	static async doesPermissionsMatch(payload:GezcezJWTPayload,network:"global"|string&{},permission_id:number) {
+		const user_permissions = await this.getPermissionIDsFromPayload(payload,network === "global" ? "_" : network)
+		if (user_permissions.includes(permission_id)) return true
+		return false
 	}
 }
 export interface GezcezJWTPayload extends Omit<JWTPayload, "sub"> {

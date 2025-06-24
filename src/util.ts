@@ -12,7 +12,9 @@ export abstract class logger {
 	static log(...strings:logType) {
 		console.log(`[${new Date().toISOString()}] backend@gezcez.com:`,...strings)
 	}
-} 
+}
+
+export type TJoinStrings<A extends string,B extends string> = `${A}${B}`
 import configI from "../service.config.json"
 export const config = configI
 

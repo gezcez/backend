@@ -4,7 +4,8 @@ import { db } from "../../util";
 import { usersTable } from "../../schema/users";
 
 export abstract class NetworkRepository {
-	static async getNetworkById(id: number) {
+	static async getNetworkById(id: number|string) {
+		if (typeof id === "string") id = parseInt(id)
 		const [result] = await db.select(
 
 		).from(networksTable).where(eq(networksTable.id, id))

@@ -1,8 +1,7 @@
 import Elysia, { t } from "elysia"
-import { NetworkMiddleware } from "../middlewares/network.middleware"
 import { GezcezResponse } from "../common/Gezcez"
 import { GezcezValidationFailedError } from "../common/GezcezError"
-import { AuthenticationMiddleware } from "../middlewares/authentication.middleware"
+import { NetworkMiddleware } from "../middlewares/network.middleware"
 import { AuthorizationMiddleware } from "../middlewares/authorization.middleware"
 
 export const TestController = new Elysia()
@@ -13,7 +12,7 @@ const dont_export = new Elysia({
 })
 	.group("/network_stuff", (app) =>
 		app.use(
-			NetworkMiddleware.get("/info", ({ network }) => {
+			NetworkMiddleware().get("/info", ({ network }) => {
 				return GezcezResponse({ network: network })
 			})
 		)
@@ -34,13 +33,10 @@ const dont_export = new Elysia({
 
 	.group("/network/", (app) =>
 		app.use(
-			AuthorizationMiddleware({
-				check_for_aud: "oauth",
-				requires_permission_id: 1,
-			})
+			AuthorizationMiddleware({ app_key: "oauth", permission_id: 1, scope: "global" })
 				.get("/network_and_jwt_auth", ({ network, payload }) => {
 					return { network, payload }
 				})
-				.get("/me", ({network}) => network)
+				.get("/me", ({ network }) => network)
 		)
 	)

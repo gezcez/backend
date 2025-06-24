@@ -19,7 +19,6 @@ export const AuthenticationMiddleware = (config: { aud: "oauth" | (string & {})}
 			let payload = await OAuthService.verifyJWT(access_token, config.aud)
 			if (!payload) return undefined as any
 			if (!payload.is_activated) return undefined as any
-			console.log(payload)
 			return { payload: payload }
 		})
 		.guard({

@@ -6,17 +6,19 @@ export const NetworkController = new Elysia({
 	tags: ["network"],
 	prefix: "/networks",
 }).use(
-	NetworkMiddleware.get("/info", ({ network }) => {
-		network: network
-	}).group("/manage", (app) =>
-		app
-			.use(
-				AuthorizationMiddleware({
-					check_for_aud: "system",
-					check_for_network_authentication: true,
-					requires_permission_id: 1,
-				})
-			)
-			.delete("/delete", ({ payload }) => payload)
-	)
+	NetworkMiddleware()
+		.get("/info", ({ network }) => {
+			network: network
+		})
+		.group("/manage", (app) =>
+			app
+				.use(
+					AuthorizationMiddleware({
+						check_for_aud: "system",
+						check_for_network_authentication: true,
+						requires_permission_id: 1,
+					})
+				)
+				.delete("/delete", ({ payload }) => payload)
+		)
 )

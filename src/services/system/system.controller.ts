@@ -1,11 +1,12 @@
 import Elysia, { t } from "elysia"
-import { AuthorizationMiddleware } from "../../middlewares/authorization.middleware"
-import { GezcezResponse } from "../../common/Gezcez"
-import { NetworkRepository } from "../network/network.repository"
-import { PermissionsRepository } from "../permissions/permissions.repository"
-import { logger } from "../../util"
 import { SOCKETS } from "../.."
+import { GezcezResponse } from "../../common/Gezcez"
+
+import { logger } from "../../util"
+import { NetworkRepository } from "../network/network.repository"
 import { OAuthService } from "../oauth/oauth.service"
+import { PermissionsRepository } from "../permissions/permissions.repository"
+import { AuthorizationMiddleware } from "../../middlewares/authorization.middleware"
 
 export const SystemController = new Elysia({
 	name: "system.controller.ts",
@@ -15,7 +16,12 @@ export const SystemController = new Elysia({
 	.ws("/terminal/", {
 		open: async (c) => {
 			const token = c.data.query.access_token
-			logger.log(c.remoteAddress, c.id, "asks to stream terminal! access_token.length=", token.length)
+			logger.log(
+				c.remoteAddress,
+				c.id,
+				"asks to stream terminal! access_token.length=",
+				token.length
+			)
 			if (!token) {
 				c.send({ type: "error", content: "unauthenticated" })
 				c.close()
@@ -27,18 +33,23 @@ export const SystemController = new Elysia({
 				c.close()
 				return
 			}
-			const permissions = await OAuthService.getPermissionIDsFromPayload(payload, "_")
-			if (!permissions.includes(10)) {
+			c.send({ type: "status", content: "authentication successful!" })
+			// 10 is root access
+			const isValid = await OAuthService.doesPermissionsMatch(payload, "global", 10)
+			// const permissions = await OAuthService.getPermissionIDsFromPayload(payload, "_")
+			if (!isValid) {
 				c.send({ type: "error", content: "unauthorized" })
 				c.close()
 				return
 			}
+			c.send({ type: "status", content: "authorization successful!" })
 			logger.log("starting terminal socket!")
 			c.send({ type: "data", content: { socket_id: c.id } })
+			c.send({ type: "status", content: `connected websocket stream with id: ${c.id}` })
 			SOCKETS.set(c.id, c)
 			logger.log(`client ${c.id} has connected to websocket successfully!`)
 		},
-		message: async (c)=> {
+		message: async (c) => {
 			if (!SOCKETS.get(c.id)) {
 				c.send({ type: "error", content: "unauthenticated" })
 				c.close()
@@ -54,13 +65,30 @@ export const SystemController = new Elysia({
 	})
 	.use(
 		AuthorizationMiddleware({
-			check_for_aud: "system",
-			requires_permission_id: 10,
+			app_key: "system",
+			scope: "global",
+			permission_id: 2,
 		})
-			.get("/networks/list", async (c) =>
-				GezcezResponse({
-					networks: await NetworkRepository.list(),
-				})
+			.group("/networks", (group) =>
+				group
+					.use(
+						AuthorizationMiddleware({
+							app_key: "system",
+							scope: "global",
+							permission_id: 10,
+						}).get("/list", async ({ payload, network }) =>
+							GezcezResponse({
+								networks: await NetworkRepository.list(),
+							})
+						)
+					)
+					.use(
+						AuthorizationMiddleware({
+							app_key: "system",
+							scope: "scoped",
+							permission_id: 10,
+						}).get("yo", ({ network, payload }) => {})
+					)
 			)
 			.group("/permissions", (group) =>
 				group.get("/list", async (c) => {
