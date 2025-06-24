@@ -16,13 +16,10 @@ export const AuthenticationMiddleware = (config: { aud: "oauth" | (string & {})}
 		})
 		.resolve({ as: "scoped" }, async ({ headers: { access_token } }) : Promise<{payload:GezcezJWTPayload}> => {
 			if (!access_token) return undefined as any
-			let payload
-			try {
-				payload = await OAuthService.verifyJWT(access_token, config.aud)
-			} catch {}
-			console.log(payload)
+			let payload = await OAuthService.verifyJWT(access_token, config.aud)
 			if (!payload) return undefined as any
 			if (!payload.is_activated) return undefined as any
+			console.log(payload)
 			return { payload: payload }
 		})
 		.guard({

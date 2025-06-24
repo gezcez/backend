@@ -6,7 +6,28 @@ import { OAuthController } from "./services/oauth/oauth.controller"
 import { TestController } from "./services/test.controller"
 import { NetworkController } from "./services/network/network.controller"
 import { SystemController } from "./services/system/system.controller"
-const app = new Elysia()
+import { ElysiaWS } from "elysia/dist/ws"
+
+const originalWrite = console.log
+export const SOCKETS: Map<string, ElysiaWS> = new Map()
+
+// overwrite console.log to stream terminal
+console.log = (...str) => {
+	originalWrite(...str)
+	SOCKETS.forEach((c) =>
+		c.send({
+			type: "message",
+			content: str.join(" "),
+		})
+	)
+	return
+}
+
+const app = new Elysia({
+	websocket: {
+		idleTimeout: 180,
+	},
+})
 	.use(
 		swagger({
 			path: "/docs",

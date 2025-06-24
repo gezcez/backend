@@ -49,9 +49,9 @@ export abstract class OAuthService {
 			cost: 14,
 		})
 	}
-	static async signJWT(payload: Omit<GezcezJWTPayload,"scopes">, expiration: string, audience: string) {
+	static async signJWT(payload: Omit<GezcezJWTPayload, "scopes">, expiration: string, audience: string) {
 		console.log(process.env.JWT_SECRET)
-		return await new SignJWT({...payload,jti:crypto.randomUUID()})
+		return await new SignJWT({ ...payload, jti: crypto.randomUUID() })
 			.setProtectedHeader({
 				alg: "HS256",
 			})
@@ -61,32 +61,38 @@ export abstract class OAuthService {
 			.sign(secret)
 	}
 	static async verifyJWT(token: string, audience: string) {
-		const { payload } = await jwtVerify(token, secret, {
-			issuer: "oauth.gezcez.com",
-			audience: audience,
-		})
-		
-		return { ...payload,sub:parseInt(payload?.sub as string) as number} as GezcezJWTPayload
+		let payload
+		try {
+			payload = (
+				await jwtVerify(token, secret, {
+					issuer: "oauth.gezcez.com",
+					audience: audience,
+				})
+			).payload
+		} catch {}
+		if (!payload) return
+
+		return { ...payload, sub: parseInt(payload?.sub as string) as number } as GezcezJWTPayload
 	}
-	static async getPermissionIDsFromPayload(payload: GezcezJWTPayload,network:string) {
+	static async getPermissionIDsFromPayload(payload: GezcezJWTPayload, network: string) {
 		let user_scopes = payload.scopes || {}
 		const scope_number = user_scopes[network as keyof typeof user_scopes]
 		if (!scope_number) return []
 		const scopes_to_return = []
 		let scope = scope_number
 		for (let index = 32; index > 0; index--) {
-			console.log(index, 2**index)
-			if (scope > 2**index) {
-				scope = scope - 2**index
+			if (scope > 2 ** index) {
+				scope = scope - 2 ** index
 				scopes_to_return.push(index)
 			}
 		}
+		console.log(scopes_to_return)
 		return scopes_to_return
 	}
 }
-export interface GezcezJWTPayload extends Omit<JWTPayload,"sub"> {
-	sub:number
-	scopes: {[key:string]:number}
+export interface GezcezJWTPayload extends Omit<JWTPayload, "sub"> {
+	sub: number
+	scopes: { [key: string]: number }
 	is_activated: boolean
 }
 const secret = new TextEncoder().encode(process.env.JWT_SECRET)
