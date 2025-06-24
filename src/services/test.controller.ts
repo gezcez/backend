@@ -5,11 +5,11 @@ import { GezcezValidationFailedError } from "../common/GezcezError"
 import { AuthenticationMiddleware } from "../middlewares/authentication.middleware"
 import { AuthorizationMiddleware } from "../middlewares/authorization.middleware"
 
-export const TestController = new Elysia({
+export const TestController = new Elysia()
+const dont_export = new Elysia({
 	name: "test.controller.ts",
 	prefix: "/test",
 	tags: ["dev"],
-	detail:{hide:true}
 })
 	.group("/network_stuff", (app) =>
 		app.use(

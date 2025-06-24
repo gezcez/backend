@@ -50,7 +50,6 @@ export abstract class OAuthService {
 		})
 	}
 	static async signJWT(payload: Omit<GezcezJWTPayload, "scopes">, expiration: string, audience: string) {
-		console.log(process.env.JWT_SECRET)
 		return await new SignJWT({ ...payload, jti: crypto.randomUUID() })
 			.setProtectedHeader({
 				alg: "HS256",
