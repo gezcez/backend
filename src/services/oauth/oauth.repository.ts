@@ -22,9 +22,10 @@ export abstract class OAuthRepository {
 	}
 
 	static async selectUserById(
-		user_id: number,
+		user_id: number|string,
 		config?: { get_raw_password?: boolean; get_raw_email?: boolean }
 	) {
+		if (typeof user_id === "string") user_id = parseInt(user_id)
 		const [result] = await db
 			.select()
 			.from(usersTable)

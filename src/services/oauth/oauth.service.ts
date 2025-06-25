@@ -95,10 +95,16 @@ export abstract class OAuthService {
 		if (user_permissions.includes(permission_id)) return true
 		return false
 	}
+
+	static async activateUser(user_id:number) {
+		const [result] = await db.update(usersTable).set({activated_at:new Date()}).where(eq(usersTable.id,user_id)).returning()
+		return result
+	}
 }
 export interface GezcezJWTPayload extends Omit<JWTPayload, "sub"> {
 	sub: number
 	scopes: { [key: string]: number }
 	is_activated: boolean
 }
-const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+export const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+export const secret_random = new TextEncoder().encode(process.env.JWT_RANDOM_STUFF)

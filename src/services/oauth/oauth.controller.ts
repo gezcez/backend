@@ -1,26 +1,23 @@
 import { Elysia, t } from "elysia"
-import { OAuthDTO } from "./oauth.dto"
+import { JWTPayload, jwtVerify, SignJWT } from "jose"
+import { GezcezResponse } from "../../common/Gezcez"
 import {
 	GezcezError,
 	GezcezValidationFailedError,
 } from "../../common/GezcezError"
-import { OAuthService } from "./oauth.service"
-import { GezcezResponse } from "../../common/Gezcez"
+import { OAuthDTO } from "./oauth.dto"
 import { OAuthRepository } from "./oauth.repository"
-import { SignJWT } from "jose"
+import { OAuthService, secret_random } from "./oauth.service"
 
-import { appsTable } from "../../schema/apps"
-import { db } from "../../util"
-import { and, eq } from "drizzle-orm"
 import { AuthenticationMiddleware } from "../../middlewares/authentication.middleware"
-import { UserRepository } from "../user/user.repository"
-import { usersTable } from "../../schema/users"
-import { AppsRepository } from "../apps/apps.repository"
 import { AuthorizationMiddleware } from "../../middlewares/authorization.middleware"
-import {
-	permissionsTable,
-	userPermissionsTable,
-} from "../../schema/permissions"
+import { AppsRepository } from "../apps/apps.repository"
+import { EmailService } from "../email/email.service"
+import { UserRepository } from "../user/user.repository"
+import { EmailRepository } from "../email/email.repository"
+import { db } from "../../util"
+import { usersTable } from "../../schema/users"
+import { eq } from "drizzle-orm"
 export const OAuthController = new Elysia({
 	prefix: "/oauth",
 	name: "oauth.controller.ts",
@@ -55,14 +52,45 @@ export const OAuthController = new Elysia({
 				username: username,
 				password: password,
 			})
-			c.set.status = 409
-			if (error) return GezcezResponse({ __message: error }, 409)
-
+			if (error || !user) {
+				c.set.status = 409
+				return GezcezResponse({ __message: error }, 409)
+			}
+			const id = crypto.randomUUID()
+			const token = await new SignJWT({
+				aud: "activation.emails",
+				email_id: id,
+			})
+				.setProtectedHeader({
+					alg: "HS256",
+				})
+				.setSubject(user.id.toString())
+				.setJti(crypto.randomUUID())
+				.setIssuer("oauth.gezcez.com")
+				.setExpirationTime("6h")
+				.sign(secret_random)
+			function build_content(token: string) {
+				return `https://api.gezcez.com/oauth/account/activate?_=${token}`
+			}
+			const [email_row, email_error] = await EmailService.sendEmail(
+				{
+					content: build_content(token),
+					type: "activation",
+					target_user_id: user.id,
+					uuid: id,
+				},
+				id
+			)
+			if (!email_row || email_error) {
+				c.set.status = 500
+				return GezcezResponse({ __message: email_error as string || "unknown error occured during email request" }, 500)
+			}
 			return GezcezResponse(
 				{
+					__debug:process.env.NODE_ENV==="dev"?{email:email_row,link:build_content(token)}:undefined,
 					account: { ...user, password: undefined },
 					__message:
-						"Account has been created successfully! [email verification needed].",
+						"Please verify your account using the link we've sent to your email adress",
 				},
 				200
 			)
@@ -73,6 +101,50 @@ export const OAuthController = new Elysia({
 	)
 	.group("/account", (app) =>
 		app
+			.get(
+				"/activate",
+				async ({ query: { _ } }) => {
+					const secret = secret_random
+					if (!secret)
+						return GezcezError("INTERNAL_SERVER_ERROR", {
+							__message:
+								"İşleminizi gerçekleştiremiyoruz. biri JWT secret'ı .env'a koymayı unutmuş." +
+								"\nbu hatayı görüyorsanız lütfen iletişime geçin: wemessedup@gezcez.com",
+						})
+					const token = _
+					let payload: {email_id:string} & JWTPayload
+					try {
+						payload = (await jwtVerify(token, secret, {
+							audience: "activation.emails",
+						})).payload as any
+					} catch {
+						return "Linkin süresi dolmuş, geçerli değil veya "
+					}
+					if (!payload) return "Linkin süresi dolmuş, geçerli değil veya "
+					const uuid = payload.email_id
+					if (!uuid) return "uuid is undefined"
+					const [email,email_error] = await EmailRepository.selectEmailById(uuid)
+					if (!email || email_error) {
+						return "Link geçerli fakat veri tabanında email bulunamadı."
+					}
+					const user = await OAuthRepository.selectUserById(payload.sub as string,{
+						get_raw_email:true,
+						get_raw_password:false
+					})
+					if (!user) return "Link geçerli fakat kullanıcı silinmiş."
+					if (user.activated_at) return "Hesap zaten aktif edilmiş."
+					const [updated_user] = await db.update(usersTable).set({
+						activated_at:new Date(),
+					}).where(eq(usersTable.id,user.id)).returning()
+					return "Hesap başarıyla aktif edildi!"
+				},
+				{
+					query: t.Object({
+						_: t.String(),
+					}),
+				}
+			)
+
 			.use(
 				AuthenticationMiddleware({
 					aud: "oauth",
@@ -99,7 +171,9 @@ export const OAuthController = new Elysia({
 					}
 					const payload_o = Object.fromEntries(scope_payload.entries())
 					if (Object.keys(payload_o).length <= 0) {
-						return GezcezError("UNAUTHORIZED",{__message:`You do not have access to app '${app_key}'`})
+						return GezcezError("UNAUTHORIZED", {
+							__message: `You do not have access to app '${app_key}'`,
+						})
 					}
 					const access_token = await OAuthService.signJWT(
 						{
@@ -154,7 +228,7 @@ export const OAuthController = new Elysia({
 				refresh_token: await OAuthService.signJWT(
 					{
 						sub: user.id.toString(),
-						is_activated: user.is_activated,
+						is_activated: !!user.activated_at,
 						jti: crypto.randomUUID(),
 					},
 					"15d",

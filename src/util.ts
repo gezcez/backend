@@ -18,10 +18,8 @@ export type TJoinStrings<A extends string,B extends string> = `${A}${B}`
 import configI from "../service.config.json"
 export const config = configI
 
-import { int } from "drizzle-orm/sqlite-core"
 
 import { drizzle } from 'drizzle-orm/libsql';
-import { usersTable } from "./schema/users"
 export const db = drizzle(process.env.URL_DB || "./GEZCEZ.db")
 
 export {}
