@@ -4,7 +4,7 @@ import { emailsTable } from "../../schema/emails"
 
 export abstract class EmailRepository {
 	static async selectEmailById(uuid: string) {
-		const result = await db
+		const [result] = await db
 			.select()
 			.from(emailsTable)
 			.where(eq(emailsTable.uuid, uuid))
