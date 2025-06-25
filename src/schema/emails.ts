@@ -3,7 +3,7 @@ import { usersTable } from "./users";
 
 export const emailsTable = sqliteTable("emails",{
 	uuid:text().primaryKey().unique(),
-	target_user_id:int().references(()=>usersTable.id).notNull(),
+	target_user_id:int(),
 	content:text().notNull(),
 	type:text().notNull().$type<"otp"|"activation"|"announcement"|"other">(),
 	created_at:int({mode:"timestamp_ms"}).defaultNow(),
