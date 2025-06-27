@@ -5,6 +5,7 @@ export function LoggerMiddleware(
 	res: Response,
 	next: NextFunction
 ) {
-	console.log(`[${req.method}] ${req.url}`)
+	const is_prod = process.env.NODE_ENV !== "dev"
+	console.log(`[${req.method}] [${is_prod ? req.headers["CF-Connecting-IP"]: req.ip}] ${req.url}`)
 	next()
 }

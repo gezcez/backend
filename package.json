@@ -2,6 +2,7 @@
 	"name": "gezcez-backend",
 	"version": "1.0.50",
 	"scripts": {
+		"build": "bun build --minify --outfile=bundle.js --target=bun ./src/index.ts -e class-transformer/storage -e @nestjs/microservices",
 		"dev": "bun run --watch src/index.ts",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start:prod": "bun run dist/index.js",
@@ -18,6 +19,7 @@
 		"@nestjs/core": "^11.0.1",
 		"@nestjs/platform-express": "^11.0.1",
 		"@nestjs/platform-socket.io": "^11.1.3",
+		"@nestjs/platform-ws": "^11.1.3",
 		"@nestjs/swagger": "^11.2.0",
 		"@nestjs/websockets": "^11.1.3",
 		"@scalar/nestjs-api-reference": "^0.5.6",

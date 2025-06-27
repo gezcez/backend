@@ -1,30 +1,30 @@
 import {
 	CanActivate,
-	ExecutionContext,
-	Injectable,
-	NestMiddleware,
+	ExecutionContext
 } from "@nestjs/common"
+import { Request } from "express"
 import { GezcezError, GezcezValidationFailedError } from "../common/GezcezError"
-import { NextFunction, Request, Response } from "express"
 import { OAuthService } from "../services/oauth/oauth.service"
 
-export function AuthorizationMiddleware(config: {
+export function AuthorizationGuard(config: {
 	scope: "global" | "scoped"
 	permission_id: number
 	app_key: string
 }) {
-	return class Guard implements NestMiddleware {
-		async use(req: Request, res: Response, next: NextFunction) {
+	return class Guard implements CanActivate {
+		async canActivate(context:ExecutionContext) {
+			const req = context.switchToHttp().getRequest<Request>()
+
 			const token = req.headers.authorization?.split(" ")[1]
 
 			if (!token) {
-				return GezcezError("NOT_AUTHENTICATED", {
-					__message: "Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım.",
+				throw GezcezError("NOT_AUTHENTICATED", {
+					__message: "Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım. (token undefined)",
 				})
 			}
 			const payload = await OAuthService.verifyJWT(token, config.app_key)
 			if (!payload) {
-				return GezcezError("NOT_AUTHENTICATED", {
+				throw GezcezError("NOT_AUTHENTICATED", {
 					__message: "Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım.",
 				})
 			}
@@ -32,7 +32,7 @@ export function AuthorizationMiddleware(config: {
 			let can_activate = false
 			if (config.scope === "scoped") {
 				if (!network_id)
-					return GezcezValidationFailedError(
+					throw GezcezValidationFailedError(
 						req,
 						"params:network_id",
 						"network_id is undefined"
@@ -51,11 +51,12 @@ export function AuthorizationMiddleware(config: {
 			}
 
 			if (!can_activate) {
-				return GezcezError("UNAUTHORIZED", {
+				throw GezcezError("UNAUTHORIZED", {
 					__message: "Bu işlemi gerçekleştirmek için yetkiniz yok.",
 				})
 			}
-			next()
+			req["payload"] = payload
+			return true
 		}
 	}
 }

@@ -2,49 +2,73 @@ import { Request } from "express"
 import { GezcezResponse } from "./Gezcez"
 
 export function GezcezError(error_type: ErrorType, error: any) {
+	const err_message = error.__message
 	switch (error_type) {
 		case "BAD_REQUEST": {
 			return GezcezResponse(
-				{ __message: "Bad Request!", error_key: error_type, error: error },
+				{
+					__message: err_message || "Bad Request!",
+					error_key: error_type,
+					error: error,
+				},
 				400
 			)
 		}
 		case "INTERNAL_SERVER_ERROR": {
 			return GezcezResponse(
-				{ __message: "Internal Server Error!", error_key: error_type, error: error },
+				{
+					__message: err_message || "Internal Server Error!",
+					error_key: error_type,
+					error: error,
+				},
 				500
 			)
 		}
 		case "NOT_AUTHENTICATED": {
 			return GezcezResponse(
-				{ __message: "Not Authenticated!", error_key: error_type },
+				{ __message: err_message || "Not Authenticated!", error_key: error_type },
 				401
 			)
 		}
 		case "NOT_FOUND": {
-			return GezcezResponse({ __message: "Not Found!", error_key: error_type }, 404)
+			return GezcezResponse(
+				{ __message: err_message || "Not Found!", error_key: error_type },
+				404
+			)
 		}
 		case "UNAUTHORIZED": {
 			return GezcezResponse(
-				{ __message: "Unauthorized!", error_key: error_type, ...error },
+				{
+					__message: err_message || "Unauthorized!",
+					error_key: error_type,
+					...error,
+				},
 				401
 			)
 		}
 		case "VALIDATION_FAILED": {
 			return GezcezResponse(
-				{ __message: "Object validation failed!", error_key: error_type, ...error },
+				{
+					__message: err_message || "Object validation failed!",
+					error_key: error_type,
+					...error,
+				},
 				400
 			)
 		}
 		case "RATELIMIT": {
 			return GezcezResponse(
-				{ __message: "Object validation failed!", error_key: error_type, ...error },
+				{
+					__message: err_message || "Object validation failed!",
+					error_key: error_type,
+					...error,
+				},
 				429
 			)
 		}
 		default: {
 			return GezcezResponse(
-				{ __message: "Unknown Error!", error_key: error_type },
+				{ __message: err_message || "Unknown Error!", error_key: error_type },
 				500
 			)
 		}

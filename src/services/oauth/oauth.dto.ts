@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEmail, IsString, IsBoolean } from "class-validator"
+import { IsEmail, IsString, IsBoolean, IsEnum } from "class-validator"
 
 export namespace OAuthDTO {
 	export class CreateAccountDto {
@@ -23,7 +23,7 @@ export namespace OAuthDTO {
 
 		@ApiProperty({
 			description: "publicly visible username",
-			example:"captain.jack"
+			example: "captain.jack",
 		})
 		@IsString()
 		username: string
@@ -40,5 +40,11 @@ export namespace OAuthDTO {
 		@ApiProperty({ description: "password of the user", example: "A0F!%6(.KV" })
 		@IsString()
 		password: string
+	}
+
+	export class AuthorizeDto {
+		@ApiProperty({ description: "app name to authorize", example: "system" })
+		@IsEnum(["system", "oauth", "portal", "mobile"])
+		app_key: string
 	}
 }

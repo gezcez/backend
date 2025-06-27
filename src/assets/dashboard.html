@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>WebSocket Reconnect Example</title>
+</head>
+
+<body style="flex-direction: column; flex: content;">
+	<button onclick="clearMessages()">CLEAR</button>
+	<div id="messages"></div>
+
+	<script>
+		const access_token = new URLSearchParams(window.location.search).get("access_token");
+		const root = document.getElementById("messages");
+
+		function setHTMLUnsafe(el, html) {
+			el.innerHTML = html;
+		}
+
+		function appendMessage(content) {
+			root.innerHTML += `<a>[${new Date().toLocaleString()}]: ${content}</a><br/>`;
+		}
+
+		function clearMessages() {
+			setHTMLUnsafe(root, "");
+		}
+
+		let stream;
+		let reconnectAttempts = 0;
+
+		function connectWebSocket() {
+			stream = new WebSocket(`ws://phase.local/system/terminal?access_token=${access_token}`);
+
+			stream.addEventListener("message", (e) => {
+				const data = JSON.parse(e.data);
+				appendMessage(`[${data?.type}]: ${data.content}`);
+			});
+
+			stream.addEventListener("close", () => {
+				appendMessage("[status]: CONNECTION LOST, RECONNECTING...");
+				reconnect();
+			});
+
+			stream.addEventListener("error", (err) => {
+				appendMessage("[status]: ERROR");
+				stream.close();
+			});
+		}
+
+		function reconnect() {
+			reconnectAttempts++;
+			const retryDelay = Math.min(10000, 1000 * reconnectAttempts); // Max delay: 10s
+			setTimeout(() => {
+				appendMessage(`[status]: RECONNECT #${reconnectAttempts}`);
+				connectWebSocket();
+			}, retryDelay);
+		}
+
+		// Initialize connection
+		connectWebSocket();
+	</script>
+</body>
+
+</html>
