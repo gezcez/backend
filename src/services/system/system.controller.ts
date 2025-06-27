@@ -1,5 +1,5 @@
 import Elysia, { t } from "elysia"
-import { SOCKETS } from "../../mainn"
+import { SOCKETS } from "../../old.index"
 import { GezcezResponse } from "../../common/Gezcez"
 
 import { logger } from "../../util"

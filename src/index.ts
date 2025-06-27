@@ -4,11 +4,12 @@ import { NestExpressApplication } from "@nestjs/platform-express"
 import { Module, ValidationPipe, WebSocketAdapter } from "@nestjs/common"
 import { WsGateway } from "./ws/ws.gateway"
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger"
-import { OAuthModule } from "./services/oauth/oauth.module"
+import { OAuthController } from "./services/oauth/oauth.controller"
+import { apiReference } from "@scalar/nestjs-api-reference"
 
 @Module({
-	imports: [OAuthModule],
 	providers: [WsGateway],
+	controllers: [OAuthController],
 })
 class AppModule {}
 
@@ -34,7 +35,14 @@ async function bootstrap() {
 		.build()
 
 	const document = SwaggerModule.createDocument(app, config)
-	SwaggerModule.setup("docs", app, document)
+	app.use(
+		"/docs",
+		apiReference({
+			theme:"bluePlanet",
+			content: document,
+		})
+	)
+	SwaggerModule.setup("swagger", app, document)
 
 	await app.listen(process.env.PORT || 80)
 	console.log(`Application is running on: ${await app.getUrl()}`)

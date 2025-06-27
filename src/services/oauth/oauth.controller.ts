@@ -1,27 +1,13 @@
 // oauth.controller.ts
-import {
-	Body,
-	Controller,
-	Post,
-	Get,
-	Query,
-	Req,
-	UseGuards,
-	Res,
-	HttpStatus,
-	HttpException,
-	Param,
-} from "@nestjs/common"
-import { OAuthService } from "./oauth.service"
-import { OAuthDTO } from "./oauth.dto"
-
+import { Body, Controller, Get, Post, Req } from "@nestjs/common"
 import { GezcezResponse } from "../../common/Gezcez"
-import { AuthenticationGuard } from "../../guards/authentication.guard"
-import { AuthorizationGuard } from "../../guards/authorization.guard"
-import { GezcezError } from "../../common/GezcezError"
-import { Response } from "express"
+import { OAuthDTO } from "./oauth.dto"
 
 @Controller("oauth")
 export class OAuthController {
-	
+	@Post("/login")
+	async login(@Req() req:Request, @Body() form : OAuthDTO.LoginDto) {
+		console.log(form.email)
+		return GezcezResponse({ __message: "oauth home" })
+	}
 }

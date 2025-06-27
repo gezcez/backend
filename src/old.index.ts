@@ -26,31 +26,6 @@ const app = new Elysia({
 		idleTimeout: 180,
 	},
 })
-	.use(
-		swagger({
-			path: "/docs",
-			provider: "scalar",
-			scalarConfig: {
-				authentication: {
-					http: {
-						bearer: { token: "a" },
-						basic: { password: "a", username: "a" },
-					},
-				},
-			},
-			documentation: {
-				info: {
-					title: "Gezcez.com Public API Documentation",
-					version: "1.0.0",
-					contact: {
-						email: "info@gezcez.com",
-					},
-					description:
-						"Public API docs for Gezcez.com, our internal services alo use this API.",
-				},
-			},
-		})
-	)
 	.on("error", (c) => {
 		if (c.code == "VALIDATION") {
 			const first_error = c.error.all.at(0)
