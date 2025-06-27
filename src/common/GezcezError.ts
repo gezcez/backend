@@ -16,6 +16,8 @@ export function GezcezError(error_type: ErrorType, error: any) {
 			return GezcezResponse({ __message: "Unauthorized!", error_key: error_type,...error }, 401)
 		} case "VALIDATION_FAILED" : {
 			return GezcezResponse({ __message: "Object validation failed!", error_key: error_type, ...error }, 400)
+		}case "RATELIMIT" : {
+			return GezcezResponse({ __message: "Object validation failed!", error_key: error_type, ...error }, 429)
 		}
 		default: {
 			return GezcezResponse({ __message: "Unknown Error!", error_key: error_type }, 500)
@@ -41,3 +43,4 @@ export type ErrorType =
 	| "INTERNAL_SERVER_ERROR"
 	| "NOT_FOUND"
 	| "VALIDATION_FAILED"
+	| "RATELIMIT"

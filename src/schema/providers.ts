@@ -19,6 +19,7 @@ export const providersTable = sqliteTable("providers", {
 	id: int().primaryKey({ autoIncrement: true }).unique().notNull(),
 	type: text().$type<ProviderCompany>(),
 	url: text().$type<ProviderUrl<ProviderCompany>>(),
+	image_url: text(),
 	overrides: text({mode:"json"}).$type<{}>(),
 	...TABLE_ACTIONS
 })

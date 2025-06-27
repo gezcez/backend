@@ -22,7 +22,7 @@ export abstract class OAuthRepository {
 	}
 
 	static async selectUserById(
-		user_id: number|string,
+		user_id: number | string,
 		config?: { get_raw_password?: boolean; get_raw_email?: boolean }
 	) {
 		if (typeof user_id === "string") user_id = parseInt(user_id)
@@ -43,7 +43,8 @@ export abstract class OAuthRepository {
 			.from(usersTable)
 			.where(eq(usersTable.email, email))
 			.limit(1)
-		const is_verified = await Password.verify(password, result.password, "bcrypt")
+			if (!result) return
+		const is_verified = await Password.verify(password, result?.password, "bcrypt")
 		if (is_verified) return { ...result, password: undefined }
 	}
 }

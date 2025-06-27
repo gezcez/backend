@@ -9,12 +9,11 @@ export const AuthenticationMiddleware = (config: { aud: "oauth" | (string & {})}
 		name: "authentication.middleware.ts",
 	})
 		.guard({
-			as: "scoped",
 			headers: t.Object({
 				access_token: t.String(),
 			}),
 		})
-		.resolve({ as: "scoped" }, async ({ headers: { access_token } }) : Promise<{payload:GezcezJWTPayload}> => {
+		.resolve( async ({ headers: { access_token } }) : Promise<{payload:GezcezJWTPayload}> => {
 			if (!access_token) return undefined as any
 			let payload = await OAuthService.verifyJWT(access_token, config.aud)
 			if (!payload) return undefined as any
@@ -22,11 +21,10 @@ export const AuthenticationMiddleware = (config: { aud: "oauth" | (string & {})}
 			return { payload: payload }
 		})
 		.guard({
-			as: "scoped",
 			async beforeHandle({ payload, set }) {
 				if (!payload) {
 					set.status = 401
 					return GezcezError("NOT_AUTHENTICATED", undefined)
 				}
 			},
-		})
+		}).as("scoped")

@@ -18,6 +18,7 @@ import { EmailRepository } from "../email/email.repository"
 import { db } from "../../util"
 import { usersTable } from "../../schema/users"
 import { eq } from "drizzle-orm"
+import { RatelimitterMiddleware } from "../../middlewares/ratelimitter.middleware"
 export const OAuthController = new Elysia({
 	prefix: "/oauth",
 	name: "oauth.controller.ts",
@@ -83,11 +84,20 @@ export const OAuthController = new Elysia({
 			)
 			if (!email_row || email_error) {
 				c.set.status = 500
-				return GezcezResponse({ __message: email_error as string || "unknown error occured during email request" }, 500)
+				return GezcezResponse(
+					{
+						__message:
+							(email_error as string) || "unknown error occured during email request",
+					},
+					500
+				)
 			}
 			return GezcezResponse(
 				{
-					__debug:process.env.NODE_ENV==="dev"?{email:email_row,link:build_content(token)}:undefined,
+					__debug:
+						process.env.NODE_ENV === "dev"
+							? { email: email_row, link: build_content(token) }
+							: undefined,
 					account: { ...user, password: undefined },
 					__message:
 						"Please verify your account using the link we've sent to your email adress",
@@ -99,6 +109,7 @@ export const OAuthController = new Elysia({
 			body: OAuthDTO.account_create,
 		}
 	)
+
 	.group("/account", (app) =>
 		app
 			.get(
@@ -112,30 +123,36 @@ export const OAuthController = new Elysia({
 								"\nbu hatayı görüyorsanız lütfen iletişime geçin: wemessedup@gezcez.com",
 						})
 					const token = _
-					let payload: {email_id:string} & JWTPayload
+					let payload: { email_id: string } & JWTPayload
 					try {
-						payload = (await jwtVerify(token, secret, {
-							audience: "activation.emails",
-						})).payload as any
+						payload = (
+							await jwtVerify(token, secret, {
+								audience: "activation.emails",
+							})
+						).payload as any
 					} catch {
 						return "Linkin süresi dolmuş, geçerli değil veya "
 					}
 					if (!payload) return "Linkin süresi dolmuş, geçerli değil veya "
 					const uuid = payload.email_id
 					if (!uuid) return "uuid is undefined"
-					const [email,email_error] = await EmailRepository.selectEmailById(uuid)
+					const [email, email_error] = await EmailRepository.selectEmailById(uuid)
 					if (!email || email_error) {
 						return "Link geçerli fakat veri tabanında email bulunamadı."
 					}
-					const user = await OAuthRepository.selectUserById(payload.sub as string,{
-						get_raw_email:true,
-						get_raw_password:false
+					const user = await OAuthRepository.selectUserById(payload.sub as string, {
+						get_raw_email: true,
+						get_raw_password: false,
 					})
 					if (!user) return "Link geçerli fakat kullanıcı silinmiş."
 					if (user.activated_at) return "Hesap zaten aktif edilmiş."
-					const [updated_user] = await db.update(usersTable).set({
-						activated_at:new Date(),
-					}).where(eq(usersTable.id,user.id)).returning()
+					const [updated_user] = await db
+						.update(usersTable)
+						.set({
+							activated_at: new Date(),
+						})
+						.where(eq(usersTable.id, user.id))
+						.returning()
 					return "Hesap başarıyla aktif edildi!"
 				},
 				{
@@ -144,10 +161,31 @@ export const OAuthController = new Elysia({
 					}),
 				}
 			)
-
 			.use(
 				AuthenticationMiddleware({
 					aud: "oauth",
+				})
+			)
+			.get("/me", async ({ payload }) => {
+				const user = await OAuthRepository.selectUserById(payload.sub, {
+					get_raw_email: true,
+				})
+				// const permissions = await UserRepository.getUserPermissions(payload.sub)
+				return GezcezResponse({
+					payload: payload,
+					account: user,
+					// permissions: permissions,
+				})
+			})
+			.use(
+				RatelimitterMiddleware({
+					allowed_rpm: 10,
+					app_key: "oauth",
+					block_for_seconds: 60,
+					key_getter: (c: any) => {
+						if (c?.payload) return `${c?.payload?.sub}`
+						return
+					},
 				})
 			)
 			.post(
@@ -191,17 +229,6 @@ export const OAuthController = new Elysia({
 				},
 				{ query: t.Object({ app_key: t.String() }) }
 			)
-			.get("/me", async ({ payload }) => {
-				const user = await OAuthRepository.selectUserById(payload.sub, {
-					get_raw_email: true,
-				})
-				// const permissions = await UserRepository.getUserPermissions(payload.sub)
-				return GezcezResponse({
-					payload: payload,
-					account: user,
-					// permissions: permissions,
-				})
-			})
 			.use(
 				AuthorizationMiddleware({
 					app_key: "oauth",

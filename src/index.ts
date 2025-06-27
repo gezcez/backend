@@ -21,7 +21,6 @@ console.log = (...str) => {
 	)
 	return
 }
-
 const app = new Elysia({
 	websocket: {
 		idleTimeout: 180,
@@ -46,7 +45,8 @@ const app = new Elysia({
 					contact: {
 						email: "info@gezcez.com",
 					},
-					description: "Public API docs for Gezcez.com, our internal services alo use this API.",
+					description:
+						"Public API docs for Gezcez.com, our internal services alo use this API.",
 				},
 			},
 		})
@@ -56,9 +56,17 @@ const app = new Elysia({
 			const first_error = c.error.all.at(0)
 			const error = c.error
 			if (first_error.summary) {
-				return GezcezValidationFailedError(c as any, `${error.type}:${first_error.path?.slice(1)}`, first_error.summary || "unknown error")
+				return GezcezValidationFailedError(
+					c as any,
+					`${error.type}:${first_error.path?.slice(1)}`,
+					first_error.summary || "unknown error"
+				)
 			}
-			return GezcezValidationFailedError(c as any, `unknown:${c.error.all.at(0)?.schema.format}`, c.error.message.summary || c.error.message || "unknown error")
+			return GezcezValidationFailedError(
+				c as any,
+				`unknown:${c.error.all.at(0)?.schema.format}`,
+				c.error.message.summary || c.error.message || "unknown error"
+			)
 		}
 		if (c.code == "PARSE") {
 			return GezcezError("BAD_REQUEST", c.error)
