@@ -1,12 +1,12 @@
 import Elysia, { t } from "elysia"
-import { SOCKETS } from "../.."
+import { SOCKETS } from "../../mainn"
 import { GezcezResponse } from "../../common/Gezcez"
 
 import { logger } from "../../util"
 import { NetworkRepository } from "../network/network.repository"
 import { OAuthService } from "../oauth/oauth.service"
 import { PermissionsRepository } from "../permissions/permissions.repository"
-import { AuthorizationMiddleware } from "../../middlewares/authorization.middleware"
+import { AuthorizationMiddleware } from "../../middlewares/old.authorization.middleware"
 
 export const SystemController = new Elysia({
 	name: "system.controller.ts",

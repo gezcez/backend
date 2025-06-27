@@ -1,6 +1,6 @@
 import { Elysia } from "elysia"
-import { NetworkMiddleware } from "../../middlewares/network.middleware"
-import { AuthorizationMiddleware } from "../../middlewares/authorization.middleware"
+import { NetworkMiddleware } from "../../middlewares/old.network.middleware"
+import { AuthorizationMiddleware } from "../../middlewares/old.authorization.middleware"
 export const NetworkController = new Elysia({
 	name: "network.controller.ts",
 	tags: ["network"],

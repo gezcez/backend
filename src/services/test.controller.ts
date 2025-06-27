@@ -1,8 +1,8 @@
 import Elysia, { t } from "elysia"
 import { GezcezResponse } from "../common/Gezcez"
 import { GezcezValidationFailedError } from "../common/GezcezError"
-import { NetworkMiddleware } from "../middlewares/network.middleware"
-import { AuthorizationMiddleware } from "../middlewares/authorization.middleware"
+import { NetworkMiddleware } from "../middlewares/old.network.middleware"
+import { AuthorizationMiddleware } from "../middlewares/old.authorization.middleware"
 
 export const TestController = new Elysia()
 const dont_export = new Elysia({

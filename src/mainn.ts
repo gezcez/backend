@@ -9,7 +9,7 @@ import { SystemController } from "./services/system/system.controller"
 import { ElysiaWS } from "elysia/dist/ws"
 
 const originalWrite = console.log
-export const SOCKETS: Map<string, ElysiaWS> = new Map()
+
 // overwrite console.log to stream terminal
 console.log = (...str) => {
 	originalWrite(...str)

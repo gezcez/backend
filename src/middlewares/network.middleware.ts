@@ -1,36 +1,25 @@
-import Elysia, { t } from "elysia"
-import { GezcezResponse } from "../common/Gezcez"
-import { NetworkService } from "../services/network/network.service"
-import { NetworkRepository } from "../services/network/network.repository"
-import { networksTable } from "../schema/networks"
+import {
+	CanActivate,
+	ExecutionContext,
+	Injectable,
+	NestMiddleware,
+} from "@nestjs/common"
+import { GezcezError, GezcezValidationFailedError } from "../common/GezcezError"
+import { NextFunction, Request, Response } from "express"
+import { OAuthService } from "../services/oauth/oauth.service"
 
-export const NetworkMiddleware = <T extends "global" | "scoped">(config?: {
-	scope: T
-}) =>
-	new Elysia({
-		name: "network.middleware.ts",
-		prefix: config?.scope === "global" ? "" : "/:network_id",
-	})
-		.guard({
-			params:config?.scope === "global" ? t.Undefined() : t.Object({
-				network_id: t.Integer()
-			}),
-		})
-		.resolve(async ({ params }) => {
-			const network_id = params?.network_id
-			if (config?.scope === "scoped" && network_id) {
-				const network = await NetworkRepository.getNetworkById(network_id)
-				return { network: network }
-			}
-		})
-		.guard({
-			beforeHandle({ network, params, set }) {
-				if (!network && config?.scope !== "global") {
-					set.status = 400
-					return GezcezResponse(
-						{ __message: `Network '${params?.network_id}' is invalid` },
-						400
-					)
-				}
-			},
-		})
+export class NetworkMiddleware implements NestMiddleware {
+	async use(req: Request, res: Response, next: NextFunction) {
+		const p_network_id = req.params["network_id"]
+		let network_id
+		try {
+			network_id = parseInt(p_network_id)
+		} catch {
+			return GezcezError("BAD_REQUEST", { __message: "Network geçersiz." })
+		}
+		if (network_id > 100 || network_id <= 0) {
+			return GezcezError("BAD_REQUEST", { __message: "Network geçersiz." })
+		}
+		next()
+	}
+}

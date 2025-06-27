@@ -1,62 +1,61 @@
-import Elysia, { t } from "elysia"
-import { GezcezError } from "../common/GezcezError"
-import { GezcezJWTPayload, OAuthService } from "../services/oauth/oauth.service"
-import { NetworkMiddleware } from "./network.middleware"
-import { JWTPayload } from "jose"
-import { GezcezResponse } from "../common/Gezcez"
+import {
+	CanActivate,
+	ExecutionContext,
+	Injectable,
+	NestMiddleware,
+} from "@nestjs/common"
+import { GezcezError, GezcezValidationFailedError } from "../common/GezcezError"
+import { NextFunction, Request, Response } from "express"
+import { OAuthService } from "../services/oauth/oauth.service"
 
-// lets do it properly this time.
-export const AuthorizationMiddleware = <T extends "global" | "scoped">(config: {
-	scope: T
+export function AuthorizationMiddleware(config: {
+	scope: "global" | "scoped"
 	permission_id: number
 	app_key: string
-}) =>
-	NetworkMiddleware<T>({
-		scope: config.scope,
-	})
-		.guard({
-			headers: t.Object({
-				access_token: t.String(),
-			}),
-		})
-		.resolve(async ({ headers: { access_token }, network }) => {
-			const verified_payload = await OAuthService.verifyJWT(
-				access_token,
-				config.app_key
-			)
-			if (!verified_payload) return
+}) {
+	return class Guard implements NestMiddleware {
+		async use(req: Request, res: Response, next: NextFunction) {
+			const token = req.headers.authorization?.split(" ")[1]
+
+			if (!token) {
+				return GezcezError("NOT_AUTHENTICATED", {
+					__message: "Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım.",
+				})
+			}
+			const payload = await OAuthService.verifyJWT(token, config.app_key)
+			if (!payload) {
+				return GezcezError("NOT_AUTHENTICATED", {
+					__message: "Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım.",
+				})
+			}
+			const network_id = req["network_id"]
+			let can_activate = false
 			if (config.scope === "scoped") {
-				if (!network) return
-				const does_permissions_match = await OAuthService.doesPermissionsMatch(
-					verified_payload,
-					network.id.toString(),
+				if (!network_id)
+					return GezcezValidationFailedError(
+						req,
+						"params:network_id",
+						"network_id is undefined"
+					)
+				can_activate = await OAuthService.doesPermissionsMatch(
+					payload,
+					network_id,
 					config.permission_id
 				)
-				if (!does_permissions_match) return
-				return {
-					network: network.id,
-					payload: verified_payload,
-				}
-			} else if (config.scope === "global") {
-				const does_permissions_match = await OAuthService.doesPermissionsMatch(
-					verified_payload,
+			} else {
+				can_activate = await OAuthService.doesPermissionsMatch(
+					payload,
 					"global",
 					config.permission_id
 				)
-				if (!does_permissions_match) return
-				return {
-					payload: verified_payload,
-				}
 			}
-		})
-		.guard({
-			beforeHandle({ payload }) {
-				if (!payload) {
-					return GezcezError("UNAUTHORIZED", { __message: "Not authorized!" })
-				}
-			},
-		})
-		.resolve(({ payload }) => {
-			if (!payload) throw new Error("payload gone??")
-			return { payload: payload as GezcezJWTPayload }
-		})
+
+			if (!can_activate) {
+				return GezcezError("UNAUTHORIZED", {
+					__message: "Bu işlemi gerçekleştirmek için yetkiniz yok.",
+				})
+			}
+			next()
+		}
+	}
+}
