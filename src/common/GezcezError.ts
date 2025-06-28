@@ -3,6 +3,7 @@ import { GezcezResponse } from "./Gezcez"
 
 export function GezcezError(error_type: ErrorType, error: any) {
 	const err_message = error.__message
+	error.__message = undefined
 	switch (error_type) {
 		case "BAD_REQUEST": {
 			return GezcezResponse(
@@ -26,7 +27,7 @@ export function GezcezError(error_type: ErrorType, error: any) {
 		}
 		case "FORBIDDEN": {
 			return GezcezResponse(
-				{ __message: err_message || "Forbidden!", error_key: error_type },
+				{ __message: err_message || "Forbidden!", error_key: error_type,error:error },
 				403
 			)
 		}
@@ -41,7 +42,7 @@ export function GezcezError(error_type: ErrorType, error: any) {
 				{
 					__message: err_message || "Unauthorized!",
 					error_key: error_type,
-					...error,
+					error:error,
 				},
 				401
 			)
@@ -51,7 +52,7 @@ export function GezcezError(error_type: ErrorType, error: any) {
 				{
 					__message: err_message || "Object validation failed!",
 					error_key: error_type,
-					...error,
+					error:error,
 				},
 				400
 			)
@@ -61,7 +62,7 @@ export function GezcezError(error_type: ErrorType, error: any) {
 				{
 					__message: err_message || "Object validation failed!",
 					error_key: error_type,
-					...error,
+					error:error,
 				},
 				429
 			)

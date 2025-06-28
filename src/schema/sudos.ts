@@ -7,7 +7,7 @@ export const sudosTable = sqliteTable(
 		sudo_key: text().primaryKey().notNull().unique(),
 		created_at: TABLE_ACTIONS.created_at,
 		created_by: TABLE_ACTIONS.created_by,
-		confirmed_at: TABLE_ACTIONS.updated_at,
+		updated_at: TABLE_ACTIONS.updated_at,
 		linked_refresh_token_id: text().notNull(),
 		confirm_hash: text().notNull()
 	},

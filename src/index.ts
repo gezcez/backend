@@ -76,7 +76,7 @@ class ErrorHandler implements ExceptionFilter {
 				? exception.getStatus()
 				: HttpStatus.INTERNAL_SERVER_ERROR
 		// console.error("Global Exception:", exception)
-		if (exception.status === 500) {
+		if ((exception.status||status) === 500) {
 			console.error(exception)
 		}
 		response

@@ -1,5 +1,5 @@
 {
-	"sudo_mode_ttl":900,
+	"sudo_mode_ttl":300,
 	"third_party_urls": {
 		"email_service":"email_service_go_brr"
 	},

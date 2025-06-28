@@ -3,9 +3,10 @@ import { Request } from "express"
 import { GezcezError, GezcezValidationFailedError } from "../common/GezcezError"
 import { GezcezJWTPayload, OAuthService } from "../services/oauth/oauth.service"
 import { refreshTokensTable } from "../schema/refresh_tokens"
-import { db } from "../util"
-import { eq } from "drizzle-orm"
+import { config, db } from "../util"
+import { and, eq } from "drizzle-orm"
 import { handleInvalidation } from "./authentication.guard"
+import { sudosTable } from "../schema/sudos"
 
 export function AuthorizationGuard<T extends true | false>(config: {
 	scope: "global" | "scoped"
@@ -99,17 +100,60 @@ async function handleFetchFromDb(
 			__message: "Bu işlemi gerçekleştirmek için yetkiniz yok.",
 		})
 	}
-	if (!user_permissions.find((e)=>e.permission_id===permission_id)) throw GezcezError("FORBIDDEN", {
-		__message: "Bu işlemi gerçekleştirmek için gereken yetkiniz kısa süre önce silinmiş.",
-	})
+	if (!user_permissions.find((e) => e.permission_id === permission_id))
+		throw GezcezError("FORBIDDEN", {
+			__message:
+				"Bu işlemi gerçekleştirmek için gereken yetkiniz kısa süre önce silinmiş.",
+		})
 }
 
 async function handleSudoMode(req: Request, sudo_key?: string) {
 	if (!sudo_key || typeof sudo_key !== "string") {
-		throw GezcezError("BAD_REQUEST", {
-			__message:
-				"Bu işlem için SUDO modunda olmanız lazım. (req.headers['sudo-key'] is undefined)",
+		throw GezcezError("FORBIDDEN", {
+			__message: "Bu işlem için SUDO modunda olmanız lazım.",
 			sudo: true,
 		})
 	}
+	const payload = req["payload"]!
+	const [sudo_row] = await db
+		.select()
+		.from(sudosTable)
+		.where(
+			and(eq(sudosTable.sudo_key, sudo_key), eq(sudosTable.created_by, payload.sub))
+		)
+		.limit(1)
+	if (!sudo_row)
+		throw GezcezError("FORBIDDEN", {
+			__message: "Bu işlem için SUDO modunda olmanız lazım.",
+			sudo: true,
+		})
+	if (!sudo_row.updated_at)
+		throw GezcezError("FORBIDDEN", {
+			__message: "SUDO işlemi onaylanmamış.",
+		})
+
+	if ((sudo_row.updated_at.getTime() + config.sudo_mode_ttl*1000 < new Date().getTime()))
+		throw GezcezError("FORBIDDEN", {
+			__message: "SUDO işleminizin süresi dolmuş.",
+			sudo:true
+		})
+	const [refresh_token] = await db
+		.select()
+		.from(refreshTokensTable)
+		.where(
+			and(
+				eq(refreshTokensTable.id, sudo_row.linked_refresh_token_id),
+				eq(refreshTokensTable.created_by, payload.sub)
+			)
+		)
+		.limit(1)
+	if (!refresh_token)
+		throw GezcezError("FORBIDDEN", {
+			__message: "Geçersiz oturum",
+		})
+	if (refresh_token.is_invalid)
+		throw GezcezError("FORBIDDEN", {
+			__message: "Oturumunuzdan çıkılmış",
+		})
+	throw GezcezError("BAD_REQUEST", { __message: "not implemented." })
 }
