@@ -2,20 +2,33 @@
 import {
 	Body,
 	Controller,
+	Get,
 	Post,
+	Query,
 	Req,
-	UseGuards
+	UseGuards,
 } from "@nestjs/common"
 import { ApiHeader } from "@nestjs/swagger"
 import type { Request } from "express"
 import { GezcezResponse } from "../../common/Gezcez"
-import { GezcezError } from "../../common/GezcezError"
+import {
+	GezcezError,
+	GezcezValidationFailedError,
+} from "../../common/GezcezError"
 import { AuthenticationGuard } from "../../middlewares/authentication.guard"
 import { AppsRepository } from "../apps/apps.repository"
 import { UserRepository } from "../user/user.repository"
 import { OAuthDTO } from "./oauth.dto"
 import { OAuthRepository } from "./oauth.repository"
-import { OAuthService } from "./oauth.service"
+import { OAuthService, secret_random } from "./oauth.service"
+import { JWTPayload, jwtVerify, SignJWT } from "jose"
+import { usersTable } from "../../schema/users"
+import { EmailRepository } from "../email/email.repository"
+import { db } from "../../util"
+import { eq } from "drizzle-orm"
+import { EmailService } from "../email/email.service"
+import { moderationLogs } from "../../schema/moderation_logs"
+import { refreshTokensTable } from "../../schema/refresh_tokens"
 
 @Controller("oauth")
 export class OAuthController {
@@ -26,30 +39,69 @@ export class OAuthController {
 		if (!user) {
 			return GezcezResponse({ __message: "Invalid email or password!" }, 401)
 		}
+		if (user.ban_record) {
+			const [ban_details] = await db
+				.select()
+				.from(moderationLogs)
+				.where(eq(moderationLogs.id, user.ban_record))
+			return GezcezResponse(
+				{
+					__message: "Hesabınız karalisteye alınmış.",
+					ban_data: {
+						...ban_details,
+						private_reason: undefined,
+						public_reason:undefined,
+						reason:ban_details.public_reason,
+						id: undefined,
+						created_by: undefined,
+						args: undefined,
+					},
+				},
+				403
+			)
+		}
+		if (!user.activated_at) {
+			return GezcezResponse(
+				{
+					__message:
+						"email'inize gönderdiğimiz linke tıklayarak hesabınızı doğrulamanız gerekli.",
+					resend: true,
+				},
+				403
+			)
+		}
+		const jti = crypto.randomUUID()
+		const token = await OAuthService.signJWT(
+			{
+				sub: user.id.toString(),
+				is_activated: !!user.activated_at,
+				jti: jti,
+			},
+			"15d",
+			"oauth"
+		)
+		const [result] = await db.insert(refreshTokensTable).values({
+			created_by:user.id,
+			id:jti,
+			args:{type:"oauth"}
+		}).returning()
+		if (!result) return GezcezError("INTERNAL_SERVER_ERROR",{__message:`Giriş işleminizi gerçekleştirirken bir hata ile karşılaştık. (refresh_token_insert_failed)`})
 		return GezcezResponse({
 			user: user,
-			refresh_token: await OAuthService.signJWT(
-				{
-					sub: user.id.toString(),
-					is_activated: !!user.activated_at,
-					jti: crypto.randomUUID(),
-				},
-				"15d",
-				"oauth"
-			),
+			refresh_token: token
 		})
 	}
 
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token",
-		required:true
+		required: true,
 	})
 	@UseGuards(AuthenticationGuard({ app_key: "oauth" }))
 	@Post("/account/authorize")
 	async authorize(@Req() req: Request, @Body() form: OAuthDTO.AuthorizeDto) {
-		const {app_key} = form
-		const payload= req["payload"]!
+		const { app_key } = form
+		const payload = req["payload"]!
 		const app_details = await AppsRepository.getAppByKey(app_key)
 		if (!app_details) return GezcezError("BAD_REQUEST", "app not found")
 		const user_permissions = await UserRepository.getUserPermissionsByAppKey(
@@ -68,7 +120,7 @@ export class OAuthController {
 		}
 		const payload_o = Object.fromEntries(scope_payload.entries())
 		if (Object.keys(payload_o).length <= 0) {
-			return GezcezError("UNAUTHORIZED", {
+			return GezcezError("FORBIDDEN", {
 				__message: `You do not have access to app '${app_key}'`,
 			})
 		}
@@ -83,6 +135,161 @@ export class OAuthController {
 		)
 		return GezcezResponse(
 			{ __message: "Logged in!", access_token: access_token, payload: payload_o },
+			200
+		)
+	}
+
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token",
+		required: true,
+	})
+	@UseGuards(AuthenticationGuard({ app_key: "oauth" }))
+	@Get("/account/list-permissions")
+	async listPermissions(@Req() req: Request) {
+		const payload = req["payload"]!
+		const user_permissions = await UserRepository.getUserPermissions(payload.sub)
+		return GezcezResponse({ permissions: user_permissions }, 200)
+	}
+
+	@Get("/account/activate")
+	async activate(@Req() req: Request, @Query() _: OAuthDTO.ActivateDto) {
+		const secret = secret_random
+		if (!secret)
+			return GezcezError("INTERNAL_SERVER_ERROR", {
+				__message:
+					"İşleminizi gerçekleştiremiyoruz. biri JWT secret'ı .env'a koymayı unutmuş." +
+					"\nbu hatayı görüyorsanız lütfen iletişime geçin: wemessedup@gezcez.com",
+			})
+		const token = _._
+		let payload: { email_id: string } & JWTPayload
+		try {
+			payload = (
+				await jwtVerify(token, secret, {
+					audience: "activation.emails",
+				})
+			).payload as any
+		} catch {
+			return "Linkin süresi dolmuş, geçerli değil veya "
+		}
+		if (!payload) return "Linkin süresi dolmuş, geçerli değil veya "
+		const uuid = payload.email_id
+		if (!uuid) return "uuid is undefined"
+		const [email, email_error] = await EmailRepository.selectEmailById(uuid)
+		if (!email || email_error) {
+			return "Link geçerli fakat veri tabanında email bulunamadı."
+		}
+		const user = await OAuthRepository.selectUserById(payload.sub as string, {
+			get_raw_email: true,
+			get_raw_password: false,
+		})
+		if (!user) return "Link geçerli fakat kullanıcı silinmiş."
+		if (user.activated_at) return "Hesap zaten aktif edilmiş."
+		const [updated_user] = await db
+			.update(usersTable)
+			.set({
+				activated_at: new Date(),
+			})
+			.where(eq(usersTable.id, user.id))
+			.returning()
+		return "Hesap başarıyla aktif edildi!"
+	}
+
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token",
+		required: true,
+	})
+	@UseGuards(AuthenticationGuard({ app_key: "oauth" }))
+	@Get("/account/me")
+	async me(@Req() req: Request) {
+		const payload = req["payload"]!
+		const user = await OAuthRepository.selectUserById(payload.sub, {
+			get_raw_email: true,
+		})
+		// const permissions = await UserRepository.getUserPermissions(payload.sub)
+		return GezcezResponse(
+			{
+				payload: payload,
+				account: user,
+				// permissions: permissions,
+			},
+			200
+		)
+	}
+
+	@Post("/account/create")
+	async create(@Req() req: Request, @Body() body: OAuthDTO.CreateAccountDto) {
+		const { email, password, tos, username } = body
+		if (!(tos === true))
+			return GezcezValidationFailedError("body:tos", "user must accept tos!")
+		if (!OAuthService.validate("username", username)) {
+			return GezcezValidationFailedError(
+				"body:username",
+				"Username must only contain numbers, lowercase and uppercase letters."
+			)
+		}
+		if (!OAuthService.validate("password", password)) {
+			return GezcezValidationFailedError(
+				"body:password",
+				`Password must be between 6 and 128 characters long`
+			)
+		}
+		if (!OAuthService.validate("email", email)) {
+			return GezcezValidationFailedError("body:password", "invalid email!")
+		}
+		const [user, error] = await OAuthRepository.insert({
+			email: email,
+			username: username,
+			password: password,
+		})
+		if (error || !user) {
+			return GezcezResponse({ __message: error }, 409)
+		}
+		const id = crypto.randomUUID()
+		const token = await new SignJWT({
+			aud: "activation.emails",
+			email_id: id,
+		})
+			.setProtectedHeader({
+				alg: "HS256",
+			})
+			.setSubject(user.id.toString())
+			.setJti(crypto.randomUUID())
+			.setIssuer("oauth.gezcez.com")
+			.setExpirationTime("6h")
+			.sign(secret_random)
+		function build_content(token: string) {
+			return `https://api.gezcez.com/oauth/account/activate?_=${token}`
+		}
+		const [email_row, email_error] = await EmailService.sendEmail(
+			{
+				content: build_content(token),
+				type: "activation",
+				target_user_id: user.id,
+				uuid: id,
+			},
+			id
+		)
+		if (!email_row || email_error) {
+			return GezcezResponse(
+				{
+					__message:
+						(email_error as string) || "unknown error occured during email request",
+				},
+				500
+			)
+		}
+		return GezcezResponse(
+			{
+				__debug:
+					process.env.NODE_ENV === "dev"
+						? { email: email_row, link: build_content(token) }
+						: undefined,
+				account: { ...user, password: undefined },
+				__message:
+					"Please verify your account using the link we've sent to your email adress",
+			},
 			200
 		)
 	}

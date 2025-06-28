@@ -162,6 +162,34 @@
       "when": 1751014641944,
       "tag": "0022_dazzling_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1751108440027,
+      "tag": "0023_dazzling_mach_iv",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1751109333267,
+      "tag": "0024_little_power_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1751110260374,
+      "tag": "0025_clear_kingpin",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1751111508988,
+      "tag": "0026_violet_wildside",
+      "breakpoints": true
     }
   ]
 }

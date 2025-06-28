@@ -24,10 +24,10 @@ export function GezcezError(error_type: ErrorType, error: any) {
 				500
 			)
 		}
-		case "NOT_AUTHENTICATED": {
+		case "FORBIDDEN": {
 			return GezcezResponse(
-				{ __message: err_message || "Not Authenticated!", error_key: error_type },
-				401
+				{ __message: err_message || "Forbidden!", error_key: error_type },
+				403
 			)
 		}
 		case "NOT_FOUND": {
@@ -76,7 +76,6 @@ export function GezcezError(error_type: ErrorType, error: any) {
 }
 
 export function GezcezValidationFailedError<T extends Request>(
-	c: T,
 	err:
 		| `query:${string}`
 		| `params:${keyof T["params"] extends string ? keyof T["params"] : never}`
@@ -93,7 +92,7 @@ export function GezcezValidationFailedError<T extends Request>(
 
 export type ErrorType =
 	| "UNAUTHORIZED"
-	| "NOT_AUTHENTICATED"
+	| "FORBIDDEN"
 	| "BAD_REQUEST"
 	| "INTERNAL_SERVER_ERROR"
 	| "NOT_FOUND"

@@ -47,4 +47,10 @@ export namespace OAuthDTO {
 		@IsEnum(["system", "oauth", "portal", "mobile"])
 		app_key: string
 	}
+
+	export class ActivateDto {
+		@ApiProperty({ description: "activation token sent to email" })
+		@IsString()
+		_: string
+	}
 }

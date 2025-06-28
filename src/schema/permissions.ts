@@ -9,8 +9,6 @@ export const permissionsTable = sqliteTable("permissions", {
 	app: text().references(() => appsTable.key).notNull(),
 	key: text().unique().notNull(),
 	description: text(),
-	requires_sudo_mode:int({mode:"boolean"}).default(false).notNull(),
-	always_check_in_db:int({mode:"boolean"}).default(false).notNull(),
 	type: text().$type<"scoped" | "global">().default("scoped").notNull(),
 	...TABLE_ACTIONS
 }, (table) => [

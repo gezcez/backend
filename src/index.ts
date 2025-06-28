@@ -7,14 +7,11 @@ import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger"
 import { OAuthController } from "./services/oauth/oauth.controller"
 import { apiReference } from "@scalar/nestjs-api-reference"
 
-import { WsAdapter } from '@nestjs/platform-ws';
+import { WsAdapter } from "@nestjs/platform-ws"
 @Module({
 	providers: [TerminalWsGateway],
-	controllers: [OAuthController,SystemController],
+	controllers: [OAuthController, SystemController],
 })
-
-
-
 class AppModule {}
 
 export const SOCKETS: Set<WebSocket> = new Set()
@@ -23,7 +20,7 @@ const originalLog = console.log
 console.log = (...args: any[]) => {
 	originalLog(...args)
 	SOCKETS.forEach((e) => {
-		e.send(BuildWSMessage("message",[...args]))
+		e.send(BuildWSMessage("message", [...args]))
 	})
 }
 
@@ -83,8 +80,13 @@ class ErrorHandler implements ExceptionFilter {
 			console.error(exception)
 		}
 		response
-			.status(exception.status||status)
-			.json(exception.status ? exception : { ...getGezcezResponseFromStatus(500), path: request.path })
+			.status(exception.status || status)
+			.json(
+				exception.time
+					? {...exception,path: request.path}
+					: { ...getGezcezResponseFromStatus(exception.status || status), path: request.path }
+
+			)
 	}
 }
 function getGezcezResponseFromStatus(status: number) {
@@ -103,12 +105,12 @@ function getGezcezResponseFromStatus(status: number) {
 			})
 		}
 		case 401: {
-			return GezcezError("NOT_AUTHENTICATED", {
+			return GezcezError("UNAUTHORIZED", {
 				__message: "Bu işlemi gerçekleştirmek için giriş yapmalısın.",
 			})
 		}
 		case 403: {
-			return GezcezError("UNAUTHORIZED", {
+			return GezcezError("FORBIDDEN", {
 				__message: "Bu işlemi gerçekleştirebilmek için yeterli iznin yok.",
 			})
 		}

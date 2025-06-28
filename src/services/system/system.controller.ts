@@ -26,14 +26,28 @@ export class SystemController {
 		return await NetworkRepository.list()
 	}
 
-	@UseGuards(AuthorizationGuard({
-		app_key:"system",
-		permission_id:11,
-		scope:"global"
-	}))
+	@UseGuards(
+		AuthorizationGuard({
+			app_key: "system",
+			permission_id: 11,
+			scope: "global",
+		})
+	)
 	@Get("/permissions/list")
-	async listPermissons(req:Request) {
+	async listPermissons(req: Request) {
 		return await PermissionsRepository.list()
 	}
 
+	@UseGuards(
+		AuthorizationGuard({
+			app_key: "system",
+			permission_id: 10,
+			scope: "global",
+			sudo_mode: true,
+		})
+	)
+	@Get("/sudo-test")
+	async sudoTest(req: Request) {
+		return await PermissionsRepository.list()
+	}
 }
