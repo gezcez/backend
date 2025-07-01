@@ -3,13 +3,15 @@ import {
 	Body,
 	Controller,
 	Get,
+	HttpStatus,
 	Post,
 	Query,
 	Req,
+	Res,
 	UseGuards,
 } from "@nestjs/common"
 import { ApiHeader } from "@nestjs/swagger"
-import type { Request } from "express"
+import type { Request, Response } from "express"
 import { GezcezResponse } from "../../common/Gezcez"
 import {
 	GezcezError,
@@ -29,7 +31,7 @@ import { eq } from "drizzle-orm"
 import { EmailService } from "../email/email.service"
 import { moderationLogs } from "../../schema/moderation_logs"
 import { refreshTokensTable } from "../../schema/refresh_tokens"
-
+import { createWriteStream, readFile } from "node:fs"
 @Controller("oauth")
 export class OAuthController {
 	@Post("/login")
@@ -50,8 +52,8 @@ export class OAuthController {
 					ban_data: {
 						...ban_details,
 						private_reason: undefined,
-						public_reason:undefined,
-						reason:ban_details.public_reason,
+						public_reason: undefined,
+						reason: ban_details.public_reason,
 						id: undefined,
 						created_by: undefined,
 						args: undefined,
@@ -80,17 +82,59 @@ export class OAuthController {
 			"15d",
 			"oauth"
 		)
-		const [result] = await db.insert(refreshTokensTable).values({
-			created_by:user.id,
-			id:jti,
-			args:{type:"oauth"}
-		}).returning()
-		if (!result) return GezcezError("INTERNAL_SERVER_ERROR",{__message:`Giriş işleminizi gerçekleştirirken bir hata ile karşılaştık. (refresh_token_insert_failed)`})
+		const [result] = await db
+			.insert(refreshTokensTable)
+			.values({
+				created_by: user.id,
+				id: jti,
+				args: { type: "oauth" },
+			})
+			.returning()
+		if (!result)
+			return GezcezError("INTERNAL_SERVER_ERROR", {
+				__message: `Giriş işleminizi gerçekleştirirken bir hata ile karşılaştık. (refresh_token_insert_failed)`,
+			})
 		return GezcezResponse({
 			user: user,
-			refresh_token: token
+			refresh_token: token,
 		})
 	}
+
+	/*
+		[30/07/2025] seems familiar? lol, lmao even.
+	*/
+
+	// @ApiHeader({
+	// 	name: "X-File-Name",
+	// 	description: "file-name",
+	// 	required: false,
+	// })
+	// @Post("/hit")
+	// async hit(@Req() req: Request, @Res() res: Response) {
+	// 	// console.log(typeof req.body, req.body)
+	// 	const file_name = req.headers["X-File-Name"]
+	// 	const name = file_name || `${new Date().toISOString().replaceAll(":", "_")}.data`
+	// 	const path = `./reqs/${name}`
+	// 	const writeStream = createWriteStream(path)
+	// 	console.log("saving file",path)
+
+	// 	await req.pipe(writeStream)
+	// 	writeStream.on("pipe",(e)=>{
+	// 		console.log("process")
+	// 	})
+	// 	writeStream.on("finish", async () => {
+	// 		const c = await readFile(path, (err, data) => {
+	// 			console.log(data.toString("utf-8"))
+	// 		})
+	// 		console.log("saved file!")
+	// 		res.status(HttpStatus.ACCEPTED).json({})
+	// 	})
+
+	// 	writeStream.on("error", (err) => {
+	// 		console.error(err)
+	// 		res.status(HttpStatus.ACCEPTED).json({})
+	// 	})
+	// }
 
 	@ApiHeader({
 		name: "Authorization",
