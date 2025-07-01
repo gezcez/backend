@@ -76,16 +76,18 @@ class ErrorHandler implements ExceptionFilter {
 				? exception.getStatus()
 				: HttpStatus.INTERNAL_SERVER_ERROR
 		// console.error("Global Exception:", exception)
-		if ((exception.status||status) === 500) {
+		if ((exception.status || status) === 500) {
 			console.error(exception)
 		}
 		response
 			.status(exception.status || status)
 			.json(
 				exception.time
-					? {...exception,path: request.path}
-					: { ...getGezcezResponseFromStatus(exception.status || status), path: request.path }
-
+					? { ...exception, path: request.path }
+					: {
+							...getGezcezResponseFromStatus(exception.status || status),
+							path: request.path,
+					  }
 			)
 	}
 }

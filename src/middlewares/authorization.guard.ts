@@ -90,7 +90,7 @@ async function handleFetchFromDb(
 		payload.sub,
 		network_number
 	)
-	const payload_scopes = await OAuthService.getPermissionIDsFromPayload(
+	const payload_scopes = OAuthService.getPermissionIDsFromPayload(
 		payload,
 		network_key
 	)
@@ -100,7 +100,7 @@ async function handleFetchFromDb(
 			__message: "Bu işlemi gerçekleştirmek için yetkiniz yok.",
 		})
 	}
-	if (!user_permissions.find((e) => e.permission_id === permission_id))
+	if (!user_permissions.find((e) => (e.permission_id === permission_id) && (e.network_id === network_number)))
 		throw GezcezError("FORBIDDEN", {
 			__message:
 				"Bu işlemi gerçekleştirmek için gereken yetkiniz kısa süre önce silinmiş.",

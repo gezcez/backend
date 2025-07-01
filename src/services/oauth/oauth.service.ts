@@ -94,7 +94,7 @@ export abstract class OAuthService {
 			sub: parseInt(payload?.sub as string) as number,
 		} as GezcezJWTPayload
 	}
-	static async getPermissionIDsFromPayload(
+	static getPermissionIDsFromPayload(
 		payload: GezcezJWTPayload,
 		network: string
 	) {
@@ -112,8 +112,20 @@ export abstract class OAuthService {
 		return scopes_to_return
 	}
 	static async listUserPermissionsOnGlobalScope(user_id: number) {}
-	static async listUserPermissionsWithNetworkId(user_id:number,network_id:number) {
-		const results = await db.select().from(userPermissionsTable).where(and(eq(userPermissionsTable.status,true),eq(userPermissionsTable.user_id,user_id),eq(userPermissionsTable.network_id,network_id)))
+	static async listUserPermissionsWithNetworkId(
+		user_id: number,
+		network_id: number
+	) {
+		const results = await db
+			.select()
+			.from(userPermissionsTable)
+			.where(
+				and(
+					eq(userPermissionsTable.status, true),
+					eq(userPermissionsTable.user_id, user_id),
+					eq(userPermissionsTable.network_id, network_id)
+				)
+			)
 		return results
 	}
 	static async doesPermissionsMatch(
@@ -121,7 +133,7 @@ export abstract class OAuthService {
 		network: "global" | (string & {}),
 		permission_id: number
 	) {
-		const user_permissions = await this.getPermissionIDsFromPayload(
+		const user_permissions = OAuthService.getPermissionIDsFromPayload(
 			payload,
 			network === "global" ? "_" : network
 		)
@@ -143,7 +155,7 @@ export type GezcezJWTPayload = {
 	sub: number
 	scopes: { [key: string]: number }
 	is_activated: boolean
-} & Omit<JWTPayload,"sub">
+} & Omit<JWTPayload, "sub">
 export const secret = new TextEncoder().encode(process.env.JWT_SECRET)
 export const secret_random = new TextEncoder().encode(
 	process.env.JWT_RANDOM_STUFF

@@ -100,42 +100,6 @@ export class OAuthController {
 		})
 	}
 
-	/*
-		[30/07/2025] seems familiar? lol, lmao even.
-	*/
-
-	// @ApiHeader({
-	// 	name: "X-File-Name",
-	// 	description: "file-name",
-	// 	required: false,
-	// })
-	// @Post("/hit")
-	// async hit(@Req() req: Request, @Res() res: Response) {
-	// 	// console.log(typeof req.body, req.body)
-	// 	const file_name = req.headers["X-File-Name"]
-	// 	const name = file_name || `${new Date().toISOString().replaceAll(":", "_")}.data`
-	// 	const path = `./reqs/${name}`
-	// 	const writeStream = createWriteStream(path)
-	// 	console.log("saving file",path)
-
-	// 	await req.pipe(writeStream)
-	// 	writeStream.on("pipe",(e)=>{
-	// 		console.log("process")
-	// 	})
-	// 	writeStream.on("finish", async () => {
-	// 		const c = await readFile(path, (err, data) => {
-	// 			console.log(data.toString("utf-8"))
-	// 		})
-	// 		console.log("saved file!")
-	// 		res.status(HttpStatus.ACCEPTED).json({})
-	// 	})
-
-	// 	writeStream.on("error", (err) => {
-	// 		console.error(err)
-	// 		res.status(HttpStatus.ACCEPTED).json({})
-	// 	})
-	// }
-
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token",
