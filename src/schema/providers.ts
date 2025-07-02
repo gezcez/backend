@@ -17,9 +17,27 @@ export type ProviderUrl<C extends ProviderCompany> = TJoinStrings<
 >
 export const providersTable = sqliteTable("providers", {
 	id: int().primaryKey({ autoIncrement: true }).unique().notNull(),
-	type: text().$type<ProviderCompany>(),
+	name: text().$type<ProviderCompany>(),
 	url: text().$type<ProviderUrl<ProviderCompany>>(),
 	image_url: text(),
-	overrides: text({mode:"json"}).$type<{}>(),
-	...TABLE_ACTIONS
+	pulled_data: text({ mode: "json" })
+		.$type<
+			{
+				key: collected_data_key
+				is_collected: boolean | string
+				can_optout: boolean
+				details: string
+			}[]
+		>()
+		.default([])
+		.notNull(),
+	...TABLE_ACTIONS,
 })
+
+export type collected_data_key =
+	| "names"
+	| "national_ids"
+	| "card_transactions"
+	| "card_discount_types"
+	| "card_images"
+	| "card_basic_information"

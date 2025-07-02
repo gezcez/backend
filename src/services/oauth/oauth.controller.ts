@@ -11,7 +11,6 @@ import {
 	UseGuards,
 } from "@nestjs/common"
 import { ApiHeader } from "@nestjs/swagger"
-import type { Request, Response } from "express"
 import { GezcezResponse } from "../../common/Gezcez"
 import {
 	GezcezError,

@@ -15,8 +15,8 @@ export abstract class logger {
 }
 
 export type TJoinStrings<A extends string, B extends string> = `${A}${B}`
-import configI from "../service.config.json"
-export const config = configI
+import __config from "../service.config.json"
+export const config = __config
 
 
 import { drizzle } from "drizzle-orm/libsql"

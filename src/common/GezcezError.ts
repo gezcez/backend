@@ -5,6 +5,16 @@ export function GezcezError(error_type: ErrorType, error: any) {
 	const err_message = error.__message
 	error.__message = undefined
 	switch (error_type) {
+		case "NOT_IMPLEMENTED" : {
+			return GezcezResponse(
+				{
+					__message: "Bu özellik daha kullanıma sunulmamış.",
+					error_key: error_type,
+					error: error,
+				},
+				501
+			)
+		}
 		case "BAD_REQUEST": {
 			return GezcezResponse(
 				{
@@ -99,3 +109,4 @@ export type ErrorType =
 	| "NOT_FOUND"
 	| "VALIDATION_FAILED"
 	| "RATELIMIT"
+	| "NOT_IMPLEMENTED"

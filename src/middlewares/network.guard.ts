@@ -15,6 +15,7 @@ export class NetworkGuard implements CanActivate {
 		let network_id
 		try {
 			network_id = parseInt(p_network_id)
+			if (isNaN(network_id)) throw GezcezError("BAD_REQUEST", { __message: "Network geçersiz." })
 		} catch {
 			throw GezcezError("BAD_REQUEST", { __message: "Network geçersiz." })
 		}

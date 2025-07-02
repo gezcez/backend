@@ -156,6 +156,9 @@ export type GezcezJWTPayload = {
 	scopes: { [key: string]: number }
 	is_activated: boolean
 } & Omit<JWTPayload, "sub">
+
+
+
 export const secret = new TextEncoder().encode(process.env.JWT_SECRET)
 export const secret_random = new TextEncoder().encode(
 	process.env.JWT_RANDOM_STUFF

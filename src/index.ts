@@ -10,7 +10,7 @@ import { apiReference } from "@scalar/nestjs-api-reference"
 import { WsAdapter } from "@nestjs/platform-ws"
 @Module({
 	providers: [TerminalWsGateway],
-	controllers: [OAuthController, SystemController],
+	controllers: [OAuthController, SystemController, WebController],
 })
 class AppModule {}
 
@@ -63,6 +63,7 @@ import {
 import { GezcezError } from "./common/GezcezError"
 import { GezcezResponse } from "./common/Gezcez"
 import { SystemController } from "./services/system/system.controller"
+import { WebController } from "./services/web/web.controller"
 
 @Catch()
 class ErrorHandler implements ExceptionFilter {
@@ -76,19 +77,19 @@ class ErrorHandler implements ExceptionFilter {
 				? exception.getStatus()
 				: HttpStatus.INTERNAL_SERVER_ERROR
 		// console.error("Global Exception:", exception)
-		if ((exception.status || status) === 500) {
+		if ((exception.result.status || status) === 500) {
 			console.error(exception)
 		}
-		response
-			.status(exception.status || status)
-			.json(
-				exception.time
-					? { ...exception, path: request.path }
-					: {
-							...getGezcezResponseFromStatus(exception.status || status),
+		response.status(exception.result.status || status).json(
+			exception.result.message
+				? { ...exception, result: { ...exception.result, path: request.path } }
+				: {
+						result: {
+							...getGezcezResponseFromStatus(exception.result.status || status),
 							path: request.path,
-					  }
-			)
+						},
+				  }
+		)
 	}
 }
 function getGezcezResponseFromStatus(status: number) {

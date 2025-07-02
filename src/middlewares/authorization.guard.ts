@@ -1,5 +1,4 @@
 import { CanActivate, ExecutionContext } from "@nestjs/common"
-import { Request } from "express"
 import { GezcezError, GezcezValidationFailedError } from "../common/GezcezError"
 import { GezcezJWTPayload, OAuthService } from "../services/oauth/oauth.service"
 import { refreshTokensTable } from "../schema/refresh_tokens"
