@@ -8,7 +8,8 @@ export const usersTable = sqliteTable("users", {
 
 	created_at: int({mode:"timestamp_ms"}).defaultNow(),
 	updated_at: int({mode:"timestamp_ms"}),
-	activated_at: int({mode:"timestamp_ms"})
+	activated_at: int({mode:"timestamp_ms"}),
+	ban_record: int(),
 });
 
 

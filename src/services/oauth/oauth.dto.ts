@@ -1,41 +1,56 @@
-import { t } from "elysia"
-import { config } from "../../util"
-export abstract class OAuthDTO {
-	static account_create = t.Object({
-		username: t.String({
-			minLength: config.validation.username.min_length,
-			maxLength: config.validation.username.max_length,
-			examples: ["john_smith"],
-			description: "Username for the account",
-			error: `Username must be between ${config.validation.username.min_length} and ${config.validation.username.max_length} characters long`
+import { ApiProperty } from "@nestjs/swagger"
+import { IsEmail, IsString, IsBoolean, IsEnum } from "class-validator"
 
-		}),
-		email: t.String({
-			minLength: config.validation.email.min_length,
-			maxLength: config.validation.email.max_length,
-			format: "email",
-			examples: ["john.s@gezcez.com"],
-			description: "email for the account",
-			error: "invalid email!"
-		}
-		),
-		password: t.String({
-			minLength: config.validation.password.min_length,
-			maxLength: config.validation.password.max_length,
-			examples: ["uIIY8u{#m2["],
-			description: "Password for the account",
-			error: "aaa"
-		}),
-		tos: t.Boolean({
-			description: "User must accept terms of service to create account",
-			default: false,
-			examples: [false],
-			error: "User must accept terms of service to create account"
+export namespace OAuthDTO {
+	export class CreateAccountDto {
+		@ApiProperty({
+			description: "email of the user",
+			example: "jack.sparrow@gezcez.com",
 		})
-	},
-	)
-	static account_login = t.Omit(
-		OAuthDTO.account_create,
-		["tos", "username"]
-	)
+		@IsEmail()
+		email: string
+
+		@ApiProperty({ description: "password of the user", example: "A0F!%6(.KV" })
+		@IsString()
+		password: string
+
+		@ApiProperty({
+			description: "user must accept TOS to use gezcez.com's services",
+			example: true,
+		})
+		@IsBoolean()
+		tos: boolean
+
+		@ApiProperty({
+			description: "publicly visible username",
+			example: "captain.jack",
+		})
+		@IsString()
+		username: string
+	}
+
+	export class LoginDto {
+		@ApiProperty({
+			description: "email of the user",
+			example: "jack.sparrow@gezcez.com",
+		})
+		@IsEmail()
+		email: string
+
+		@ApiProperty({ description: "password of the user", example: "A0F!%6(.KV" })
+		@IsString()
+		password: string
+	}
+
+	export class AuthorizeDto {
+		@ApiProperty({ description: "app name to authorize", example: "system" })
+		@IsEnum(["system", "oauth", "portal", "mobile"])
+		app_key: string
+	}
+
+	export class ActivateDto {
+		@ApiProperty({ description: "activation token sent to email" })
+		@IsString()
+		_: string
+	}
 }

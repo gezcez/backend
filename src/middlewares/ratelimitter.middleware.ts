@@ -14,7 +14,6 @@ export const RatelimitterMiddleware = (config: {
 		.guard({
 			beforeHandle: async (c) => {
 				const payload = (c as any).payload as GezcezJWTPayload
-				console.log("sub",payload.sub)
 				// todo
 				const identifier =
 					(config.key_getter && config.key_getter(c)) || c.headers["CF-Connecting-IP"]
