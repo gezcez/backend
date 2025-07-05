@@ -1,8 +1,9 @@
 import { and, eq } from "drizzle-orm"
-import { usersTable } from "../../schema/users"
-import { db } from "../../util"
+import { OAuthUtils } from "@gezcez/common"
 import { OAuthService } from "./oauth.service"
 import { password as Password } from "bun"
+import { usersTable } from "../../schemas"
+import { db } from "../../db"
 export abstract class OAuthRepository {
 	static async insert(
 		user: typeof usersTable.$inferInsert
@@ -15,7 +16,7 @@ export abstract class OAuthRepository {
 			.insert(usersTable)
 			.values({
 				...user,
-				password: await OAuthService.hashPassword(user.password),
+				password: await OAuthUtils.hashPassword(user.password),
 			})
 			.returning()
 		return [result]

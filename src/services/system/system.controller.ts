@@ -1,11 +1,9 @@
 // oauth.controller.ts
 import { Controller, Get, Param, UseGuards } from "@nestjs/common"
 import { NetworkRepository } from "../network/network.repository"
-import { AuthenticationGuard } from "../../middlewares/authentication.guard"
 import { ApiHeader } from "@nestjs/swagger"
-import { AuthorizationGuard } from "../../middlewares/authorization.guard"
 import { PermissionsRepository } from "../permissions/permissions.repository"
-import { NetworkGuard } from "../../middlewares/network.guard"
+import { AuthorizationGuard, NetworkGuard } from "@gezcez/common"
 const dash = require("../../assets/dashboard.html")
 
 @UseGuards(

@@ -1,36 +1,34 @@
 // oauth.controller.ts
 import {
+	AuthenticationGuard,
+	GezcezError,
+	GezcezResponse,
+	GezcezValidationFailedError,
+	OAuthUtils,
+	secret_random,
+} from "@gezcez/common/"
+import {
 	Body,
 	Controller,
 	Get,
-	HttpStatus,
 	Post,
 	Query,
 	Req,
-	Res,
 	UseGuards,
 } from "@nestjs/common"
+import type { Request } from "express"
 import { ApiHeader } from "@nestjs/swagger"
-import { GezcezResponse } from "../../common/Gezcez"
-import {
-	GezcezError,
-	GezcezValidationFailedError,
-} from "../../common/GezcezError"
-import { AuthenticationGuard } from "../../middlewares/authentication.guard"
+import { eq } from "drizzle-orm"
+import { JWTPayload, jwtVerify, SignJWT } from "jose"
 import { AppsRepository } from "../apps/apps.repository"
+import { EmailRepository } from "../email/email.repository"
+import { EmailService } from "../email/email.service"
 import { UserRepository } from "../user/user.repository"
 import { OAuthDTO } from "./oauth.dto"
 import { OAuthRepository } from "./oauth.repository"
-import { OAuthService, secret_random } from "./oauth.service"
-import { JWTPayload, jwtVerify, SignJWT } from "jose"
-import { usersTable } from "../../schema/users"
-import { EmailRepository } from "../email/email.repository"
-import { db } from "../../util"
-import { eq } from "drizzle-orm"
-import { EmailService } from "../email/email.service"
-import { moderationLogs } from "../../schema/moderation_logs"
-import { refreshTokensTable } from "../../schema/refresh_tokens"
-import { createWriteStream, readFile } from "node:fs"
+import { OAuthService } from "./oauth.service"
+import { db } from "../../db"
+import { moderationLogs, refreshTokensTable, usersTable } from "../../schemas"
 @Controller("oauth")
 export class OAuthController {
 	@Post("/login")
@@ -72,7 +70,7 @@ export class OAuthController {
 			)
 		}
 		const jti = crypto.randomUUID()
-		const token = await OAuthService.signJWT(
+		const token = await OAuthUtils.signJWT(
 			{
 				sub: user.id.toString(),
 				is_activated: !!user.activated_at,
@@ -131,7 +129,7 @@ export class OAuthController {
 				__message: `You do not have access to app '${app_key}'`,
 			})
 		}
-		const access_token = await OAuthService.signJWT(
+		const access_token = await OAuthUtils.signJWT(
 			{
 				scopes: payload_o,
 				sub: payload.sub.toString(),
@@ -230,19 +228,19 @@ export class OAuthController {
 		const { email, password, tos, username } = body
 		if (!(tos === true))
 			return GezcezValidationFailedError("body:tos", "user must accept tos!")
-		if (!OAuthService.validate("username", username)) {
+		if (!OAuthUtils.validate("username", username)) {
 			return GezcezValidationFailedError(
 				"body:username",
 				"Username must only contain numbers, lowercase and uppercase letters."
 			)
 		}
-		if (!OAuthService.validate("password", password)) {
+		if (!OAuthUtils.validate("password", password)) {
 			return GezcezValidationFailedError(
 				"body:password",
 				`Password must be between 6 and 128 characters long`
 			)
 		}
-		if (!OAuthService.validate("email", email)) {
+		if (!OAuthUtils.validate("email", email)) {
 			return GezcezValidationFailedError("body:password", "invalid email!")
 		}
 		const [user, error] = await OAuthRepository.insert({

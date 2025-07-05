@@ -1,5 +1,6 @@
-import { permissionsTable } from "../../schema/permissions";
-import { db } from "../../util";
+import { db } from "../../db"
+import { permissionsTable } from "../../schemas"
+
 
 export abstract class PermissionsRepository {
 	static async insert(values:typeof permissionsTable.$inferInsert) {

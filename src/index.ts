@@ -1,13 +1,40 @@
+import {
+	CallHandler,
+	ExecutionContext,
+	Injectable,
+	Module,
+	NestInterceptor,
+	ValidationPipe,
+} from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
-import { LoggerMiddleware } from "./middlewares/logger.middleware"
 import { NestExpressApplication } from "@nestjs/platform-express"
-import { Module, ValidationPipe, WebSocketAdapter } from "@nestjs/common"
-import { BuildWSMessage, TerminalWsGateway } from "./ws/terminal.ws"
-import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger"
-import { OAuthController } from "./services/oauth/oauth.controller"
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { apiReference } from "@scalar/nestjs-api-reference"
+import { OAuthController } from "./services/oauth/oauth.controller"
+import { BuildWSMessage, TerminalWsGateway } from "./ws/terminal.ws"
+const __config: IConfig = require("../service.config.json")
+
+export const config = buildConfig<typeof __config>()
+
+import {
+	buildConfig,
+	GezcezError,
+	IConfig,
+	LoggerMiddleware,
+} from "@gezcez/common"
+import {
+	ArgumentsHost,
+	Catch,
+	ExceptionFilter,
+	HttpException,
+	HttpStatus,
+} from "@nestjs/common"
 
 import { WsAdapter } from "@nestjs/platform-ws"
+import { SystemController } from "./services/system/system.controller"
+import { WebController } from "./services/web/web.controller"
+import { map } from "rxjs"
+import { Response } from "express"
 @Module({
 	providers: [TerminalWsGateway],
 	controllers: [OAuthController, SystemController, WebController],
@@ -24,10 +51,11 @@ console.log = (...args: any[]) => {
 	})
 }
 
-async function bootstrap() {
+export async function bootstrap(ignore_listen?: boolean) {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
 	app.useGlobalPipes(new ValidationPipe())
+	app.useGlobalInterceptors(new ResponseInterceptor())
 	app.use(LoggerMiddleware)
 	app.useWebSocketAdapter(new WsAdapter(app))
 	const config = new DocumentBuilder()
@@ -47,23 +75,14 @@ async function bootstrap() {
 		})
 	)
 	SwaggerModule.setup("swagger", app, document)
-
-	await app.listen(process.env.PORT || 80, process.env.HOST || "localhost")
-	console.log(`Application is running on: ${await app.getUrl()}`)
+	if (!ignore_listen) {
+		await app.listen(process.env.PORT || 80, process.env.HOST || "localhost")
+		console.log(`Application is running on: ${await app.getUrl()}`)
+	}
+	return app
 }
-bootstrap()
 
-import {
-	ExceptionFilter,
-	Catch,
-	ArgumentsHost,
-	HttpException,
-	HttpStatus,
-} from "@nestjs/common"
-import { GezcezError } from "./common/GezcezError"
-import { GezcezResponse } from "./common/Gezcez"
-import { SystemController } from "./services/system/system.controller"
-import { WebController } from "./services/web/web.controller"
+bootstrap()
 
 @Catch()
 class ErrorHandler implements ExceptionFilter {
@@ -77,21 +96,41 @@ class ErrorHandler implements ExceptionFilter {
 				? exception.getStatus()
 				: HttpStatus.INTERNAL_SERVER_ERROR
 		// console.error("Global Exception:", exception)
-		if ((exception.result.status || status) === 500) {
+		if ((exception?.result?.status || status) === 500) {
 			console.error(exception)
 		}
-		response.status(exception.result.status || status).json(
-			exception.result.message
+		response.status(exception?.result?.status || status).json(
+			exception?.result?.message
 				? { ...exception, result: { ...exception.result, path: request.path } }
 				: {
 						result: {
-							...getGezcezResponseFromStatus(exception.result.status || status),
+							...getGezcezResponseFromStatus(exception?.result?.status || status),
 							path: request.path,
 						},
 				  }
 		)
 	}
 }
+
+@Injectable()
+export class ResponseInterceptor implements NestInterceptor {
+	intercept(context: ExecutionContext, next: CallHandler) {
+		// You can also access the request/response if needed
+		const ctx = context.switchToHttp()
+		const response = ctx.getResponse() as Response
+		// response.status(response.?.status || 500)
+		
+		return next.handle().pipe(
+			map((data) => {
+				// Example: Override status code if needed
+				response.status(data.result?.status || 500)
+
+				return data
+			})
+		)
+	}
+}
+
 function getGezcezResponseFromStatus(status: number) {
 	switch (status) {
 		case 500: {

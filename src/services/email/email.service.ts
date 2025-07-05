@@ -1,5 +1,6 @@
-import { emailsTable } from "../../schema/emails"
-import { config, db } from "../../util"
+import { config } from "../.."
+import { db } from "../../db"
+import { emailsTable } from "../../schemas"
 
 export abstract class EmailService {
 	static async sendEmail(args: typeof emailsTable.$inferInsert, uuid: string) {
