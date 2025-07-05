@@ -1,22 +1,23 @@
 // oauth.controller.ts
 import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common"
 import { NetworkRepository } from "../network/network.repository"
-import { AuthorizationGuard } from "../../middlewares/authorization.guard"
 import { PermissionsRepository } from "../permissions/permissions.repository"
-import { NetworkGuard } from "../../middlewares/network.guard"
-import { providersTable } from "../../schema/providers"
-import { db } from "../../util"
-import { GezcezResponse } from "../../common/Gezcez"
-import { GezcezError } from "../../common/GezcezError"
 import { WebModels } from "./web.dto"
-import { networksTable } from "../../schema/networks"
 import { and, eq, isNotNull, not } from "drizzle-orm"
 import { notEquals } from "class-validator"
+import type { Request } from "express"
+import {
+	GezcezResponse,
+	NetworkGuard,
+	GezcezError,
+} from "@gezcez/common"
+import { db } from "../../db"
+import { networksTable, providersTable } from "../../schemas"
 
 @Controller("web")
 export class WebController {
-	@Get("/privacy/data-providers")
-	async getNetworks(req: Request) {
+	@Get("/providers/list")
+	async getProviders(req: Request) {
 		const providers = await db
 			.select({
 				id: providersTable.id,
@@ -67,7 +68,9 @@ export class WebController {
 			return GezcezError("BAD_REQUEST", { __message: "Geçersiz network_id" })
 		const optouts = []
 		for (const optout_key of body.features) {
-			const optout = network.provider?.pulled_data.find((e) => (e.key === optout_key) && e.can_optout)
+			const optout = network.provider?.pulled_data.find(
+				(e) => e.key === optout_key && e.can_optout
+			)
 			if (!optout) {
 				return GezcezError("BAD_REQUEST", {
 					__message: `'${optout_key}' bilgisi network '${network.network.name}/${network.network.id}' için toplanmıyor veya gizlenebilir değil.`,
@@ -75,11 +78,13 @@ export class WebController {
 			}
 			optouts.push(optout)
 		}
-		return GezcezError("NOT_IMPLEMENTED", {debug:{
-			optout_fields:optouts,
-			form:body,
-			...network
-		}})
+		return GezcezError("NOT_IMPLEMENTED", {
+			debug: {
+				optout_fields: optouts,
+				form: body,
+				...network,
+			},
+		})
 		return GezcezResponse(network)
 	}
 
@@ -99,6 +104,7 @@ export class WebController {
 					url: providersTable.url,
 					image_url: providersTable.image_url,
 					pulled_data: providersTable.pulled_data,
+					network_id_defined_by_provider: networksTable.network_id_defined_by_provider,
 				},
 			})
 			.from(networksTable)
@@ -106,6 +112,37 @@ export class WebController {
 				and(not(eq(networksTable.hide, true)), isNotNull(networksTable.provider_id))
 			)
 			.leftJoin(providersTable, eq(providersTable.id, networksTable.id))
+		if (!networks)
+			return GezcezError("INTERNAL_SERVER_ERROR", {
+				__message: "Error while fetching data providers from database!",
+			})
+		return GezcezResponse({ networks: networks })
+	}
+
+	@Get("/networks/list")
+	async getNetworks(req: Request) {
+		const networks = await db
+			.select({
+				network: {
+					id: networksTable.id,
+					name: networksTable.name,
+					country: networksTable.country,
+					provider_id: networksTable.provider_id,
+					network_id_defined_by_provider: networksTable.network_id_defined_by_provider,
+					public_secret: networksTable.network_public_secret,
+				},
+				provider: {
+					id: providersTable.id,
+					name: providersTable.name,
+					url: providersTable.url,
+					image_url: providersTable.image_url,
+				},
+			})
+			.from(networksTable)
+			.where(
+				and(not(eq(networksTable.hide, true)), isNotNull(networksTable.provider_id))
+			)
+			.leftJoin(providersTable, eq(providersTable.id, networksTable.provider_id))
 		if (!networks)
 			return GezcezError("INTERNAL_SERVER_ERROR", {
 				__message: "Error while fetching data providers from database!",

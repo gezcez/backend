@@ -1,5 +1,4 @@
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { permissionsTable } from "./permissions";
 import { TABLE_ACTIONS } from "./users";
 
 export const appsTable = sqliteTable("apps", {

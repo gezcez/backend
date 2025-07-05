@@ -1,5 +1,4 @@
 import { index, int, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { usersTable } from "./users";
 
 export const emailsTable = sqliteTable("emails",{
 	uuid:text().primaryKey().unique(),

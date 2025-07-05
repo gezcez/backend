@@ -1,13 +1,13 @@
+import { logger, OAuthUtils } from "@gezcez/common"
 import {
-	WebSocketGateway,
 	OnGatewayConnection,
-	WebSocketServer,
 	OnGatewayDisconnect,
 	OnGatewayInit,
+	WebSocketGateway,
+	WebSocketServer,
 } from "@nestjs/websockets"
-import { Server, WebSocket } from "ws"
-import { logger } from "../util"
-import { OAuthService } from "../services/oauth/oauth.service"
+import type { WebSocket } from "ws"
+import { Server } from "ws"
 import { SOCKETS } from ".."
 
 export function BuildWSMessage(
@@ -56,7 +56,7 @@ export class TerminalWsGateway
 			client.close(401)
 			return
 		}
-		const payload = await OAuthService.verifyJWT(access_token, "system")
+		const payload = await OAuthUtils.verifyJWT(access_token, "system")
 		if (!payload) {
 			client.send(BuildWSMessage("status", "authentication failed", "red"))
 			client.close(401)
@@ -65,7 +65,7 @@ export class TerminalWsGateway
 
 		client.send(BuildWSMessage("status", "authentication complete!", "green"))
 		client.send(BuildWSMessage("status", "checking authorization"))
-		const is_authorized = await OAuthService.doesPermissionsMatch(
+		const is_authorized = await OAuthUtils.doesPermissionsMatch(
 			payload,
 			"global",
 			10
@@ -78,7 +78,7 @@ export class TerminalWsGateway
 
 		client.send(BuildWSMessage("status", `authorization complete!`, "green"))
 		client.send(BuildWSMessage("status", `connection uuid: ${uuid}`))
-		SOCKETS.add(client)
+		SOCKETS.add(client as any)
 	}
 
 	broadcast(message: string) {}

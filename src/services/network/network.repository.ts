@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
-import { networksTable } from "../../schema/networks";
-import { db } from "../../util";
-import { usersTable } from "../../schema/users";
+import { db } from "../../db";
+import { networksTable } from "../../schemas";
 
 export abstract class NetworkRepository {
 	static async getNetworkById(id: number|string) {
