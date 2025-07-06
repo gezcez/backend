@@ -6,7 +6,7 @@
 		"dev": "bun run --watch src/index.ts",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start:prod": "bun run dist/index.js",
-		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+		"lint": "eslint \"./src/**/*.ts\" --fix",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
@@ -14,7 +14,6 @@
 		"test:e2e": "jest --config ./test/jest-e2e.json"
 	},
 	"dependencies": {
-		"@gezcez/common": "^1.1.65",
 		"@libsql/client": "^0.15.9",
 		"@nestjs/common": "^11.0.1",
 		"@nestjs/core": "^11.0.1",
@@ -24,6 +23,7 @@
 		"@nestjs/swagger": "^11.2.0",
 		"@nestjs/websockets": "^11.1.3",
 		"@scalar/nestjs-api-reference": "^0.5.6",
+		"@shared": "file:../common-utilities",
 		"@types/supertest": "^6.0.3",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.2",
@@ -35,14 +35,17 @@
 	"devDependencies": {
 		"@types/bun": "^1.2.17",
 		"@types/express": "^5.0.3",
+		"@typescript-eslint/eslint-plugin": "^8.35.1",
+		"@typescript-eslint/parser": "^8.35.1",
 		"bun-types": "latest",
 		"drizzle-kit": "^0.31.1",
+		"eslint": "^9.30.1",
 		"supertest": "^7.1.1"
 	},
 	"module": "src/index.js",
 	"type": "module",
 	"private": true,
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^5.8.3"
 	}
 }
