@@ -2,7 +2,8 @@
 	"name": "gezcez-backend",
 	"version": "1.0.50",
 	"scripts": {
-		"build": "bun build --minify --outfile=bundle.js --target=bun ./src/index.ts -e class-transformer/storage -e @nestjs/microservices",
+		"deploy": "git pull && bun run build && servicectl api.gezcez.com restart",
+		"build": "bun build --outdir=dist --target=bun ./src/index.ts -e class-transformer/storage -e @nestjs/microservices",
 		"dev": "bun run --watch src/index.ts",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start:prod": "bun run dist/index.js",
