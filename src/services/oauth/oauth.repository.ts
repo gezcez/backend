@@ -1,11 +1,10 @@
-import { and, eq } from "drizzle-orm"
-import { OAuthUtils } from "@gezcez/common"
+import { and, eq, or } from "drizzle-orm"
+import { OAuthUtils, usersTable } from "@shared"
 import { OAuthService } from "./oauth.service"
 import { password as Password } from "bun"
-import { usersTable } from "../../schemas"
 import { db } from "../../db"
 export abstract class OAuthRepository {
-	static async insert(
+	static async insertUser(
 		user: typeof usersTable.$inferInsert
 	): Promise<[typeof usersTable.$inferSelect] | [false, string]> {
 		const is_username_and_email_available =
@@ -22,7 +21,7 @@ export abstract class OAuthRepository {
 		return [result]
 	}
 
-	static async selectUserById(
+	static async getUserById(
 		user_id: number | string,
 		config?: { get_raw_password?: boolean; get_raw_email?: boolean }
 	) {
@@ -38,7 +37,7 @@ export abstract class OAuthRepository {
 			email: config?.get_raw_email ? result.email : undefined,
 		}
 	}
-	static async selectUserByEmailAndPassword(email: string, password: string) {
+	static async getUserByEmailAndPassword(email: string, password: string) {
 		const [result] = await db
 			.select()
 			.from(usersTable)
@@ -47,5 +46,24 @@ export abstract class OAuthRepository {
 			if (!result) return
 		const is_verified = await Password.verify(password, result?.password, "bcrypt")
 		if (is_verified) return { ...result, password: undefined }
+	}
+
+	static async getUserByUsernameAndEmail(email:string,username:string) {
+		
+		const [result] = await db
+			.select()
+			.from(usersTable)
+			.where(or(eq(usersTable.username, username), eq(usersTable.email, email)))
+			return result
+	}
+
+	static async activateUser(user_id:number) {
+		
+		const [result] = await db
+			.update(usersTable)
+			.set({ activated_at: new Date() })
+			.where(eq(usersTable.id, user_id))
+			.returning()
+		return result
 	}
 }

@@ -1,4 +1,4 @@
-import { logger, OAuthUtils } from "@gezcez/common"
+import { logger, OAuthUtils } from "@shared"
 import {
 	OnGatewayConnection,
 	OnGatewayDisconnect,

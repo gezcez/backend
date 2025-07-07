@@ -10,22 +10,14 @@ import {
 	GezcezResponse,
 	NetworkGuard,
 	GezcezError,
-} from "@gezcez/common"
-import { db } from "../../db"
-import { networksTable, providersTable } from "../../schemas"
+} from "@shared"
+import { ProvidersRepository } from "../system/repositories/providers.repository"
 
 @Controller("web")
 export class WebController {
 	@Get("/providers/list")
 	async getProviders(req: Request) {
-		const providers = await db
-			.select({
-				id: providersTable.id,
-				url: providersTable.url,
-				name: providersTable.name,
-				image_url: providersTable.image_url,
-			})
-			.from(providersTable)
+		const providers = await ProvidersRepository.listAll()
 		if (!providers)
 			return GezcezError("INTERNAL_SERVER_ERROR", {
 				__message: "Error while fetching data providers from database!",
@@ -38,32 +30,7 @@ export class WebController {
 	async optOut(@Req() req: Request, @Body() body: WebModels.OptOutDto) {
 		const net = req.network_id
 		console.log("redieved opt-out request", net)
-		const [network] = await db
-			.select({
-				network: {
-					id: networksTable.id,
-					name: networksTable.name,
-					country: networksTable.country,
-					provider_id: networksTable.provider_id,
-				},
-				provider: {
-					id: providersTable.id,
-					name: providersTable.name,
-					url: providersTable.url,
-					image_url: providersTable.image_url,
-					pulled_data: providersTable.pulled_data,
-				},
-			})
-			.from(networksTable)
-			.where(
-				and(
-					not(eq(networksTable.hide, true)),
-					isNotNull(networksTable.provider_id),
-					eq(networksTable.id, net)
-				)
-			)
-			.leftJoin(providersTable, eq(providersTable.id, networksTable.id))
-			.limit(1)
+		const network = await NetworkRepository.getNetworkWithProvider(net)
 		if (!network || !network.provider)
 			return GezcezError("BAD_REQUEST", { __message: "Geçersiz network_id" })
 		const optouts = []
@@ -90,28 +57,7 @@ export class WebController {
 
 	@Get("/privacy/get-form")
 	async getForm(req: Request) {
-		const networks = await db
-			.select({
-				network: {
-					id: networksTable.id,
-					name: networksTable.name,
-					country: networksTable.country,
-					provider_id: networksTable.provider_id,
-				},
-				provider: {
-					id: providersTable.id,
-					name: providersTable.name,
-					url: providersTable.url,
-					image_url: providersTable.image_url,
-					pulled_data: providersTable.pulled_data,
-					network_id_defined_by_provider: networksTable.network_id_defined_by_provider,
-				},
-			})
-			.from(networksTable)
-			.where(
-				and(not(eq(networksTable.hide, true)), isNotNull(networksTable.provider_id))
-			)
-			.leftJoin(providersTable, eq(providersTable.id, networksTable.id))
+		const networks = await NetworkRepository.list
 		if (!networks)
 			return GezcezError("INTERNAL_SERVER_ERROR", {
 				__message: "Error while fetching data providers from database!",
@@ -121,29 +67,8 @@ export class WebController {
 
 	@Get("/networks/list")
 	async getNetworks(req: Request) {
-		const networks = await db
-			.select({
-				network: {
-					id: networksTable.id,
-					name: networksTable.name,
-					country: networksTable.country,
-					provider_id: networksTable.provider_id,
-					network_id_defined_by_provider: networksTable.network_id_defined_by_provider,
-					public_secret: networksTable.network_public_secret,
-				},
-				provider: {
-					id: providersTable.id,
-					name: providersTable.name,
-					url: providersTable.url,
-					image_url: providersTable.image_url,
-				},
-			})
-			.from(networksTable)
-			.where(
-				and(not(eq(networksTable.hide, true)), isNotNull(networksTable.provider_id))
-			)
-			.leftJoin(providersTable, eq(providersTable.id, networksTable.provider_id))
-		if (!networks)
+		const networks = await NetworkRepository.listWithProviders()
+		if (!networks || !networks.at(0))
 			return GezcezError("INTERNAL_SERVER_ERROR", {
 				__message: "Error while fetching data providers from database!",
 			})

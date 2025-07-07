@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm"
 import { db } from "../../db"
-import { permissionsTable, userPermissionsTable } from "../../schemas"
+import { permissionsTable, userPermissionsTable } from "@shared"
 export abstract class UserRepository {
 	static async getUserPermissions(user_id: number) {
 		const result = await db

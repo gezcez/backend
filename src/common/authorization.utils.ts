@@ -1,8 +1,11 @@
-import { buildConfig, GezcezError, IConfig, OAuthUtils } from "@gezcez/common"
+import { buildConfig, GezcezError, IConfig, OAuthUtils, refreshTokensTable } from "@shared"
 import { OAuthService } from "../services/oauth/oauth.service"
 import type {Request} from "express"
 import { db } from "../db"
-import { sudosTable } from "../schemas"
+import { sudosTable } from "@shared"
+import { and, eq } from "drizzle-orm"
+import { OAuthRepository } from "../services/oauth/oauth.repository"
+import { PermissionsRepository } from "../services/permissions/permissions.repository"
 export async function handleFetchFromDb(
 	req: Request,
 	network_id: "global" | (string & {}),
@@ -11,7 +14,7 @@ export async function handleFetchFromDb(
 	const payload = req["payload"]!
 	const network_key = network_id === "global" ? "_" : network_id
 	const network_number = network_id === "global" ? 0 : parseInt(network_id)
-	const user_permissions = await OAuthService.listUserPermissionsWithNetworkId(
+	const user_permissions = await PermissionsRepository.listUserPermissionsWithNetworkId(
 		payload.sub,
 		network_number
 	)

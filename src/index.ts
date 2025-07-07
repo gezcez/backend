@@ -12,16 +12,11 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { apiReference } from "@scalar/nestjs-api-reference"
 import { OAuthController } from "./services/oauth/oauth.controller"
 import { BuildWSMessage, TerminalWsGateway } from "./ws/terminal.ws"
-const __config: IConfig = require("../service.config.json")
+const __config: IConfig = buildConfig()
 
 export const config = buildConfig<typeof __config>()
 
-import {
-	buildConfig,
-	GezcezError,
-	IConfig,
-	LoggerMiddleware,
-} from "@gezcez/common"
+
 import {
 	ArgumentsHost,
 	Catch,
@@ -35,6 +30,7 @@ import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
 import { map } from "rxjs"
 import { Response } from "express"
+import { buildConfig, GezcezError, IConfig, LoggerMiddleware } from "@shared"
 @Module({
 	providers: [TerminalWsGateway],
 	controllers: [OAuthController, SystemController, WebController],

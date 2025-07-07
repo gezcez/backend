@@ -6,7 +6,7 @@ import {
 	GezcezValidationFailedError,
 	OAuthUtils,
 	secret_random,
-} from "@gezcez/common/"
+} from "@shared"
 import {
 	Body,
 	Controller,
@@ -28,14 +28,14 @@ import { OAuthDTO } from "./oauth.dto"
 import { OAuthRepository } from "./oauth.repository"
 import { OAuthService } from "./oauth.service"
 import { db } from "../../db"
-import { moderationLogs, refreshTokensTable, usersTable } from "../../schemas"
+import { moderationLogs, refreshTokensTable, usersTable } from "@shared"
 @Controller("oauth")
 export class OAuthController {
 	@Post("/login")
 	async login(@Req() req: Request, @Body() form: OAuthDTO.LoginDto) {
 		const { email, password } = form
-		const user = await OAuthRepository.selectUserByEmailAndPassword(email, password)
-		if (!user) {
+		const user = await OAuthRepository.getUserByEmailAndPassword(email, password)
+	if (!user) {
 			return GezcezResponse({ __message: "Invalid email or password!" }, 401)
 		}
 		if (user.ban_record) {
@@ -184,7 +184,7 @@ export class OAuthController {
 		if (!email || email_error) {
 			return "Link geçerli fakat veri tabanında email bulunamadı."
 		}
-		const user = await OAuthRepository.selectUserById(payload.sub as string, {
+		const user = await OAuthRepository.getUserById(payload.sub as string, {
 			get_raw_email: true,
 			get_raw_password: false,
 		})
@@ -209,7 +209,7 @@ export class OAuthController {
 	@Get("/account/me")
 	async me(@Req() req: Request) {
 		const payload = req["payload"]!
-		const user = await OAuthRepository.selectUserById(payload.sub, {
+		const user = await OAuthRepository.getUserById(payload.sub, {
 			get_raw_email: true,
 		})
 		// const permissions = await UserRepository.getUserPermissions(payload.sub)
@@ -243,7 +243,7 @@ export class OAuthController {
 		if (!OAuthUtils.validate("email", email)) {
 			return GezcezValidationFailedError("body:password", "invalid email!")
 		}
-		const [user, error] = await OAuthRepository.insert({
+		const [user, error] = await OAuthRepository.insertUser({
 			email: email,
 			username: username,
 			password: password,

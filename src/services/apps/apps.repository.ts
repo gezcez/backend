@@ -1,6 +1,6 @@
 
 import { eq } from "drizzle-orm"
-import { appsTable } from "../../schemas"
+import { appsTable } from "@shared"
 import { db } from "../../db"
 export class AppsRepository {
 	static async list() {

@@ -17,6 +17,7 @@
 		"typeRoots": [
 			"../common-utilities/dist/index.d.ts"
 		],
+		"lib": ["ES2023"],
 		/* JavaScript Support */
 		/* Emit */
 		/* Interop Constraints */

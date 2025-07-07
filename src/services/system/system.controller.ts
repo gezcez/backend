@@ -3,9 +3,9 @@ import { Controller, Get, Param, UseGuards } from "@nestjs/common"
 import { NetworkRepository } from "../network/network.repository"
 import { ApiHeader } from "@nestjs/swagger"
 import { PermissionsRepository } from "../permissions/permissions.repository"
-import { AuthorizationGuard, NetworkGuard } from "@gezcez/common"
+import { AuthorizationGuard, NetworkGuard } from "@shared"
+// import { AuthorizationGuard, NetworkGuard } from "@shared"
 const dash = require("../../assets/dashboard.html")
-
 @UseGuards(
 	AuthorizationGuard({
 		app_key: "system",
