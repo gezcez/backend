@@ -2,7 +2,7 @@
 	"name": "gezcez-backend",
 	"version": "1.0.50",
 	"scripts": {
-		"deploy": "git pull && bun run build && systemctl restart api.gezcez.com",
+		"deploy": "git pull && systemctl restart api.gezcez.com",
 		"build": "bun build --outdir=dist --target=bun ./src/index.ts -e class-transformer/storage -e @nestjs/microservices",
 		"dev": "bun run --watch src/index.ts",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
