@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm"
 import { db } from "../../db"
-import { permissionsTable, userPermissionsTable, userRolesTable } from "@shared"
+import { permissionsTable, rolesTable, userPermissionsTable, userRolesTable } from "@shared"
 export abstract class UserRepository {
 	static async getUserPermissions(user_id: number) {
 		const result = await db
@@ -39,6 +39,21 @@ export abstract class UserRepository {
 		return result
 	}
 
+	static async listUserRolesWithLeftJoin(user_id: number) {
+		const result = await db
+			.select({
+				user_role:userRolesTable,
+				role:rolesTable
+			})
+			.from(userRolesTable)
+			.where(
+				and(
+					eq(userRolesTable.user_id, user_id),
+				eq(userRolesTable.status, true)
+				)
+			).leftJoin(rolesTable,eq(rolesTable.id,userRolesTable.role_id))
+		return result
+	}
 	static async getUserPermissionsByAppKey(user_id: number, app_key: string) {
 		const result = await db
 			.select({

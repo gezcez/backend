@@ -1,4 +1,3 @@
-
 import {
 	buildConfig,
 	GezcezError,
@@ -38,10 +37,12 @@ import { map } from "rxjs"
 import { db } from "./db"
 import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
+import { SharedController } from "./services/shared/shared.controller"
+import { DashboardController } from "./services/dashboard/dashboard.controller"
 
 @Module({
 	providers: [TerminalWsGateway],
-	controllers: [OAuthController, SystemController, WebController],
+	controllers: [OAuthController, SystemController, WebController,SharedController,DashboardController],
 })
 class AppModule {}
 
@@ -59,7 +60,13 @@ export async function bootstrap(ignore_listen?: boolean) {
 	await RELOAD_SYNCED_CONFIG({ db: db })
 
 	logger.success("Project init successfull, bootstrapping server")
-	const app = await NestFactory.create<NestExpressApplication>(AppModule)
+	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+		cors: true,
+	})
+	app.enableCors({
+		origin: "http://localhost:5173",
+		credentials: true,
+	})
 	app.useGlobalPipes(new ValidationPipe())
 	app.useGlobalInterceptors(new ResponseInterceptor())
 	app.use(LoggerMiddleware)
@@ -102,15 +109,21 @@ class ErrorHandler implements ExceptionFilter {
 				? exception.getStatus()
 				: HttpStatus.INTERNAL_SERVER_ERROR
 		// console.error("Global Exception:", exception)
-		if ((exception?.result?.status || status) === 500) {
+		if ((exception.response?.result?.status || status) !== 200) {
 			console.error(exception)
 		}
-		response.status(exception?.result?.status || status).json(
-			exception?.result?.message
-				? { ...exception, result: { ...exception.result, path: request.path } }
+		console.log("response",exception)
+		response.status(exception.result?.status || status).json(
+			exception.result?.message
+				? {
+						...exception,
+						result: { ...exception.result, path: request.path },
+				  }
 				: {
+						...getGezcezResponseFromStatus(exception?.result?.status || status),
 						result: {
-							...getGezcezResponseFromStatus(exception?.result?.status || status),
+							...(getGezcezResponseFromStatus(exception?.result?.status || status)).result,
+							message:exception.response?.message,
 							path: request.path,
 						},
 				  }

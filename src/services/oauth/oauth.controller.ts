@@ -5,6 +5,7 @@ import {
 	GezcezError,
 	GezcezResponse,
 	GezcezValidationFailedError,
+	logger,
 	OAuthUtils,
 	RoleUtils,
 	secret_random,
@@ -113,7 +114,7 @@ export class OAuthController {
 		const { app_key } = form
 		const payload = req["payload"]!
 		const app_details = await AppsRepository.getAppByKey(app_key)
-		if (!app_details) return GezcezError("BAD_REQUEST", "app not found")
+		if (!app_details) return GezcezError("BAD_REQUEST", {__message:"app not found"})
 		const user_permissions = await UserRepository.getUserPermissionsByAppKey(
 			payload.sub,
 			app_key
@@ -151,7 +152,7 @@ export class OAuthController {
 				is_activated: payload.is_activated,
 				type:"refresh"
 			},
-			"1h",
+			"4h",
 			app_key
 		)
 		return GezcezResponse(
@@ -167,31 +168,7 @@ export class OAuthController {
 		)
 	}
 
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token",
-		required: true,
-	})
-	@UseGuards(AuthenticationGuard({ app_key: "oauth" }))
-	@Get("/account/list-permissions")
-	async listPermissions(@Req() req: Request) {
-		const payload = req["payload"]!
-		const user_permissions = await UserRepository.getUserPermissions(payload.sub)
-		return GezcezResponse({ permissions: user_permissions }, 200)
-	}
 
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token",
-		required: true,
-	})
-	@UseGuards(AuthenticationGuard({ app_key: "oauth" }))
-	@Get("/account/list-roles")
-	async listRoles(@Req() req: Request) {
-		const payload = req["payload"]!
-		const user_roles = await UserRepository.listUserRoles(payload.sub)
-		return GezcezResponse({ roles: user_roles }, 200)
-	}
 
 	@Get("/account/activate")
 	async activate(@Req() req: Request, @Query() _: OAuthDTO.ActivateDto) {
@@ -236,28 +213,6 @@ export class OAuthController {
 		return "Hesap başarıyla aktif edildi!"
 	}
 
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token",
-		required: true,
-	})
-	@UseGuards(AuthenticationGuard({ app_key: "oauth" }))
-	@Get("/account/me")
-	async me(@Req() req: Request) {
-		const payload = req["payload"]!
-		const user = await OAuthRepository.getUserById(payload.sub, {
-			get_raw_email: true,
-		})
-		// const permissions = await UserRepository.getUserPermissions(payload.sub)
-		return GezcezResponse(
-			{
-				payload: payload,
-				account: user,
-				// permissions: permissions,
-			},
-			200
-		)
-	}
 
 	@Post("/account/create")
 	async create(@Req() req: Request, @Body() body: OAuthDTO.CreateAccountDto) {

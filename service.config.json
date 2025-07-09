@@ -27,7 +27,11 @@
 			"users.permissions.write":6,
 			"users.permissions.list":7,
 			"users.list":8,
-			"base.network_admin":9
+			"base.roles.list-permissions":9,
+			"users.roles.read":15,
+			"users.roles.write":16,
+			"base.roles.list":17,
+			"base.roles.list-users":18
 		}
 	},
 	"validation": {

@@ -44,7 +44,8 @@ export namespace OAuthDTO {
 
 	export class AuthorizeDto {
 		@ApiProperty({ description: "app name to authorize", example: "system" })
-		@IsEnum(["system", "oauth", "portal", "mobile"])
+		// @IsEnum(["system", "oauth", "dashboard", "mobile"],{message:(args)=>`Invalid app_key`})
+		@IsString()
 		app_key: string
 	}
 
