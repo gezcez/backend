@@ -1,3 +1,14 @@
+
+import {
+	buildConfig,
+	GezcezError,
+	IConfig,
+	logger,
+	LoggerMiddleware,
+	RELOAD_SYNCED_CONFIG,
+	SYNCED_CONFIG,
+} from "@shared"
+export var config: IConfig = buildConfig()
 import {
 	CallHandler,
 	ExecutionContext,
@@ -22,26 +33,11 @@ import {
 } from "@nestjs/common"
 
 import { WsAdapter } from "@nestjs/platform-ws"
-import {
-	buildConfig,
-	GezcezError,
-	IConfig,
-	logger,
-	LoggerMiddleware,
-	RELOAD_SYNCED_CONFIG,
-	SYNCED_CONFIG,
-} from "@shared"
 import { Response } from "express"
 import { map } from "rxjs"
 import { db } from "./db"
 import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
-export var config: IConfig = {} as any
-const imported_config = buildConfig()
-for (const key of Object.keys(imported_config)) {
-	// change config without breaking reference
-	config[key] = imported_config[key as keyof IConfig]
-}
 
 @Module({
 	providers: [TerminalWsGateway],

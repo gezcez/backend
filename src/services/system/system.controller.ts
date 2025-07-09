@@ -3,9 +3,9 @@ import { Controller, Get, Param, UseGuards } from "@nestjs/common"
 import { NetworkRepository } from "../network/network.repository"
 import { ApiHeader } from "@nestjs/swagger"
 import { PermissionsRepository } from "../permissions/permissions.repository"
-import { AuthenticationGuard, AuthorizationGuard, GezcezResponse, NetworkGuard, RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@shared"
+import { AuthenticationGuard, AuthorizationGuard, buildConfig, GezcezResponse, NetworkGuard, RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@shared"
 import { db } from "../../db"
-import { config } from "../.."
+const config = buildConfig()
 // import { AuthorizationGuard, NetworkGuard } from "@shared"
 @UseGuards(
 	AuthenticationGuard({
