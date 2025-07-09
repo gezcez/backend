@@ -36,10 +36,12 @@ import { map } from "rxjs"
 import { db } from "./db"
 import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
-export var config : IConfig = {} as any
-
-
-
+export var config: IConfig = {} as any
+const imported_config = buildConfig()
+for (const key of Object.keys(imported_config)) {
+	// change config without breaking reference
+	config[key] = imported_config[key as keyof IConfig]
+}
 
 @Module({
 	providers: [TerminalWsGateway],
@@ -58,12 +60,8 @@ console.log = (...args: any[]) => {
 }
 
 export async function bootstrap(ignore_listen?: boolean) {
-	await RELOAD_SYNCED_CONFIG({db:db})
-	const imported_config = buildConfig()
-	for (const key of Object.keys(imported_config)) {
-		// change config without breaking reference
-		config[key] = imported_config[key as keyof IConfig]
-	}
+	await RELOAD_SYNCED_CONFIG({ db: db })
+
 	logger.success("Project init successfull, bootstrapping server")
 	const app = await NestFactory.create<NestExpressApplication>(AppModule)
 	app.useGlobalPipes(new ValidationPipe())
