@@ -11,11 +11,11 @@
 		"moduleResolution": "node", /* Specify how TypeScript looks up a file from a given module specifier. */
 		"paths": {
 			"@shared": [
-				"../common-utilities/index.ts"
+				"../common/index.ts"
 			]
 		},
 		"typeRoots": [
-			"../common-utilities/dist/index.d.ts"
+			"../common/dist/index.d.ts"
 		],
 		"lib": ["ES2023"],
 		/* JavaScript Support */
@@ -31,5 +31,5 @@
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
-	"references": [{"path":"../common-utilities"}]
+	"references": [{"path":"../common"}]
 }

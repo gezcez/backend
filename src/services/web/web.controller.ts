@@ -57,7 +57,7 @@ export class WebController {
 
 	@Get("/privacy/get-form")
 	async getForm(req: Request) {
-		const networks = await NetworkRepository.list
+		const networks = await NetworkRepository.list()
 		if (!networks)
 			return GezcezError("INTERNAL_SERVER_ERROR", {
 				__message: "Error while fetching data providers from database!",

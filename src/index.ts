@@ -12,10 +12,6 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { apiReference } from "@scalar/nestjs-api-reference"
 import { OAuthController } from "./services/oauth/oauth.controller"
 import { BuildWSMessage, TerminalWsGateway } from "./ws/terminal.ws"
-const __config: IConfig = buildConfig()
-
-export const config = buildConfig<typeof __config>()
-
 
 import {
 	ArgumentsHost,
@@ -26,11 +22,25 @@ import {
 } from "@nestjs/common"
 
 import { WsAdapter } from "@nestjs/platform-ws"
+import {
+	buildConfig,
+	GezcezError,
+	IConfig,
+	logger,
+	LoggerMiddleware,
+	resyncConfig,
+	SYNCED_CONFIG,
+} from "@shared"
+import { Response } from "express"
+import { map } from "rxjs"
+import { db } from "./db"
 import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
-import { map } from "rxjs"
-import { Response } from "express"
-import { buildConfig, GezcezError, IConfig, LoggerMiddleware } from "@shared"
+export let config : IConfig = {} as any
+
+
+
+
 @Module({
 	providers: [TerminalWsGateway],
 	controllers: [OAuthController, SystemController, WebController],
@@ -48,13 +58,19 @@ console.log = (...args: any[]) => {
 }
 
 export async function bootstrap(ignore_listen?: boolean) {
+	await resyncConfig({db:db})
+	const imported_config = buildConfig<IConfig>()
+	for (const key of Object.keys(imported_config)) {
+		// change config without breaking reference
+		config[key] = imported_config[key as keyof IConfig]
+	}
+	logger.success("Project init successfull, bootstrapping server")
 	const app = await NestFactory.create<NestExpressApplication>(AppModule)
-
 	app.useGlobalPipes(new ValidationPipe())
 	app.useGlobalInterceptors(new ResponseInterceptor())
 	app.use(LoggerMiddleware)
 	app.useWebSocketAdapter(new WsAdapter(app))
-	const config = new DocumentBuilder()
+	const openapi_doc = new DocumentBuilder()
 		.setTitle("Gezcez.com Public API Documentation")
 		.setDescription("Public API docs for Gezcez.com")
 		.setVersion("1.0.0")
@@ -62,7 +78,7 @@ export async function bootstrap(ignore_listen?: boolean) {
 		.build()
 
 	app.useGlobalFilters(new ErrorHandler())
-	const document = SwaggerModule.createDocument(app, config)
+	const document = SwaggerModule.createDocument(app, openapi_doc)
 	app.use(
 		"/docs",
 		apiReference({
@@ -115,7 +131,7 @@ export class ResponseInterceptor implements NestInterceptor {
 		const ctx = context.switchToHttp()
 		const response = ctx.getResponse() as Response
 		// response.status(response.?.status || 500)
-		
+
 		return next.handle().pipe(
 			map((data) => {
 				// Example: Override status code if needed

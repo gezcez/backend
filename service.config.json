@@ -14,7 +14,7 @@
 			"apps.read":13,
 			"apps.write":14
 		},
-		"portal":{
+		"dashboard":{
 			"base.access":4,
 			"users.permissions.read":5,
 			"users.permissions.write":6,
