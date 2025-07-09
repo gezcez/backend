@@ -7,7 +7,6 @@ import { AuthenticationGuard, AuthorizationGuard, GezcezResponse, NetworkGuard, 
 import { db } from "../../db"
 import { config } from "../.."
 // import { AuthorizationGuard, NetworkGuard } from "@shared"
-const dash = require("../../assets/dashboard.html")
 @UseGuards(
 	AuthenticationGuard({
 		app_key:"system",

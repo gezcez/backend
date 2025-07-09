@@ -36,7 +36,7 @@ import { map } from "rxjs"
 import { db } from "./db"
 import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
-export let config : IConfig = {} as any
+export var config : IConfig = {} as any
 
 
 
