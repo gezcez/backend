@@ -14,10 +14,15 @@
 				"../common/index.ts"
 			]
 		},
+		"types": [
+			"bun-types"
+		],
 		"typeRoots": [
 			"../common/dist/index.d.ts"
 		],
-		"lib": ["ES2023"],
+		"lib": [
+			"ES2023"
+		],
 		/* JavaScript Support */
 		/* Emit */
 		/* Interop Constraints */
@@ -31,5 +36,9 @@
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
-	"references": [{"path":"../common"}]
+	"references": [
+		{
+			"path": "../common"
+		}
+	]
 }

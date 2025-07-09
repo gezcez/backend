@@ -28,7 +28,7 @@ import {
 	IConfig,
 	logger,
 	LoggerMiddleware,
-	resyncConfig,
+	RELOAD_SYNCED_CONFIG,
 	SYNCED_CONFIG,
 } from "@shared"
 import { Response } from "express"
@@ -58,8 +58,8 @@ console.log = (...args: any[]) => {
 }
 
 export async function bootstrap(ignore_listen?: boolean) {
-	await resyncConfig({db:db})
-	const imported_config = buildConfig<IConfig>()
+	await RELOAD_SYNCED_CONFIG({db:db})
+	const imported_config = buildConfig()
 	for (const key of Object.keys(imported_config)) {
 		// change config without breaking reference
 		config[key] = imported_config[key as keyof IConfig]
@@ -89,7 +89,7 @@ export async function bootstrap(ignore_listen?: boolean) {
 	SwaggerModule.setup("swagger", app, document)
 	if (!ignore_listen) {
 		await app.listen(process.env.PORT || 80, process.env.HOST || "localhost")
-		console.log(`Application is running on: ${await app.getUrl()}`)
+		logger.log(`Application is running on: ${await app.getUrl()}`)
 	}
 	return app
 }
@@ -135,7 +135,7 @@ export class ResponseInterceptor implements NestInterceptor {
 		return next.handle().pipe(
 			map((data) => {
 				// Example: Override status code if needed
-				response.status(data.result?.status || 500)
+				response.status(data?.result?.status || 500)
 
 				return data
 			})

@@ -40,7 +40,7 @@ export class TerminalWsGateway
 	private clients: Set<WebSocket> = new Set()
 
 	afterInit(server: Server) {
-		console.log("WebSocket server initialized")
+		logger.log("WebSocket server initialized")
 	}
 
 	handleDisconnect(client: any) {}

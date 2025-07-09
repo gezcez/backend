@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm"
 import { db } from "../../db"
-import { permissionsTable, userPermissionsTable } from "@shared"
+import { permissionsTable, userPermissionsTable, userRolesTable } from "@shared"
 export abstract class UserRepository {
 	static async getUserPermissions(user_id: number) {
 		const result = await db
@@ -25,6 +25,20 @@ export abstract class UserRepository {
 				: true
 		)
 	}
+
+	static async listUserRoles(user_id: number) {
+		const result = await db
+			.select()
+			.from(userRolesTable)
+			.where(
+				and(
+					eq(userRolesTable.user_id, user_id),
+				eq(userRolesTable.status, true)
+				)
+			)
+		return result
+	}
+
 	static async getUserPermissionsByAppKey(user_id: number, app_key: string) {
 		const result = await db
 			.select({

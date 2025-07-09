@@ -1,10 +1,12 @@
 // oauth.controller.ts
 import {
 	AuthenticationGuard,
+	AuthorizationGuard,
 	GezcezError,
 	GezcezResponse,
 	GezcezValidationFailedError,
 	OAuthUtils,
+	RoleUtils,
 	secret_random,
 } from "@shared"
 import {
@@ -35,7 +37,7 @@ export class OAuthController {
 	async login(@Req() req: Request, @Body() form: OAuthDTO.LoginDto) {
 		const { email, password } = form
 		const user = await OAuthRepository.getUserByEmailAndPassword(email, password)
-	if (!user) {
+		if (!user) {
 			return GezcezResponse({ __message: "Invalid email or password!" }, 401)
 		}
 		if (user.ban_record) {
@@ -75,6 +77,7 @@ export class OAuthController {
 				sub: user.id.toString(),
 				is_activated: !!user.activated_at,
 				jti: jti,
+				type: "refresh",
 			},
 			"15d",
 			"oauth"
@@ -102,7 +105,9 @@ export class OAuthController {
 		description: "Bearer token",
 		required: true,
 	})
-	@UseGuards(AuthenticationGuard({ app_key: "oauth" }))
+	@UseGuards(
+		AuthenticationGuard({ app_key: "oauth", is_use_refresh_token: true })
+	)
 	@Post("/account/authorize")
 	async authorize(@Req() req: Request, @Body() form: OAuthDTO.AuthorizeDto) {
 		const { app_key } = form
@@ -113,6 +118,15 @@ export class OAuthController {
 			payload.sub,
 			app_key
 		)
+		const user_roles = await UserRepository.listUserRoles(payload.sub)
+		const networks = [...new Set(user_roles.map((e) => e.network_id))]
+		const roles_payload: Record<string, number> = {}
+		for (const network of networks) {
+			const value = RoleUtils.getValueFromRoles(
+				user_roles.filter((e) => e.network_id === network)
+			)
+			roles_payload[`${network === 0 ? "_" : network}`] = value
+		}
 		const scope_payload = new Map()
 		for (const permission of user_permissions) {
 			const user_p = permission.user_permission
@@ -124,22 +138,31 @@ export class OAuthController {
 			}
 		}
 		const payload_o = Object.fromEntries(scope_payload.entries())
-		if (Object.keys(payload_o).length <= 0) {
-			return GezcezError("FORBIDDEN", {
-				__message: `You do not have access to app '${app_key}'`,
-			})
-		}
+		// if (Object.keys(payload_o).length <= 0) {
+		// 	return GezcezError("FORBIDDEN", {
+		// 		__message: `You do not have access to app '${app_key}'`,
+		// 	})
+		// }
 		const access_token = await OAuthUtils.signJWT(
 			{
 				scopes: payload_o,
+				roles: roles_payload,
 				sub: payload.sub.toString(),
 				is_activated: payload.is_activated,
+				type:"refresh"
 			},
 			"1h",
-			"system"
+			app_key
 		)
 		return GezcezResponse(
-			{ __message: "Logged in!", access_token: access_token, payload: payload_o },
+			{
+				__message: "Logged in!",
+				app:app_key,
+				token: access_token,
+				scopes: payload_o,
+				roles: roles_payload,
+				type:"refresh"
+			},
 			200
 		)
 	}
@@ -155,6 +178,19 @@ export class OAuthController {
 		const payload = req["payload"]!
 		const user_permissions = await UserRepository.getUserPermissions(payload.sub)
 		return GezcezResponse({ permissions: user_permissions }, 200)
+	}
+
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token",
+		required: true,
+	})
+	@UseGuards(AuthenticationGuard({ app_key: "oauth" }))
+	@Get("/account/list-roles")
+	async listRoles(@Req() req: Request) {
+		const payload = req["payload"]!
+		const user_roles = await UserRepository.listUserRoles(payload.sub)
+		return GezcezResponse({ roles: user_roles }, 200)
 	}
 
 	@Get("/account/activate")
@@ -294,6 +330,76 @@ export class OAuthController {
 				account: { ...user, password: undefined },
 				__message:
 					"Please verify your account using the link we've sent to your email adress",
+			},
+			200
+		)
+	}
+
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token",
+		required: true,
+	})
+	@UseGuards(AuthenticationGuard({
+		is_use_refresh_token:true,
+		app_key:"inherit",
+	}))
+	@Post("/account/access")
+	async accessApp(@Req() req:Request, @Body() body: OAuthDTO.AuthorizeDto) {
+		const { app_key } = body
+		const payload = req["payload"]!
+		const app_details = await AppsRepository.getAppByKey(app_key)
+		if (!app_details) return GezcezError("BAD_REQUEST", "app not found")
+		const user_permissions = await UserRepository.getUserPermissionsByAppKey(
+			payload.sub,
+			app_key
+		)
+		const user_roles = await UserRepository.listUserRoles(payload.sub)
+		const networks = [...new Set(user_roles.map((e) => e.network_id))]
+		const roles_payload: Record<string, number> = {}
+		for (const network of networks) {
+			const value = RoleUtils.getValueFromRoles(
+				user_roles.filter((e) => e.network_id === network)
+			)
+			roles_payload[`${network === 0 ? "_" : network}`] = value
+		}
+		const scope_payload = new Map()
+		for (const permission of user_permissions) {
+			const user_p = permission.user_permission
+			const details = permission.permission_details
+			const scope = details?.type === "scoped" ? user_p.network_id.toString() : "_"
+			const current_value = scope_payload.get(scope) || 0
+			if (user_p.status === true) {
+				scope_payload.set(scope, current_value + 2 ** user_p.permission_id)
+			}
+		}
+		const payload_o = Object.fromEntries(scope_payload.entries())
+		// if (Object.keys(payload_o).length <= 0) {
+		// 	return GezcezError("FORBIDDEN", {
+		// 		__message: `You do not have access to app '${app_key}'`,
+		// 	})
+		// }
+		const access_token = await OAuthUtils.signJWT(
+			{
+				scopes: payload_o,
+				roles: roles_payload,
+				sub: payload.sub.toString(),
+				is_activated: payload.is_activated,
+				type:"access",
+				parent: payload.jti,
+			},
+			"15m",
+			app_key
+		)
+		return GezcezResponse(
+			{
+				__message: "Logged in!",
+				app:app_key,
+				token: access_token,
+				scopes: payload_o,
+				roles: roles_payload,
+				type:"access",
+				parent:payload.jti
 			},
 			200
 		)

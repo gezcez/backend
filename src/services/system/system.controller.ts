@@ -3,14 +3,15 @@ import { Controller, Get, Param, UseGuards } from "@nestjs/common"
 import { NetworkRepository } from "../network/network.repository"
 import { ApiHeader } from "@nestjs/swagger"
 import { PermissionsRepository } from "../permissions/permissions.repository"
-import { AuthorizationGuard, NetworkGuard } from "@shared"
+import { AuthenticationGuard, AuthorizationGuard, GezcezResponse, NetworkGuard, RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@shared"
+import { db } from "../../db"
+import { config } from "../.."
 // import { AuthorizationGuard, NetworkGuard } from "@shared"
 const dash = require("../../assets/dashboard.html")
 @UseGuards(
-	AuthorizationGuard({
-		app_key: "system",
-		permission_id: 2,
-		scope: "global",
+	AuthenticationGuard({
+		app_key:"system",
+		
 	})
 )
 @ApiHeader({
@@ -23,6 +24,18 @@ export class SystemController {
 	@Get("/networks")
 	async getNetworks(req: Request) {
 		return await NetworkRepository.list()
+	}
+
+	@UseGuards(
+		AuthorizationGuard({
+			app_key: "system",
+			permission_id: config.permissions.system.root,
+			scope: "global",
+		})
+	)
+	@Get("/get-config")
+	async getConfig(req: Request) {
+		return GezcezResponse({config:await RELOAD_SYNCED_CONFIG({db:db})})
 	}
 
 	@UseGuards(

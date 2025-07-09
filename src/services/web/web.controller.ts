@@ -29,7 +29,7 @@ export class WebController {
 	@Post("/privacy/:network_id/opt-out")
 	async optOut(@Req() req: Request, @Body() body: WebModels.OptOutDto) {
 		const net = req.network_id
-		console.log("redieved opt-out request", net)
+		logger.log("opt-out request", net)
 		const network = await NetworkRepository.getNetworkWithProvider(net)
 		if (!network || !network.provider)
 			return GezcezError("BAD_REQUEST", { __message: "Geçersiz network_id" })
