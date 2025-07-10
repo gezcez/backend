@@ -8,6 +8,7 @@ import {
 	buildConfig,
 	GezcezError,
 	GezcezResponse,
+	RELOAD_SYNCED_CONFIG,
 	SYNCED_CONFIG,
 	UseNetwork,
 } from "@shared"
@@ -17,6 +18,7 @@ import { OAuthRepository } from "../oauth/oauth.repository"
 import { PermissionsRepository } from "../permissions/permissions.repository"
 import { NetworkRepository } from "../network/network.repository"
 import { RolesRepository } from "../roles/roles.repository"
+import { db } from "../../db"
 
 const config = buildConfig()
 
@@ -88,7 +90,7 @@ export class DashboardController {
 	}
 
 	@UseNetwork()
-	@Get("/:network_id/list-roles")
+	@Get("/:network_id/roles/list-all")
 	async listAllRoles(@Req() req: Request) {
 		const payload = req["payload"]!
 		const network_id = req["network_id"]
@@ -109,7 +111,7 @@ export class DashboardController {
 	@UseNetwork()
 	@Get("/:network_id/get-user-info")
 	async getUserInfo(@Req() req: Request, @Query("user_id") user_id: number) {
-		if (!user_id) return GezcezError("BAD_REQUEST",{__message:"Kullanıcı bilgisi çekilemedi."})
+		if (!user_id || isNaN(user_id)) return GezcezError("BAD_REQUEST",{__message:"Kullanıcı bilgisi çekilemedi."})
 		const payload = req["payload"]!
 		const network_id = req["network_id"]
 		const roles = await UserRepository.listUserRolesWithLeftJoin(user_id)
@@ -117,6 +119,27 @@ export class DashboardController {
 		return GezcezResponse({
 			user: user,
 			roles: roles,
+		})
+	}
+
+
+	@UseGuards(
+		AuthorizationGuard({
+			app_key: "dashboard",
+			scope: "scoped",
+			permission_id: config.permissions.dashboard["base.roles.list-permissions"],
+		})
+	)
+	@UseNetwork()
+	@Get("/:network_id/roles/get-permission-matrix")
+	async getRolePermissionMatrix(@Req() req: Request) {
+		await RELOAD_SYNCED_CONFIG({db:db})
+		const payload = req["payload"]!
+		const network_id = req["network_id"]
+		return GezcezResponse({
+			role_permissions:SYNCED_CONFIG.role_permissions,
+			permissions:SYNCED_CONFIG.permissions,
+			roles:SYNCED_CONFIG.roles
 		})
 	}
 }

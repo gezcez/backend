@@ -112,7 +112,6 @@ class ErrorHandler implements ExceptionFilter {
 		if ((exception.response?.result?.status || status) !== 200) {
 			console.error(exception)
 		}
-		console.log("response",exception)
 		response.status(exception.result?.status || status).json(
 			exception.result?.message
 				? {
