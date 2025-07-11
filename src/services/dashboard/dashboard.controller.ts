@@ -10,6 +10,7 @@ import {
 	GezcezResponse,
 	RELOAD_SYNCED_CONFIG,
 	SYNCED_CONFIG,
+	UseAuthorization,
 	UseNetwork,
 } from "@shared"
 import type { Request } from "express"
@@ -19,6 +20,7 @@ import { PermissionsRepository } from "../permissions/permissions.repository"
 import { NetworkRepository } from "../network/network.repository"
 import { RolesRepository } from "../roles/roles.repository"
 import { db } from "../../db"
+import { DashboardModels } from "./dashboard.dto"
 
 const config = buildConfig()
 
@@ -53,7 +55,12 @@ export class DashboardController {
 		)
 	}
 
-	@UseNetwork()
+	@UseAuthorization({
+		app_key: "dashboard",
+		permission_key: "base.access",
+		scope: "scoped",
+		description: "User can access the base system",
+	})
 	@Get("/:network_id/get-page-buttons")
 	async getPageButtons(@Req() req: Request) {
 		const payload = req["payload"]!
@@ -78,9 +85,9 @@ export class DashboardController {
 		return GezcezResponse(
 			{
 				pages: final_permissions.map((e) => ({
+					app: e.app,
 					key: e.key,
 					id: e.id,
-					description: e.description,
 					href: e.page_href || null,
 					label: e.page_label || null,
 				})),
@@ -89,11 +96,14 @@ export class DashboardController {
 		)
 	}
 
-	@UseNetwork()
+	@UseAuthorization({
+		app_key: "dashboard",
+		permission_key: "base.roles.read",
+		scope: "scoped",
+		description: "Can user list all of the roles",
+	})
 	@Get("/:network_id/roles/list-all")
 	async listAllRoles(@Req() req: Request) {
-		const payload = req["payload"]!
-		const network_id = req["network_id"]
 		const all_roles = await RolesRepository.listAllRoles()
 
 		return GezcezResponse({
@@ -101,17 +111,15 @@ export class DashboardController {
 		})
 	}
 
-	@UseGuards(
-		AuthorizationGuard({
-			app_key: "dashboard",
-			scope: "scoped",
-			permission_id: config.permissions.dashboard["users.list"],
-		})
-	)
-	@UseNetwork()
+	@UseAuthorization({
+		app_key: "dashboard",
+		scope: "scoped",
+		permission_key: "users.list",
+	})
 	@Get("/:network_id/get-user-info")
 	async getUserInfo(@Req() req: Request, @Query("user_id") user_id: number) {
-		if (!user_id || isNaN(user_id)) return GezcezError("BAD_REQUEST",{__message:"Kullanıcı bilgisi çekilemedi."})
+		if (!user_id || isNaN(user_id))
+			return GezcezError("BAD_REQUEST", { __message: "Kullanıcı bilgisi çekilemedi." })
 		const payload = req["payload"]!
 		const network_id = req["network_id"]
 		const roles = await UserRepository.listUserRolesWithLeftJoin(user_id)
@@ -122,24 +130,63 @@ export class DashboardController {
 		})
 	}
 
-
-	@UseGuards(
-		AuthorizationGuard({
-			app_key: "dashboard",
-			scope: "scoped",
-			permission_id: config.permissions.dashboard["base.roles.list-permissions"],
-		})
-	)
-	@UseNetwork()
+	@UseAuthorization({
+		app_key: "dashboard",
+		scope: "scoped",
+		permission_key: "base.roles.list-permissions",
+	})
 	@Get("/:network_id/roles/get-permission-matrix")
-	async getRolePermissionMatrix(@Req() req: Request) {
-		await RELOAD_SYNCED_CONFIG({db:db})
-		const payload = req["payload"]!
-		const network_id = req["network_id"]
+	async getRolePermissionMatrix(@Req() req: Request, @Query("role_ids") role_ids: string) {
+		const formatted_ids = (role_ids || "")
+			.split(",")
+			.map((e) => parseInt(e))
+			.filter((e) => isFinite(e))
+		await RELOAD_SYNCED_CONFIG({ db: db })
 		return GezcezResponse({
-			role_permissions:SYNCED_CONFIG.role_permissions,
-			permissions:SYNCED_CONFIG.permissions,
-			roles:SYNCED_CONFIG.roles
+			role_permissions: SYNCED_CONFIG.role_permissions.filter((e) => {
+				if (formatted_ids.length) {
+					return formatted_ids.includes(e.role_id)
+				}
+				return true
+			}),
+			permissions: SYNCED_CONFIG.permissions,
+			roles: SYNCED_CONFIG.roles,
 		})
+	}
+
+	@UseAuthorization({
+		app_key: "dashboard",
+		scope: "global",
+		permission_key: "base.roles.write",
+		description: "Edit role permissions [requires root]",
+		sudo_mode: false,
+	})
+	@Post("/manage/roles/write-permission")
+	async addPermissionToRole(@Req() req: Request, @Body() body: DashboardModels.WritePermissionsToRoleDTO) {
+		const { operations, role_id } = body
+		const results : {error:string|undefined,permission_id:number}[] = []
+		for (const operation of operations) {
+			if (SYNCED_CONFIG.permissions.find((e)=>e.key==="base.roles.write")?.id===(operation.permission_id)) {
+				results.push({error:"recursion is not allowed",permission_id:operation.permission_id})
+				continue
+			}
+			if (operation.operation_type === "add") {
+				const [op_result, op_err] = await RolesRepository.addPermissionToRole({
+					executor_id: req.payload["sub"],
+					permission_id: operation.permission_id,
+					role_id: role_id,
+				})
+				if (op_err) results.push({error:op_err,permission_id:operation.permission_id})
+			} else if (operation.operation_type === "remove") {
+				const [op_result, op_err] = await RolesRepository.removePermissionFromRole({
+					executor_id: req.payload["sub"],
+					permission_id: operation.permission_id,
+					role_id: role_id,
+				})
+				if (op_err) results.push({error:op_err,permission_id:operation.permission_id})
+			}
+		}
+		await RELOAD_SYNCED_CONFIG({ db: db })
+		return GezcezResponse({ results:results })
 	}
 }

@@ -77,7 +77,6 @@ export async function bootstrap(ignore_listen?: boolean) {
 		.setVersion("1.0.0")
 		.setContact("phasenull.dev", "https://phasenull.dev", "contact@phasenull.dev")
 		.build()
-
 	app.useGlobalFilters(new ErrorHandler())
 	const document = SwaggerModule.createDocument(app, openapi_doc)
 	app.use(

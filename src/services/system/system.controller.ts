@@ -28,7 +28,7 @@ export class SystemController {
 	@UseGuards(
 		AuthorizationGuard({
 			app_key: "system",
-			permission_id: config.permissions.system.root,
+			permission_key: "root",
 			scope: "global",
 		})
 	)
@@ -40,7 +40,7 @@ export class SystemController {
 	@UseGuards(
 		AuthorizationGuard({
 			app_key: "system",
-			permission_id: 11,
+			permission_key:"permissions.list",
 			scope: "global",
 		})
 	)
@@ -53,7 +53,7 @@ export class SystemController {
 		NetworkGuard,
 		AuthorizationGuard({
 			app_key: "system",
-			permission_id: 6,
+			permission_key:"sudo",
 			scope: "scoped",
 			sudo_mode: true,
 		})
@@ -66,7 +66,7 @@ export class SystemController {
 	@UseGuards(
 		AuthorizationGuard({
 			app_key: "system",
-			permission_id: 10,
+			permission_key: "sudo",
 			scope: "global",
 			sudo_mode: true,
 		})

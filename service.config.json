@@ -3,37 +3,6 @@
 	"third_party_urls": {
 		"email_service":"email_service_go_brr"
 	},
-	"roles": {
-		"root":1,
-		"network_admin":2,
-		"base_user":3,
-		"data_governer":4,
-		"guest_user":5
-	},
-	"permissions": {
-		"oauth":{},
-		"system":{
-			"networks.read":2,
-			"networks.write":3,
-			"root":10,
-			"permissions.read":11,
-			"permissions.write":12,
-			"apps.read":13,
-			"apps.write":14
-		},
-		"dashboard":{
-			"base.access":4,
-			"users.permissions.read":5,
-			"users.permissions.write":6,
-			"users.permissions.list":7,
-			"users.list":8,
-			"base.roles.list-permissions":9,
-			"users.roles.read":15,
-			"users.roles.write":16,
-			"base.roles.list":17,
-			"base.roles.list-users":18
-		}
-	},
 	"validation": {
 		"password": {
 			"min_length": 8,
