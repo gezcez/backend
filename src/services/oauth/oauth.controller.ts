@@ -348,7 +348,6 @@ export class OAuthController {
 		)
 		return GezcezResponse(
 			{
-				__message: "Logged in!",
 				app:app_key,
 				token: access_token,
 				scopes: payload_o,
