@@ -164,10 +164,10 @@ export class DashboardController {
 	@Post("/manage/roles/write-permission")
 	async addPermissionToRole(@Req() req: Request, @Body() body: DashboardModels.WritePermissionsToRoleDTO) {
 		const { operations, role_id } = body
-		const results : {error:string|undefined,permission_id:number}[] = []
+		const results: { error: string | undefined; permission_id: number }[] = []
 		for (const operation of operations) {
-			if (SYNCED_CONFIG.permissions.find((e)=>e.key==="base.roles.write")?.id===(operation.permission_id)) {
-				results.push({error:"recursion is not allowed",permission_id:operation.permission_id})
+			if (SYNCED_CONFIG.permissions.find((e) => e.key === "base.roles.write")?.id === operation.permission_id) {
+				results.push({ error: "recursion is not allowed", permission_id: operation.permission_id })
 				continue
 			}
 			if (operation.operation_type === "add") {
@@ -176,17 +176,49 @@ export class DashboardController {
 					permission_id: operation.permission_id,
 					role_id: role_id,
 				})
-				if (op_err) results.push({error:op_err,permission_id:operation.permission_id})
+				if (op_err) results.push({ error: op_err, permission_id: operation.permission_id })
 			} else if (operation.operation_type === "remove") {
 				const [op_result, op_err] = await RolesRepository.removePermissionFromRole({
 					executor_id: req.payload["sub"],
 					permission_id: operation.permission_id,
 					role_id: role_id,
 				})
-				if (op_err) results.push({error:op_err,permission_id:operation.permission_id})
+				if (op_err) results.push({ error: op_err, permission_id: operation.permission_id })
 			}
 		}
 		await RELOAD_SYNCED_CONFIG({ db: db })
-		return GezcezResponse({ results:results })
+		return GezcezResponse({
+			results: results,
+			__message: results.length ? "OK" : "Tüm işlemler başarıyla gerçekleştirildi.",
+		})
+	}
+
+	@UseAuthorization({
+		scope: "global",
+		app_key: "dashboard",
+		permission_key: "base.permissions.read",
+		description: "List and read all permissions",
+	})
+	@Get("/manage/permissions/list-all")
+	async listAllPermissions(@Req() req: Request) {
+		await RELOAD_SYNCED_CONFIG({ db: db })
+		return GezcezResponse({
+			permissions: SYNCED_CONFIG.permissions,
+		})
+	}
+	
+	@UseAuthorization({
+		scope: "global",
+		app_key: "dashboard",
+		permission_key: "base.permissions.path-registry",
+		description: "List and read all path registries",
+	})
+	@Get("/manage/permissions/get-registry")
+	async getPathRegistry(@Req() req: Request) {
+		await RELOAD_SYNCED_CONFIG({ db: db })
+		return GezcezResponse({
+			permissions:SYNCED_CONFIG.permissions,
+			path_registries: SYNCED_CONFIG.path_registries,
+		})
 	}
 }
