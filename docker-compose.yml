@@ -1,0 +1,12 @@
+version: '3.9'
+services:
+  backend:
+    build: .
+    ports:
+      - "25565:25565"
+    volumes:
+      - ../gezcez-vault:/app/data
+    environment:
+      - DB_PATH=/app/data/GEZCEZ.db
+    env_file:
+      - .env
