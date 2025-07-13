@@ -114,7 +114,7 @@ export class DashboardController {
 	@UseAuthorization({
 		app_key: "dashboard",
 		scope: "scoped",
-		permission_key: "users.list",
+		permission_key: "base.users.read",
 	})
 	@Get("/:network_id/get-user-info")
 	async getUserInfo(@Req() req: Request, @Query("user_id") user_id: number) {

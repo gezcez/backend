@@ -132,7 +132,7 @@ export class OAuthController {
 		for (const permission of user_permissions) {
 			const user_p = permission.user_permission
 			const details = permission.permission_details
-			const scope = details?.type === "scoped" ? user_p.network_id.toString() : "_"
+			const scope = (user_p.network_id||"_").toString()
 			const current_value = scope_payload.get(scope) || 0
 			if (user_p.status === true) {
 				scope_payload.set(scope, current_value + 2 ** user_p.permission_id)
@@ -322,7 +322,7 @@ export class OAuthController {
 		for (const permission of user_permissions) {
 			const user_p = permission.user_permission
 			const details = permission.permission_details
-			const scope = details?.type === "scoped" ? user_p.network_id.toString() : "_"
+			const scope = (user_p.network_id||"_").toString()
 			const current_value = scope_payload.get(scope) || 0
 			if (user_p.status === true) {
 				scope_payload.set(scope, current_value + 2 ** user_p.permission_id)
