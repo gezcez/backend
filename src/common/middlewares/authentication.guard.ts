@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext } from "@nestjs/common"
 import { JWK, jwtVerify, JWTVerifyOptions, KeyObject } from "jose"
 import { GezcezError } from "../GezcezError"
-import { GezcezJWTPayload } from "../types/gezcez"
+import { GezcezJWTPayload } from "@types" 
 import { OAuthUtils } from "../utils/oauth"
 import { logger } from "../utils"
 
