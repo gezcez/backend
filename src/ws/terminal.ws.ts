@@ -1,4 +1,3 @@
-import { logger, OAuthUtils } from "@shared"
 import {
 	OnGatewayConnection,
 	OnGatewayDisconnect,
@@ -8,7 +7,8 @@ import {
 } from "@nestjs/websockets"
 import type { WebSocket } from "ws"
 import { Server } from "ws"
-import { SOCKETS } from ".."
+import { config, SOCKETS } from ".."
+import { logger, OAuthUtils } from "@common/utils"
 
 export function BuildWSMessage(
 	type: "status" | "message",
@@ -68,7 +68,7 @@ export class TerminalWsGateway
 		const is_authorized = await OAuthUtils.doesPermissionsMatch(
 			payload,
 			"global",
-			10
+			config.permissions.system.root
 		)
 		if (!is_authorized) {
 			client.send(BuildWSMessage("status", "authorization failed!", "red"))

@@ -2,25 +2,19 @@
 import { Controller, Get, Post, Req, Body, Query } from "@nestjs/common"
 import { UseGuards } from "@nestjs/common/decorators"
 import { ApiHeader } from "@nestjs/swagger"
-import {
-	AuthenticationGuard,
-	AuthorizationGuard,
-	buildConfig,
-	GezcezError,
-	GezcezResponse,
-	RELOAD_SYNCED_CONFIG,
-	SYNCED_CONFIG,
-	UseAuthorization,
-	UseNetwork,
-} from "@shared"
+
 import type { Request } from "express"
 import { UserRepository } from "../user/user.repository"
 import { OAuthRepository } from "../oauth/oauth.repository"
-import { PermissionsRepository } from "../permissions/permissions.repository"
+import { PermissionsRepository } from "../web/repositories/permissions.repository"
 import { NetworkRepository } from "../network/network.repository"
 import { RolesRepository } from "../roles/roles.repository"
 import { db } from "../../db"
 import { DashboardModels } from "./dashboard.dto"
+import { AuthenticationGuard, UseAuthorization } from "@common/middlewares"
+import { GezcezResponse } from "@common/Gezcez"
+import { buildConfig, RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@common/utils"
+import { GezcezError } from "@common/GezcezError"
 
 const config = buildConfig()
 

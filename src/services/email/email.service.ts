@@ -1,6 +1,6 @@
 import { config } from "../.."
 import { db } from "../../db"
-import { emailsTable } from "@shared"
+import { emailsTable } from "@schemas" 
 
 export abstract class EmailService {
 	static async sendEmail(args: typeof emailsTable.$inferInsert, uuid: string) {

@@ -1,17 +1,17 @@
 // oauth.controller.ts
 import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common"
 import { NetworkRepository } from "../network/network.repository"
-import { PermissionsRepository } from "../permissions/permissions.repository"
+import { PermissionsRepository } from "./repositories/permissions.repository"
 import { WebModels } from "./web.dto"
 import { and, eq, isNotNull, not } from "drizzle-orm"
 import { notEquals } from "class-validator"
 import type { Request } from "express"
-import {
-	GezcezResponse,
-	NetworkGuard,
-	GezcezError,
-} from "@shared"
-import { ProvidersRepository } from "../system/repositories/providers.repository"
+
+import { ProvidersRepository } from "./repositories/providers.repository"
+import { GezcezError } from "@common/GezcezError"
+import { GezcezResponse } from "@common/Gezcez"
+import { NetworkGuard } from "@common/middlewares"
+import { logger } from "@common/utils"
 
 @Controller("web")
 export class WebController {

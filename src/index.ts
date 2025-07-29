@@ -1,13 +1,4 @@
-import {
-	buildConfig,
-	GezcezError,
-	IConfig,
-	logger,
-	LoggerMiddleware,
-	RELOAD_SYNCED_CONFIG,
-	SYNCED_CONFIG,
-} from "@shared"
-export var config: IConfig = buildConfig()
+
 import {
 	CallHandler,
 	ExecutionContext,
@@ -39,7 +30,12 @@ import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
 import { SharedController } from "./services/shared/shared.controller"
 import { DashboardController } from "./services/dashboard/dashboard.controller"
+import { IConfig } from "@types"
+import { buildConfig, logger, RELOAD_SYNCED_CONFIG } from "@common/utils"
+import { LoggerMiddleware } from "@common/middlewares"
+import { GezcezError } from "@common/GezcezError"
 
+export var config: IConfig = buildConfig()
 @Module({
 	providers: [TerminalWsGateway],
 	controllers: [OAuthController, SystemController, WebController,SharedController,DashboardController],
@@ -102,16 +98,14 @@ class ErrorHandler implements ExceptionFilter {
 		const ctx = host.switchToHttp()
 		const response = ctx.getResponse()
 		const request = ctx.getRequest()
-
+		
+		// console.log(response.json())
 		const status =
-			exception instanceof HttpException
-				? exception.getStatus()
-				: HttpStatus.INTERNAL_SERVER_ERROR
-		// console.error("Global Exception:", exception)
-		if ((exception.response?.result?.status || status) !== 200) {
-			console.error(exception)
+			exception.result?.status || exception.status || HttpStatus.INTERNAL_SERVER_ERROR
+		if (![404,400,403,401,200].includes(status)) {
+			console.error("global exception",status,exception.status,exception)
 		}
-		response.status(exception.result?.status || status).json(
+		response.status(status).json(
 			exception.result?.message
 				? {
 						...exception,

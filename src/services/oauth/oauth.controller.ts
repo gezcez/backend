@@ -1,15 +1,5 @@
 // oauth.controller.ts
-import {
-	AuthenticationGuard,
-	AuthorizationGuard,
-	GezcezError,
-	GezcezResponse,
-	GezcezValidationFailedError,
-	logger,
-	OAuthUtils,
-	RoleUtils,
-	secret_random,
-} from "@shared"
+
 import {
 	Body,
 	Controller,
@@ -23,7 +13,7 @@ import type { Request } from "express"
 import { ApiHeader } from "@nestjs/swagger"
 import { eq } from "drizzle-orm"
 import { JWTPayload, jwtVerify, SignJWT } from "jose"
-import { AppsRepository } from "../apps/apps.repository"
+import { AppsRepository } from "../web/repositories/apps.repository"
 import { EmailRepository } from "../email/email.repository"
 import { EmailService } from "../email/email.service"
 import { UserRepository } from "../user/user.repository"
@@ -31,7 +21,11 @@ import { OAuthDTO } from "./oauth.dto"
 import { OAuthRepository } from "./oauth.repository"
 import { OAuthService } from "./oauth.service"
 import { db } from "../../db"
-import { moderationLogs, refreshTokensTable, usersTable } from "@shared"
+import { moderationLogs, refreshTokensTable, usersTable } from "@schemas"
+import { GezcezResponse } from "@common/Gezcez"
+import { OAuthUtils, RoleUtils, secret_random } from "@common/utils"
+import { AuthenticationGuard } from "@common/middlewares"
+import { GezcezError, GezcezValidationFailedError } from "@common/GezcezError"
 @Controller("oauth")
 export class OAuthController {
 	@Post("/login")

@@ -1,4 +1,4 @@
-import { providersTable } from "@shared";
+import { providersTable } from "@schemas";
 import { db } from "../../../db";
 
 export abstract class ProvidersRepository {

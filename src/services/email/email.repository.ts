@@ -1,6 +1,6 @@
 import { db } from "../../db"
 import { eq } from "drizzle-orm"
-import { emailsTable } from "@shared"
+import { emailsTable } from "@schemas"
 
 export abstract class EmailRepository {
 	static async selectEmailById(uuid: string) {

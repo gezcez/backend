@@ -2,10 +2,11 @@
 import { Controller, Get, Post, Req, Body } from "@nestjs/common"
 import { UseGuards } from "@nestjs/common/decorators"
 import { ApiHeader } from "@nestjs/swagger"
-import { AuthenticationGuard, GezcezResponse } from "@shared"
 import type { Request } from "express"
 import { UserRepository } from "../user/user.repository"
 import { OAuthRepository } from "../oauth/oauth.repository"
+import { AuthenticationGuard } from "@common/middlewares"
+import { GezcezResponse } from "@common/Gezcez"
 @Controller("shared")
 @ApiHeader({
 	name: "Authorization",
@@ -47,5 +48,10 @@ export class SharedController {
 		const payload = req["payload"]!
 		const user_roles = await UserRepository.listUserRolesWithLeftJoin(payload.sub)
 		return GezcezResponse({ roles: user_roles }, 200)
+	}
+
+	@Get("/account/list-apps")
+	async listApps(@Req() req:Request) {
+		
 	}
 }

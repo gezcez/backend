@@ -1,14 +1,8 @@
-import {
-	logger,
-	networksTable,
-	ProperPromise,
-	rolePermissionsTable,
-	rolesTable,
-	SYNCED_CONFIG,
-	userRolesTable,
-} from "@shared"
+
+import { networksTable, rolePermissionsTable, rolesTable, userRolesTable } from "@schemas"
 import { db } from "../../db"
 import { and, eq } from "drizzle-orm"
+import { logger, ProperPromise, SYNCED_CONFIG } from "@common/utils"
 
 export abstract class RolesRepository {
 	static async listUserNetworks(user_id: number) {

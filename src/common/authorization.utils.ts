@@ -5,7 +5,7 @@ import { db } from "../db"
 import { sudosTable } from "@shared"
 import { and, eq } from "drizzle-orm"
 import { OAuthRepository } from "../services/oauth/oauth.repository"
-import { PermissionsRepository } from "../services/permissions/permissions.repository"
+import { PermissionsRepository } from "../services/web/repositories/permissions.repository"
 export async function handleFetchFromDb(
 	req: Request,
 	network_id: "global" | (string & {}),

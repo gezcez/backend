@@ -1,6 +1,6 @@
-import { networksTable, providersTable } from "@shared"
 import { and, eq, isNotNull, not } from "drizzle-orm"
 import { db } from "../../db"
+import { networksTable, providersTable } from "@schemas"
 
 export abstract class NetworkRepository {
 	static async getNetworkById(id: number | string) {

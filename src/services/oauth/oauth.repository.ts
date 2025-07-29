@@ -1,8 +1,9 @@
 import { and, eq, or } from "drizzle-orm"
-import { OAuthUtils, usersTable } from "@shared"
 import { OAuthService } from "./oauth.service"
 import { password as Password } from "bun"
 import { db } from "../../db"
+import { usersTable } from "@schemas"
+import { OAuthUtils } from "@common/utils"
 export abstract class OAuthRepository {
 	static async insertUser(
 		user: typeof usersTable.$inferInsert

@@ -1,7 +1,7 @@
 
 import { eq } from "drizzle-orm"
-import { appsTable } from "@shared"
-import { db } from "../../db"
+import { appsTable } from "@schemas"
+import { db } from "../../../db"
 export class AppsRepository {
 	static async list() {
 		const result = await db.select().from(appsTable).limit(50)

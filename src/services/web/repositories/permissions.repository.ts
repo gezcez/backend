@@ -1,5 +1,5 @@
-import { networksTable, permissionsTable, userPermissionsTable } from "@shared"
-import { db } from "../../db"
+import { networksTable, permissionsTable, userPermissionsTable } from "@schemas"
+import { db } from "../../../db"
 import { and, eq, inArray } from "drizzle-orm"
 
 
