@@ -60,7 +60,7 @@ export async function bootstrap(ignore_listen?: boolean) {
 		cors: true,
 	})
 	app.enableCors({
-		origin: "http://localhost:5173",
+		origin: ["http://localhost:5173","https://dash.gezcez.com"],
 		credentials: true,
 	})
 	app.useGlobalPipes(new ValidationPipe())
