@@ -19,6 +19,7 @@ reqs/*
 .DS_Store
 *.pem
 *.db
+*.local
 # debug
 npm-debug.log*
 yarn-debug.log*
