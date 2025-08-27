@@ -13,7 +13,7 @@ import { db } from "../../db"
 import { DashboardModels } from "./dashboard.dto"
 import { AuthenticationGuard, UseAuthorization } from "@common/middlewares"
 import { GezcezResponse } from "@common/Gezcez"
-import { buildConfig, RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@common/utils"
+import { buildConfig, logger, RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@common/utils"
 import { GezcezError } from "@common/GezcezError"
 
 const config = buildConfig()
@@ -33,6 +33,7 @@ const config = buildConfig()
 export class DashboardController {
 	@Get("/account/list-networks")
 	async getAccountMe(@Req() req: Request) {
+		return GezcezResponse ({networks:SYNCED_CONFIG.networks},200)
 		const payload = req["payload"]!
 		const user_networks_from_permissions = await PermissionsRepository.listUserNetworks(payload.sub)
 		const user_networks_from_networks = await RolesRepository.listUserNetworks(payload.sub)

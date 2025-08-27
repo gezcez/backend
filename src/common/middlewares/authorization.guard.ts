@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext } from "@nestjs/common"
 import type { Request } from "express"
 import { GezcezError, GezcezValidationFailedError } from "../GezcezError"
-import { GezcezJWTPayload } from "../types/gezcez"
+import { GezcezJWTPayload } from "@types" 
 import { isTokenInvalid, OAuthUtils } from "../utils/oauth"
 import { handlePermissionRegistryAndReturnID } from "../utils"
 import { PATH_METADATA } from "@nestjs/common/constants"

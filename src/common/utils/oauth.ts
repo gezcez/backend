@@ -82,7 +82,7 @@ export abstract class OAuthUtils {
 		const user_roles = RoleUtils.getRolesFromValue(
 			payload.roles[network === "global" ? "_" : `${network}`]
 		)
-		console.log(`user ${payload.sub} roles`,user_roles.map((e)=>e.id).join(","))
+		console.log(`user_id:${payload.sub} user roles:`,user_roles.map((e)=>e.id).join(","))
 		const role_permissions = user_roles.map((role)=>SYNCED_CONFIG.role_permissions.filter((p)=>p.role_id===role.id)).reduce((a,b)=>[...a,...b],[])
 		console.log(`search: ${permission_id}`,"role permissions:",role_permissions.map((e)=>e.permission_id).join(","))
 		if ([...user_permissions,...role_permissions.map((e)=>e.permission_id)].includes(permission_id)) return true
