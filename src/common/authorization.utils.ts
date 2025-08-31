@@ -1,11 +1,13 @@
-import { buildConfig, GezcezError, IConfig, OAuthUtils, refreshTokensTable } from "@shared"
 import { OAuthService } from "../services/oauth/oauth.service"
 import type {Request} from "express"
 import { db } from "../db"
-import { sudosTable } from "@shared"
 import { and, eq } from "drizzle-orm"
 import { OAuthRepository } from "../services/oauth/oauth.repository"
 import { PermissionsRepository } from "../services/web/repositories/permissions.repository"
+import { refreshTokensTable, sudosTable } from "@schemas"
+import { buildConfig, OAuthUtils } from "./utils"
+import { GezcezError } from "./GezcezError"
+import { IConfig } from "@types"
 export async function handleFetchFromDb(
 	req: Request,
 	network_id: "global" | (string & {}),
@@ -38,7 +40,7 @@ export async function handleFetchFromDb(
 				"Bu işlemi gerçekleştirmek için gereken yetkiniz kısa süre önce silinmiş.",
 		})
 }
-const config = buildConfig<IConfig>()
+const config = buildConfig()
 export async function handleSudoMode(req: Request, sudo_key?: string) {
 	if (!sudo_key || typeof sudo_key !== "string") {
 		throw GezcezError("FORBIDDEN", {
