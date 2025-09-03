@@ -4,6 +4,6 @@ export default defineConfig({
 	schema: './src/schemas/*.ts',
 	dialect: 'sqlite',
 	dbCredentials: {
-		url: process.env.URL_DB ||"./GEZCEZ.db",
+		url: process.env.URL_DB ||"./volume/GEZCEZ.db",
 	},
 });
