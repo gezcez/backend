@@ -3,6 +3,8 @@ import { and, eq, gte } from "drizzle-orm"
 
 
 import { LibSQLDatabase } from "drizzle-orm/libsql"
+
+import { logger } from "@gezcez/core"
 import {
 	networksTable,
 	permissionPathRegistryTable,
@@ -11,7 +13,7 @@ import {
 	rolePermissionsTable,
 	rolesTable,
 } from "@schemas"
-import { logger } from "@gezcez/core"
+
 
 export let SYNCED_CONFIG: {
 	roles: (typeof rolesTable.$inferSelect)[]

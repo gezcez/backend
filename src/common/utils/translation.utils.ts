@@ -1,8 +1,7 @@
-import type { ExtractArgsObjectWithTypeSafety, FlattenKeys, GetValueFromFlattenRecord } from "../../types/type-helpers";
-import { buildConfig } from ".";
+import { buildConfig, ExtractArgsObjectWithTypeSafety, FlattenKeys, GetValueFromFlattenRecord } from "@gezcez/core";
 import { LANG_TR } from "@lang/tr";
 import { LANG_EN } from "@lang/en";
-
+import {} from "@gezcez/core"
 const LANGS = {
 	TR: LANG_TR,
 	EN: LANG_EN,

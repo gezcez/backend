@@ -1,7 +1,6 @@
 import { applyDecorators, ExecutionContext, UseGuards } from "@nestjs/common"
 import { ApiHeader, ApiParam } from "@nestjs/swagger"
 import { NetworkGuard } from "./network.guard"
-import { GezcezJWTPayload } from "../../types"
 import { AuthorizationGuard, IAuthorizationConfig } from "./authorization.guard"
 
 export function UseAuthorization<T extends boolean, SCOPE extends "global" | "scoped">(

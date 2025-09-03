@@ -1,10 +1,8 @@
-import { ConfigurableModuleBuilder, INestApplication, Type } from "@nestjs/common"
-import { PATH_METADATA, METHOD_METADATA, GUARDS_METADATA } from "@nestjs/common/constants"
-import "reflect-metadata"
+import { permissionPathRegistryTable, permissionsTable } from "@schemas"
 import { RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "./master"
 
-import { logger } from "../../../../core/src/util/logger"
-import { permissionPathRegistryTable, permissionsTable } from "@schemas"
+import { logger } from "@gezcez/core"
+
 interface IArgs {
 	config: {
 		app_key: string

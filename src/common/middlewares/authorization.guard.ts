@@ -1,10 +1,9 @@
 import { CanActivate, ExecutionContext } from "@nestjs/common"
 import type { Request } from "express"
-import { GezcezError, GezcezValidationFailedError } from "../../../../core/src/GezcezError"
-import { GezcezJWTPayload } from "../types/gezcez"
-import { isTokenInvalid, OAuthUtils } from "../utils/oauth"
-import { handlePermissionRegistryAndReturnID } from "../utils"
 import { PATH_METADATA } from "@nestjs/common/constants"
+import { GezcezError, GezcezJWTPayload, GezcezValidationFailedError } from "@gezcez/core"
+import { handlePermissionRegistryAndReturnID } from "@common/utils"
+import { isTokenInvalid, OAuthUtils } from "@common/utils/oauth.utils"
 function joinPaths(...paths: (string | string[])[]): string {
 	return paths
 		.flat()
