@@ -22,10 +22,9 @@ import { OAuthRepository } from "./oauth.repository"
 import { OAuthService } from "./oauth.service"
 import { db } from "../../db"
 import { moderationLogs, refreshTokensTable, usersTable } from "@schemas"
-import { GezcezResponse } from "@common/Gezcez"
 import { OAuthUtils, RoleUtils, secret_random } from "@common/utils"
 import { AuthenticationGuard } from "@common/middlewares"
-import { GezcezError, GezcezValidationFailedError } from "@common/GezcezError"
+import { GezcezError, GezcezResponse, GezcezValidationFailedError } from "@gezcez/core"
 @Controller("oauth")
 export class OAuthController {
 	@Post("/login")

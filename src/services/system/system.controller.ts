@@ -6,7 +6,7 @@ import { PermissionsRepository } from "../web/repositories/permissions.repositor
 import { db } from "../../db"
 import { AuthenticationGuard, AuthorizationGuard, NetworkGuard } from "@common/middlewares"
 import { buildConfig, RELOAD_SYNCED_CONFIG } from "@common/utils"
-import { GezcezResponse } from "@common/Gezcez"
+import { GezcezResponse } from "@gezcez/core"
 const config = buildConfig()
 // import { AuthorizationGuard, NetworkGuard } from "@shared"
 @UseGuards(

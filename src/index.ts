@@ -3,6 +3,7 @@ import {
 	CallHandler,
 	ExecutionContext,
 	Injectable,
+	Logger,
 	Module,
 	NestInterceptor,
 	ValidationPipe,
@@ -33,7 +34,7 @@ import { DashboardController } from "./services/dashboard/dashboard.controller"
 import { IConfig } from "@types"
 import { buildConfig, logger, RELOAD_SYNCED_CONFIG } from "@common/utils"
 import { LoggerMiddleware } from "@common/middlewares"
-import { GezcezError } from "@common/GezcezError"
+import { GezcezError } from "@gezcez/core"
 
 export var config: IConfig = buildConfig()
 @Module({
@@ -55,7 +56,7 @@ console.log = (...args: any[]) => {
 export async function bootstrap(ignore_listen?: boolean) {
 	await RELOAD_SYNCED_CONFIG({ db: db })
 
-	logger.success("Project init successfull, bootstrapping server")
+	Logger.log("Project init successfull, bootstrapping server","bootstrap")
 	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
 		cors: true,
 	})
@@ -85,7 +86,7 @@ export async function bootstrap(ignore_listen?: boolean) {
 	SwaggerModule.setup("swagger", app, document)
 	if (!ignore_listen) {
 		await app.listen(process.env.PORT || 80, process.env.HOST || "localhost")
-		logger.log(`Application is running on: ${await app.getUrl()}`)
+		Logger.log(`Application is running on: ${await app.getUrl()}`,"bootstrap")
 	}
 	return app
 }

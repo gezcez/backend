@@ -6,7 +6,7 @@ import type { Request } from "express"
 import { UserRepository } from "../user/user.repository"
 import { OAuthRepository } from "../oauth/oauth.repository"
 import { AuthenticationGuard } from "@common/middlewares"
-import { GezcezResponse } from "@common/Gezcez"
+import { GezcezResponse } from "@gezcez/core"
 @Controller("shared")
 @ApiHeader({
 	name: "Authorization",

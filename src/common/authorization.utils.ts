@@ -6,7 +6,7 @@ import { OAuthRepository } from "../services/oauth/oauth.repository"
 import { PermissionsRepository } from "../services/web/repositories/permissions.repository"
 import { refreshTokensTable, sudosTable } from "@schemas"
 import { buildConfig, OAuthUtils } from "./utils"
-import { GezcezError } from "./GezcezError"
+import { GezcezError } from "../../../core/src/GezcezError"
 import { IConfig } from "@types"
 export async function handleFetchFromDb(
 	req: Request,

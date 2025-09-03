@@ -1,4 +1,4 @@
-import { userRolesTable } from "@schemas"
+import type { userRolesTable } from "@gezcez/backend"
 import { SYNCED_CONFIG } from "./master"
 
 export abstract class RoleUtils {

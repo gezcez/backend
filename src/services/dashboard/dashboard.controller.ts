@@ -12,9 +12,8 @@ import { RolesRepository } from "../roles/roles.repository"
 import { db } from "../../db"
 import { DashboardModels } from "./dashboard.dto"
 import { AuthenticationGuard, UseAuthorization } from "@common/middlewares"
-import { GezcezResponse } from "@common/Gezcez"
 import { buildConfig, RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@common/utils"
-import { GezcezError } from "@common/GezcezError"
+import { GezcezError, GezcezResponse } from "@gezcez/core"
 
 const config = buildConfig()
 

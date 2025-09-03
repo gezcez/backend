@@ -3,7 +3,7 @@ import { PATH_METADATA, METHOD_METADATA, GUARDS_METADATA } from "@nestjs/common/
 import "reflect-metadata"
 import { RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "./master"
 
-import { logger } from "./logger"
+import { logger } from "../../../../core/src/util/logger"
 import { permissionPathRegistryTable, permissionsTable } from "@schemas"
 interface IArgs {
 	config: {

@@ -8,10 +8,9 @@ import { notEquals } from "class-validator"
 import type { Request } from "express"
 
 import { ProvidersRepository } from "./repositories/providers.repository"
-import { GezcezError } from "@common/GezcezError"
-import { GezcezResponse } from "@common/Gezcez"
 import { NetworkGuard } from "@common/middlewares"
 import { logger } from "@common/utils"
+import { GezcezError, GezcezResponse } from "@gezcez/core"
 
 @Controller("web")
 export class WebController {

@@ -1,15 +1,7 @@
-import { IConfig } from "@types"
-import { BaseSQLiteDatabase } from "drizzle-orm/sqlite-core"
 import { and, eq, gte } from "drizzle-orm"
 
 
-export type TJoinStrings<A extends string, B extends string> = `${A}${B}`
 
-export async function fetchJSON(input: string | URL | globalThis.Request, init?: RequestInit) {
-	const request = await fetch(input, init)
-	const json = await request.json()
-	return json
-}
 import { LibSQLDatabase } from "drizzle-orm/libsql"
 import {
 	networksTable,
@@ -19,7 +11,7 @@ import {
 	rolePermissionsTable,
 	rolesTable,
 } from "@schemas"
-import { logger } from "./logger"
+import { logger } from "@gezcez/core"
 
 export let SYNCED_CONFIG: {
 	roles: (typeof rolesTable.$inferSelect)[]
@@ -38,7 +30,6 @@ export let SYNCED_CONFIG: {
 	__DANGEROURS_ACCESS_DB: undefined,
 	invalid_tokens: [],
 }
-export type ProperPromise<T> = Promise<[T]|[false,string]>
 export async function RELOAD_SYNCED_CONFIG(args: { db: LibSQLDatabase }) {
 	logger.log("refreshing sync config!")
 	let { db } = args
