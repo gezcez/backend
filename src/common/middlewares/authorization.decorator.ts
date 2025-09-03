@@ -2,9 +2,10 @@ import { applyDecorators, ExecutionContext, UseGuards } from "@nestjs/common"
 import { ApiHeader, ApiParam } from "@nestjs/swagger"
 import { NetworkGuard } from "./network.guard"
 import { AuthorizationGuard, IAuthorizationConfig } from "./authorization.guard"
-import { logger, RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@common/utils"
+import { RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@common/utils"
 import { db } from "@db"
 import { permissionsTable } from "@schemas"
+import { logger } from "@gezcez/core"
 
 export function UseAuthorization<T extends boolean, SCOPE extends "global" | "scoped">(
 	config: IAuthorizationConfig<T, SCOPE>
