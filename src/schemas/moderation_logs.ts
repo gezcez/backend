@@ -1,5 +1,5 @@
 import { index, int, sqliteTable, text } from "drizzle-orm/sqlite-core"
-import { TABLE_ACTIONS } from "@common/utils"
+import { TABLE_ACTIONS } from "@gezcez/core"
 
 export const moderationLogs = sqliteTable("moderation_logs", {
 	id: int().primaryKey({ autoIncrement: true }).primaryKey().unique(),

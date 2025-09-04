@@ -1,5 +1,5 @@
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core"
-import { TABLE_ACTIONS } from "@common/utils" 
+import { TABLE_ACTIONS } from "@gezcez/core" 
 
 export const refreshTokensTable = sqliteTable("refresh_tokens", {
 	id:text().notNull().primaryKey().unique(),

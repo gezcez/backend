@@ -1,5 +1,5 @@
 import { index, int, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
-import { TABLE_ACTIONS } from "@common/utils"
+import { TABLE_ACTIONS } from "@gezcez/core"
 import { usersTable } from "./users"
 import { networksTable } from "./networks"
 

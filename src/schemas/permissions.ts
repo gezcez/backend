@@ -3,7 +3,7 @@ import { usersTable } from "./users";
 import { appsTable } from "./apps";
 import { networksTable } from "./networks";
 import { rolesTable } from "./roles";
-import { TABLE_ACTIONS } from "@common/utils";
+import { TABLE_ACTIONS } from "@gezcez/core";
 
 
 export const permissionsTable = sqliteTable("permissions", {

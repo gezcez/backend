@@ -1,5 +1,5 @@
 import { int, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { TABLE_ACTIONS } from "@common/utils";
+import { TABLE_ACTIONS } from "@gezcez/core";
 import { providersTable } from "./providers";
 
 export const networksTable = sqliteTable("networks",{

@@ -31,9 +31,8 @@ import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
 import { SharedController } from "./services/shared/shared.controller"
 import { DashboardController } from "./services/dashboard/dashboard.controller"
-import { IConfig } from "@types"
 import { buildConfig, logger, RELOAD_SYNCED_CONFIG } from "@common/utils"
-import { LoggerMiddleware } from "@common/middlewares"
+import { IConfig, LoggerMiddleware } from "@gezcez/core"
 import { GezcezError } from "@gezcez/core"
 
 export var config: IConfig = buildConfig()
