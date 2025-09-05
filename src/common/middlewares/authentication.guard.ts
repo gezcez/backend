@@ -2,6 +2,7 @@ import { jwtVerify, type JWK, type JWTVerifyOptions, type KeyObject } from "jose
 import type { GezcezJWTPayload } from "@gezcez/core/src/types"
 import type { CanActivate, ExecutionContext } from "@nestjs/common"
 import { GezcezError } from "@gezcez/core/src/GezcezError"
+import { OAuthUtils } from "@common/utils"
 
 export function AuthenticationGuard(config: {
 	app_key: "inherit" | (string & {})
@@ -45,7 +46,7 @@ export function AuthenticationGuard(config: {
 				)
 				payload = payload_i as any as GezcezJWTPayload
 			} else {
-				// payload = await OAuthUtils.verifyJWT(token, config.app_key)
+				payload = await OAuthUtils.verifyJWT(token, config.app_key)
 			}
 			if (!payload) {
 				throw GezcezError("UNAUTHORIZED", {
