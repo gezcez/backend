@@ -5,7 +5,7 @@ export default {
 			description: 'Dont allow importing db module outside of repository files',
 		},
 		messages: {
-			noDbImport: 'Importing stuff related to db is only allowed in *repository.ts files.',
+			noDbImport: 'Importing stuff related to db is only allowed in *.repository.ts files.',
 		},
 		schema: [], // no options
 	},
@@ -15,6 +15,7 @@ export default {
 
 		const isRepositoryFile = /repository\.ts$/.test(filename) || filename === "authorization.utils.ts" ;
 		const isDecoratorFile = filename.endsWith("decorators.ts");
+		const isMasterUtilsFile = filename.includes("master.ts");
 		return {
 			ImportDeclaration(node) {
 				
@@ -22,7 +23,7 @@ export default {
 				// Adjust this to match your db module's path
 				const isDbImport = importPath.includes("db");
 
-				if (isDbImport && !isRepositoryFile && !isDecoratorFile) {
+				if (isDbImport && !isRepositoryFile && !isDecoratorFile && !isMasterUtilsFile) {
 					context.report({
 						node,
 						messageId: 'noDbImport',
