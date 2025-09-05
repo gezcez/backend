@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import parser from "@typescript-eslint/parser"
 import respectRepositories from './eslint-rules/respect-repositories.js';
+import drizzleImportsOnly from './eslint-rules/drizzle-imports-only.js';
 
 /** @type {import("eslint").FlatConfig.ConfigArray} */
 export default [
@@ -25,9 +26,15 @@ export default [
 					'repositories-only': respectRepositories,
 				},
 			},
+			drizzle: {
+				rules: {
+					'imports-only': drizzleImportsOnly,
+				},
+			},
 		},
 		rules: {
 			'respect/repositories-only': 'error',
+			'drizzle/imports-only': 'error',
 		},
 	},
 ];
