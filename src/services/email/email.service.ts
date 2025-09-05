@@ -1,6 +1,6 @@
 import { config } from "../.."
-import { db } from "../../db"
 import { emailsTable } from "@schemas" 
+import { EmailRepository } from "./email.repository"
 
 export abstract class EmailService {
 	static async sendEmail(args: typeof emailsTable.$inferInsert, uuid: string) {
@@ -25,8 +25,7 @@ export abstract class EmailService {
 		} catch {}
 		if ((!request || ![201, 200].includes(request.status)) && process.env.NODE_ENV !== "dev")
 			return [undefined, "couldn't send email [third party service threw an error]"]
-		const [result] = await db.insert(emailsTable).values(args).returning()
-
+		const result = await EmailRepository.insertEmails(args)
 		return [result,undefined]
 	}
 }

@@ -13,6 +13,7 @@ import {
 	rolePermissionsTable,
 	rolesTable,
 } from "@schemas"
+import { db as iDB} from "@db"
 
 
 export let SYNCED_CONFIG: {
@@ -32,9 +33,10 @@ export let SYNCED_CONFIG: {
 	__DANGEROURS_ACCESS_DB: undefined,
 	invalid_tokens: [],
 }
-export async function RELOAD_SYNCED_CONFIG(args: { db: LibSQLDatabase }) {
+
+export async function RELOAD_SYNCED_CONFIG(args?: { db: LibSQLDatabase }) {
 	logger.log("refreshing sync config!")
-	let { db } = args
+	let db = args?.db || iDB
 	const networks_promise = db.select().from(networksTable)
 	const permissions_promise = db.select().from(permissionsTable)
 	const path_registries_promise = db.select().from(permissionPathRegistryTable)

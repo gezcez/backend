@@ -11,4 +11,8 @@ export abstract class EmailRepository {
 		if (!result) return [undefined,"email not found"]
 		return [result]
 	}
+	static async insertEmails(args: typeof emailsTable.$inferInsert) {
+		const [result] = await db.insert(emailsTable).values(args).returning()
+		return result
+	}
 }

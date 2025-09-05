@@ -3,22 +3,19 @@ import { ApiHeader, ApiParam } from "@nestjs/swagger"
 import { NetworkGuard } from "./network.guard"
 import { AuthorizationGuard, IAuthorizationConfig } from "./authorization.guard"
 import { RELOAD_SYNCED_CONFIG, SYNCED_CONFIG } from "@common/utils"
-import { db } from "@db"
 import { permissionsTable } from "@schemas"
 import { logger } from "@gezcez/core"
+import { PermissionsRepository } from "@services/permissions/permissions.repository"
 
 export function UseAuthorization<T extends boolean, SCOPE extends "global" | "scoped">(
 	config: IAuthorizationConfig<T, SCOPE>
 ) {
 	if (!SYNCED_CONFIG.permissions.find((e)=>config.permission_key===e.key&&config.app_key===e.app)) {
-		RELOAD_SYNCED_CONFIG({db:db}).then(()=>{
+		RELOAD_SYNCED_CONFIG().then(()=>{
 			if (!SYNCED_CONFIG.permissions.find((e)=>config.permission_key===e.key&&config.app_key===e.app)) {
 				logger.warning(`authorization.decorator.ts could'nt find permission with key '${config.app_key}/${config.permission_key}', creating one`)
-				db.insert(permissionsTable).values({
-					app:config.app_key,
-					key:config.permission_key
-				}).then((e)=>{
-					logger.success(`Created permission '${config.app_key}/${config.permission_key}'`)
+				PermissionsRepository.createPermission(config.app_key, config.permission_key).catch((err)=>{
+					logger.error(`authorization.decorator.ts could'nt create permission with key '${config.app_key}/${config.permission_key}'`,err)
 				})
 			}
 		})

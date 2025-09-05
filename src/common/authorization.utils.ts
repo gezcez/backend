@@ -1,13 +1,11 @@
 import { OAuthService } from "../services/oauth/oauth.service"
 import type {Request} from "express"
-import { db } from "../db"
 import { and, eq } from "drizzle-orm"
 import { OAuthRepository } from "../services/oauth/oauth.repository"
 import { PermissionsRepository } from "../services/web/repositories/permissions.repository"
 import { refreshTokensTable, sudosTable } from "@schemas"
 import { buildConfig, OAuthUtils } from "./utils"
 import { GezcezError } from "../../../core/src/GezcezError"
-import { IConfig } from "@types"
 export async function handleFetchFromDb(
 	req: Request,
 	network_id: "global" | (string & {}),
@@ -49,13 +47,7 @@ export async function handleSudoMode(req: Request, sudo_key?: string) {
 		})
 	}
 	const payload = req["payload"]!
-	const [sudo_row] = await db
-		.select()
-		.from(sudosTable)
-		.where(
-			and(eq(sudosTable.sudo_key, sudo_key), eq(sudosTable.created_by, payload.sub))
-		)
-		.limit(1)
+	const sudo_row = await OAuthRepository.getSudoRow(sudo_key,payload.sub)
 	if (!sudo_row)
 		throw GezcezError("FORBIDDEN", {
 			__message: "Bu işlem için SUDO modunda olmanız lazım.",
@@ -74,16 +66,10 @@ export async function handleSudoMode(req: Request, sudo_key?: string) {
 			__message: "SUDO işleminizin süresi dolmuş.",
 			sudo: true,
 		})
-	const [refresh_token] = await db
-		.select()
-		.from(refreshTokensTable)
-		.where(
-			and(
-				eq(refreshTokensTable.id, sudo_row.linked_refresh_token_id),
-				eq(refreshTokensTable.created_by, payload.sub)
-			)
-		)
-		.limit(1)
+	const refresh_token = await OAuthRepository.getRefreshTokenById(
+		sudo_row.linked_refresh_token_id,
+		payload.sub
+	)
 	if (!refresh_token)
 		throw GezcezError("FORBIDDEN", {
 			__message: "Geçersiz oturum",

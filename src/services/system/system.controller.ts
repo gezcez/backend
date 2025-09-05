@@ -3,7 +3,6 @@ import { Controller, Get, Param, UseGuards } from "@nestjs/common"
 import { NetworkRepository } from "../network/network.repository"
 import { ApiHeader } from "@nestjs/swagger"
 import { PermissionsRepository } from "../web/repositories/permissions.repository"
-import { db } from "../../db"
 import { AuthenticationGuard, AuthorizationGuard, NetworkGuard } from "@common/middlewares"
 import { buildConfig, RELOAD_SYNCED_CONFIG } from "@common/utils"
 import { GezcezResponse } from "@gezcez/core"
@@ -36,7 +35,7 @@ export class SystemController {
 	)
 	@Get("/get-config")
 	async getConfig(req: Request) {
-		return GezcezResponse({config:await RELOAD_SYNCED_CONFIG({db:db})})
+		return GezcezResponse({config:await RELOAD_SYNCED_CONFIG()})
 	}
 
 	@UseGuards(

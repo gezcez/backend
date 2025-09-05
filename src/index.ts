@@ -26,7 +26,6 @@ import {
 import { WsAdapter } from "@nestjs/platform-ws"
 import { Response } from "express"
 import { map } from "rxjs"
-import { db } from "./db"
 import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
 import { SharedController } from "./services/shared/shared.controller"
@@ -34,11 +33,13 @@ import { DashboardController } from "./services/dashboard/dashboard.controller"
 import { buildConfig, logger, RELOAD_SYNCED_CONFIG } from "@common/utils"
 import { IConfig, LoggerMiddleware } from "@gezcez/core"
 import { GezcezError } from "@gezcez/core"
+import { DashboardModule } from "@services/dashboard/dahboard.module"
 
 export var config: IConfig = buildConfig()
 @Module({
 	providers: [TerminalWsGateway],
-	controllers: [OAuthController, SystemController, WebController,SharedController,DashboardController],
+	imports: [DashboardModule],
+	controllers: [OAuthController, SystemController, WebController,SharedController],
 })
 class AppModule {}
 
@@ -53,7 +54,7 @@ console.log = (...args: any[]) => {
 }
 
 export async function bootstrap(ignore_listen?: boolean) {
-	await RELOAD_SYNCED_CONFIG({ db: db })
+	await RELOAD_SYNCED_CONFIG()
 
 	Logger.log("Project init successfull, bootstrapping server","bootstrap")
 	const app = await NestFactory.create<NestExpressApplication>(AppModule, {

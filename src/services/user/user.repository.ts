@@ -3,10 +3,12 @@ import { db } from "../../db"
 
 import { RolesRepository } from "../roles/roles.repository"
 import {
+	moderationLogs,
 	permissionsTable,
 	rolesTable,
 	userPermissionsTable,
-	userRolesTable
+	userRolesTable,
+	usersTable
 } from "@schemas"
 import { SYNCED_CONFIG } from "@common/utils"
 export abstract class UserRepository {
@@ -117,5 +119,23 @@ export abstract class UserRepository {
 			)
 
 		return result.filter((e) => e.permission_details?.app === app_key)
+	}
+
+	static async activateUser(user_id: number) {
+		const [updated_user] = await db
+			.update(usersTable)
+			.set({
+				activated_at: new Date()
+			})
+			.where(eq(usersTable.id, user_id))
+			.returning()
+		return updated_user
+	}
+	static async getUserBanRecordFromRecordId(record_id: number) {
+		const found = await db
+			.select()
+			.from(moderationLogs)
+			.where(and(eq(moderationLogs.id, record_id)))
+		return found[0]
 	}
 }

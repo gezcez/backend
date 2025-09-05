@@ -20,7 +20,6 @@ import { UserRepository } from "../user/user.repository"
 import { OAuthDTO } from "./oauth.dto"
 import { OAuthRepository } from "./oauth.repository"
 import { OAuthService } from "./oauth.service"
-import { db } from "../../db"
 import { moderationLogs, refreshTokensTable, usersTable } from "@schemas"
 import { OAuthUtils, RoleUtils, secret_random } from "@common/utils"
 import { AuthenticationGuard } from "@common/middlewares"
@@ -35,10 +34,7 @@ export class OAuthController {
 			return GezcezResponse({ __message: "Invalid email or password!" }, 401)
 		}
 		if (user.ban_record) {
-			const [ban_details] = await db
-				.select()
-				.from(moderationLogs)
-				.where(eq(moderationLogs.id, user.ban_record))
+			const ban_details = await UserRepository.getUserBanRecordFromRecordId(user.ban_record)
 			return GezcezResponse(
 				{
 					__message: "Hesabınız karalisteye alınmış.",
@@ -76,14 +72,7 @@ export class OAuthController {
 			"15d",
 			"oauth"
 		)
-		const [result] = await db
-			.insert(refreshTokensTable)
-			.values({
-				created_by: user.id,
-				id: jti,
-				args: { type: "oauth" },
-			})
-			.returning()
+		const result = await OAuthRepository.insertRefreshToken(user.id, jti)
 		if (!result)
 			return GezcezError("INTERNAL_SERVER_ERROR", {
 				__message: `Giriş işleminizi gerçekleştirirken bir hata ile karşılaştık. (refresh_token_insert_failed)`,
@@ -196,13 +185,7 @@ export class OAuthController {
 		})
 		if (!user) return "Link geçerli fakat kullanıcı silinmiş."
 		if (user.activated_at) return "Hesap zaten aktif edilmiş."
-		const [updated_user] = await db
-			.update(usersTable)
-			.set({
-				activated_at: new Date(),
-			})
-			.where(eq(usersTable.id, user.id))
-			.returning()
+		
 		return "Hesap başarıyla aktif edildi!"
 	}
 
