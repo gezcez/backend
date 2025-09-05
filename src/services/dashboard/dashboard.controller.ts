@@ -9,7 +9,6 @@ import { OAuthRepository } from "../oauth/oauth.repository"
 import { PermissionsRepository } from "../web/repositories/permissions.repository"
 import { NetworkRepository } from "../network/network.repository"
 import { RolesRepository } from "../roles/roles.repository"
-import { db } from "../../db"
 import { DashboardModels } from "./dashboard.dto"
 import { AuthenticationGuard, UseAuthorization } from "@common/middlewares"
 import { buildConfig, GezcezError, GezcezResponse } from "@gezcez/core"
@@ -29,6 +28,7 @@ const config = buildConfig()
 		is_use_refresh_token: false,
 	})
 )
+
 export class DashboardController {
 	@Get("/account/list-networks")
 	async getAccountMe(@Req() req: Request) {
@@ -135,7 +135,7 @@ export class DashboardController {
 			.split(",")
 			.map((e) => parseInt(e))
 			.filter((e) => isFinite(e))
-		await RELOAD_SYNCED_CONFIG({ db: db })
+		await RELOAD_SYNCED_CONFIG()
 		return GezcezResponse({
 			role_permissions: SYNCED_CONFIG.role_permissions.filter((e) => {
 				if (formatted_ids.length) {
@@ -180,7 +180,7 @@ export class DashboardController {
 				if (op_err) results.push({ error: op_err, permission_id: operation.permission_id })
 			}
 		}
-		await RELOAD_SYNCED_CONFIG({ db: db })
+		await RELOAD_SYNCED_CONFIG()
 		return GezcezResponse({
 			results: results,
 			__message: results.length ? "OK" : "Tüm işlemler başarıyla gerçekleştirildi.",
@@ -195,7 +195,7 @@ export class DashboardController {
 	})
 	@Get("/manage/permissions/list-all")
 	async listAllPermissions(@Req() req: Request) {
-		await RELOAD_SYNCED_CONFIG({ db: db })
+		await RELOAD_SYNCED_CONFIG()
 		return GezcezResponse({
 			permissions: SYNCED_CONFIG.permissions,
 		})
@@ -209,7 +209,7 @@ export class DashboardController {
 	})
 	@Get("/manage/permissions/get-registry")
 	async getPathRegistry(@Req() req: Request) {
-		await RELOAD_SYNCED_CONFIG({ db: db })
+		await RELOAD_SYNCED_CONFIG()
 		return GezcezResponse({
 			permissions:SYNCED_CONFIG.permissions,
 			path_registries: SYNCED_CONFIG.path_registries,
