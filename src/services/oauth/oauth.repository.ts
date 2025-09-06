@@ -1,4 +1,4 @@
-import { and, eq, or } from "drizzle-orm"
+import { and, eq, isNull, not, or } from "drizzle-orm"
 import { OAuthService } from "./oauth.service"
 import { password as Password } from "bun"
 import { db } from "../../db"
@@ -21,6 +21,19 @@ export abstract class OAuthRepository {
 			.returning()
 		return [result]
 	}
+	static async invalidateRefreshToken(jti: string, user_id: number) {
+		const [result] = await db
+			.update(refreshTokensTable)
+			.set({ invalidated_at: new Date(),updated_at: new Date() })
+			.where(
+				and(
+					eq(refreshTokensTable.id, jti),
+					eq(refreshTokensTable.created_by, user_id)
+				)
+			).returning()
+		return result
+	}
+
 	static async insertRefreshToken(user_id: number, jti: string) {
 		const [result] = await db
 			.insert(refreshTokensTable)
@@ -106,4 +119,20 @@ export abstract class OAuthRepository {
 			.returning()
 		return result
 	}
+
+	static async isJWTValid(jti: string, user_id: number) {
+		const [token_row] = await db
+			.select()
+			.from(refreshTokensTable)
+			.where(
+				and(
+					eq(refreshTokensTable.id, jti),
+					eq(refreshTokensTable.created_by, user_id),
+					isNull(refreshTokensTable.invalidated_at)
+				)
+			)
+			.limit(1)
+		return token_row
+	}
+
 }

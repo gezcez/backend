@@ -3,6 +3,7 @@ import type { GezcezJWTPayload } from "@gezcez/core/src/types"
 import { buildConfig } from "@gezcez/core/src/util/config"
 import { SYNCED_CONFIG } from "./master"
 import { RoleUtils } from "./role.utils"
+import { OAuthRepository } from "@services/oauth/oauth.repository"
 const config = buildConfig()
 export abstract class OAuthUtils {
 	static async signJWT(
@@ -125,12 +126,13 @@ export const secret_random = new TextEncoder().encode(
 	process.env.JWT_RANDOM_STUFF
 )
 
-export async function isTokenInvalid(payload:GezcezJWTPayload) {
+export async function isAppAccessTokenInvalid(payload:GezcezJWTPayload) {
 	const id = payload.jti
 	const parent_id = payload.parent
 	if (!id) return true
 	let is_invalid_due_to_id = SYNCED_CONFIG.invalid_tokens.find((e)=>e===id)
 	let is_invalid_due_to_parent_id
+	if (!payload.parent) return true
 	if (parent_id) {
 		is_invalid_due_to_parent_id = SYNCED_CONFIG.invalid_tokens.find((e)=>e===parent_id)
 	}

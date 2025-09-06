@@ -3,7 +3,7 @@ import type { Request } from "express"
 import { PATH_METADATA } from "@nestjs/common/constants"
 import { GezcezError, GezcezJWTPayload, GezcezValidationFailedError } from "@gezcez/core"
 import { handlePermissionRegistryAndReturnID } from "@common/utils"
-import { isTokenInvalid, OAuthUtils } from "@common/utils/oauth.utils"
+import { isAppAccessTokenInvalid, OAuthUtils } from "@common/utils/oauth.utils"
 function joinPaths(...paths: (string | string[])[]): string {
 	return paths
 		.flat()
@@ -90,7 +90,7 @@ export function AuthorizationGuard<T extends boolean, SCOPE extends "global" | "
 			if (config.handleInvalidation) {
 				await config.handleInvalidation(payload, context)
 			} else {
-				const is_invalid = await isTokenInvalid(payload)
+				const is_invalid = await isAppAccessTokenInvalid(payload)
 				if (is_invalid) {
 					throw GezcezError("UNAUTHORIZED", { __message: "Oturumun süresi dolmuş veya çıkış yapılmış." })
 				}

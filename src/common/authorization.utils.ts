@@ -74,7 +74,7 @@ export async function handleSudoMode(req: Request, sudo_key?: string) {
 		throw GezcezError("FORBIDDEN", {
 			__message: "Geçersiz oturum",
 		})
-	if (refresh_token.is_invalid)
+	if (refresh_token.invalidated_at)
 		throw GezcezError("FORBIDDEN", {
 			__message: "Oturumunuzdan çıkılmış",
 		})

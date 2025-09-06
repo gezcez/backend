@@ -1,4 +1,4 @@
-import { and, eq, gte } from "drizzle-orm"
+import { and, eq, gte, isNotNull } from "drizzle-orm"
 
 
 
@@ -46,7 +46,7 @@ export async function RELOAD_SYNCED_CONFIG(args?: { db: LibSQLDatabase }) {
 		.from(refreshTokensTable)
 		.where(
 			and(
-				eq(refreshTokensTable.is_invalid, true),
+				isNotNull(refreshTokensTable.invalidated_at),
 				gte(refreshTokensTable.updated_at, new Date(Date.now() - ONE_DAY))
 			)
 		)

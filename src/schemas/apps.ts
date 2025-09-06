@@ -7,6 +7,7 @@ export const appsTable = sqliteTable("apps", {
 	sensitive: int({ mode: "boolean" }).notNull(),
 	refresh_token_ttl: int().notNull(),
 	access_token_ttl: int().notNull(),
+	oauth_callback_url: text(),
 	// access_permission: int().references(() => permissionsTable.id).notNull(),
 	...TABLE_ACTIONS
 })

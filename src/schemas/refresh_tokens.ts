@@ -6,7 +6,7 @@ export const refreshTokensTable = sqliteTable("refresh_tokens", {
 	created_at:TABLE_ACTIONS.created_at,
 	created_by:TABLE_ACTIONS.created_by,
 	updated_at:TABLE_ACTIONS.updated_at,
-	is_invalid:int({mode:"boolean"}),
+	invalidated_at:int({mode:"timestamp_ms"}),
 	args: text({mode:"json"}).$type<{
 		
 	}>()
