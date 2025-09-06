@@ -22,10 +22,27 @@ import { OAuthRepository } from "./oauth.repository"
 import { OAuthService } from "./oauth.service"
 import { moderationLogs, refreshTokensTable, usersTable } from "@schemas"
 import { OAuthUtils, RoleUtils, secret_random } from "@common/utils"
-import { AuthenticationGuard } from "@common/middlewares"
+import { AuthenticationGuard, UseAuthorization } from "@common/middlewares"
 import { GezcezError, GezcezResponse, GezcezValidationFailedError } from "@gezcez/core"
 @Controller("oauth")
 export class OAuthController {
+	
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token",
+		required: true,
+	})
+	@UseGuards(
+		AuthenticationGuard({ app_key: "oauth", is_use_refresh_token: true })
+	)
+	@Post("/logout")
+	async logout(@Req() req: Request) {
+		const payload = req["payload"]!
+		const result = await OAuthRepository.invalidateRefreshToken(payload.jti,payload.sub)
+		if (!result) return GezcezError("INTERNAL_SERVER_ERROR", { __message: "Logout failed" })
+		return GezcezResponse({ __message: "Logout successful" })
+	}
+
 	@Post("/login")
 	async login(@Req() req: Request, @Body() form: OAuthDTO.LoginDto) {
 		const { email, password } = form
@@ -97,6 +114,8 @@ export class OAuthController {
 		const payload = req["payload"]!
 		const app_details = await AppsRepository.getAppByKey(app_key)
 		if (!app_details) return GezcezError("BAD_REQUEST", {__message:"app not found"})
+		const is_valid = await OAuthRepository.isJWTValid(payload.jti, payload.sub)
+		if (!is_valid) return GezcezError("UNAUTHORIZED", {__message:"Token is invalidated"})
 		const user_permissions = await UserRepository.getUserPermissionsByAppKey(
 			payload.sub,
 			app_key
@@ -126,13 +145,14 @@ export class OAuthController {
 		// 		__message: `You do not have access to app '${app_key}'`,
 		// 	})
 		// }
-		const access_token = await OAuthUtils.signJWT(
+		const refresh_token = await OAuthUtils.signJWT(
 			{
 				scopes: payload_o,
 				roles: roles_payload,
 				sub: payload.sub.toString(),
 				is_activated: payload.is_activated,
-				type:"refresh"
+				type:"refresh",
+				parent: payload.jti,
 			},
 			"4h",
 			app_key
@@ -141,7 +161,8 @@ export class OAuthController {
 			{
 				__message: "Logged in!",
 				app:app_key,
-				token: access_token,
+				token: refresh_token,
+				redirect_uri: app_details.oauth_callback_url ? `${app_details.oauth_callback_url}?_=${refresh_token}` : null,
 				scopes: payload_o,
 				roles: roles_payload,
 				type:"refresh"
@@ -151,6 +172,17 @@ export class OAuthController {
 	}
 
 
+	@Get("/account/get-apps")
+	async getApps(@Req() req: Request) {
+		const apps = (await AppsRepository.list()).map((app)=>{
+			return {
+				key:app.key,
+				name:app.name,
+				redirect_uri:app.oauth_callback_url,
+			}
+		})
+		return GezcezResponse({ apps }, 200)
+	}
 
 	@Get("/account/activate")
 	async activate(@Req() req: Request, @Query() _: OAuthDTO.ActivateDto) {
@@ -285,6 +317,14 @@ export class OAuthController {
 			payload.sub,
 			app_key
 		)
+		if (! (app_key === payload.aud)) {
+			return GezcezError("FORBIDDEN",{__message:"JWT audience does not match app_key provided in the body"})
+		}
+		if (!payload.parent) {
+			return GezcezError("FORBIDDEN",{__message:"This endpoint only accepts refresh tokens (parent missing)"})
+		}
+		const is_valid = await OAuthRepository.isJWTValid(payload.parent, payload.sub)
+		if (!is_valid) return GezcezError("UNAUTHORIZED", {__message:"Token is invalidated"})
 		const user_roles = await UserRepository.listUserRoles(payload.sub)
 		const networks = [...new Set(user_roles.map((e) => e.network_id))]
 		const roles_payload: Record<string, number> = {}
