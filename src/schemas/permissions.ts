@@ -9,7 +9,7 @@ import { TABLE_ACTIONS } from "@gezcez/core";
 export const permissionsTable = sqliteTable("permissions", {
 	id: int().primaryKey({ autoIncrement: true }).notNull(),
 	app: text().references(() => appsTable.key).notNull(),
-	key: text().unique().notNull(),
+	key: text().notNull(),
 	page_label:text(),
 	page_href:text(),
 	created_at:TABLE_ACTIONS.created_at,

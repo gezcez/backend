@@ -28,7 +28,6 @@ const config = buildConfig()
 		is_use_refresh_token: false,
 	})
 )
-
 export class DashboardController {
 	@Get("/account/list-networks")
 	async getAccountMe(@Req() req: Request) {

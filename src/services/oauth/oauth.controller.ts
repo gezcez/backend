@@ -326,8 +326,10 @@ export class OAuthController {
 		if (!payload.parent) {
 			return GezcezError("FORBIDDEN",{__message:"This endpoint only accepts refresh tokens (parent missing)"})
 		}
-		const is_valid = await OAuthRepository.isJWTValid(payload.parent, payload.sub)
-		if (!is_valid) return GezcezError("UNAUTHORIZED", {__message:"Token is invalidated"})
+		if (process.env.NODE_ENV === "production") {
+			const is_valid = await OAuthRepository.isJWTValid(payload.parent, payload.sub)
+			if (!is_valid) return GezcezError("UNAUTHORIZED", {__message:"Token is invalidated"})
+		}
 		const user_roles = await UserRepository.listUserRoles(payload.sub)
 		const networks = [...new Set(user_roles.map((e) => e.network_id))]
 		const roles_payload: Record<string, number> = {}

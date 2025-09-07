@@ -1,4 +1,9 @@
-import { jwtVerify, type JWK, type JWTVerifyOptions, type KeyObject } from "jose"
+import {
+	jwtVerify,
+	type JWK,
+	type JWTVerifyOptions,
+	type KeyObject
+} from "jose"
 import type { GezcezJWTPayload } from "@gezcez/core/src/types"
 import type { CanActivate, ExecutionContext } from "@nestjs/common"
 import { GezcezError } from "@gezcez/core/src/GezcezError"
@@ -24,20 +29,25 @@ export function AuthenticationGuard(config: {
 			if (!token) {
 				throw GezcezError("UNAUTHORIZED", {
 					__message:
-						"Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım. (token undefined)",
+						"Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım. (token undefined)"
 				})
 			}
 			let payload
+			const is_dev = process.env.NODE_ENV === "production" ? false : true
 			if (config.app_key === "inherit") {
 				const [_, body, __] = token.split(".")
 				const unverified_payload = JSON.parse(await atob(body))
 				if (unverified_payload.aud === "oauth")
 					throw GezcezError("BAD_REQUEST", {
-						__message: `Access tokenler oauth uygulamalarında kullanılamaz..`,
+						__message: `Access tokenler oauth uygulamalarında kullanılamaz..`
 					})
-				config.app_key = unverified_payload.aud
+				config.app_key = `${unverified_payload.aud}`
 				config.is_inherit = true
 			}
+			const aud =
+				!config.is_inherit && process.env.NODE_ENV !== "production"
+					? `${config.app_key}_dev`
+					: config.app_key
 			if (config.override_jwt_config) {
 				const { payload: payload_i } = await jwtVerify(
 					token,
@@ -46,30 +56,35 @@ export function AuthenticationGuard(config: {
 				)
 				payload = payload_i as any as GezcezJWTPayload
 			} else {
-				payload = await OAuthUtils.verifyJWT(token, config.app_key)
+				payload = await OAuthUtils.verifyJWT(token, `${aud}`)
 			}
 			if (!payload) {
 				throw GezcezError("UNAUTHORIZED", {
 					__message:
 						"Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım. (unverified payload)",
+					debug: {
+						app_key: `${aud}`,
+						is_dev: is_dev,
+						is_inherit: config.is_inherit || false
+					}
 				})
 			}
 
 			if (config.is_use_refresh_token) {
 				if (config.app_key !== "oauth" && !config.is_inherit) {
 					throw GezcezError("BAD_REQUEST", {
-						__message: `Refresh token'ler sadece oauth key'ine sahip uygulamalarda kullanılabilir.`,
+						__message: `Refresh token'ler sadece oauth key'ine sahip uygulamalarda kullanılabilir.`
 					})
 				}
 				if (payload.type !== "refresh") {
 					throw GezcezError("BAD_REQUEST", {
-						__message: `token.type geçersiz ('refresh' beklenirken '${payload.type} bulundu')`,
+						__message: `token.type geçersiz ('refresh' beklenirken '${payload.type} bulundu')`
 					})
 				}
 			} else {
 				if (payload.type !== "access") {
 					throw GezcezError("BAD_REQUEST", {
-						__message: `token.type geçersiz ('access' beklenirken '${payload.type} bulundu')`,
+						__message: `token.type geçersiz ('access' beklenirken '${payload.type} bulundu')`
 					})
 				}
 			}
