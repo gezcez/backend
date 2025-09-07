@@ -12,7 +12,9 @@ export abstract class EmailService {
 		const url = config.third_party_urls.email_service
 		if (!url) return [undefined, "config.third_party_urls.email_service is undefined"]
 
-		// send email
+		// TODO: actually send the email
+		const result = await EmailRepository.insertEmails(args)
+		return [result,undefined]
 		let request
 		try {
 			request = await fetch(url, {
@@ -25,7 +27,5 @@ export abstract class EmailService {
 		} catch {}
 		if ((!request || ![201, 200].includes(request.status)) && process.env.NODE_ENV !== "dev")
 			return [undefined, "couldn't send email [third party service threw an error]"]
-		const result = await EmailRepository.insertEmails(args)
-		return [result,undefined]
 	}
 }
