@@ -247,8 +247,11 @@ export class OAuthController {
 			username: username,
 			password: password,
 		})
-		if (error || !user) {
-			return GezcezResponse({ __message: error }, 409)
+		if (error) {
+			return GezcezResponse({ __message: error }, 500)
+		}
+		if (!user) {
+			return GezcezResponse({ __message: "A user with this email or username already exists" }, 200)
 		}
 		const id = crypto.randomUUID()
 		const token = await new SignJWT({

@@ -18,19 +18,21 @@ export abstract class OAuthRepository {
 				...user,
 				password: await OAuthUtils.hashPassword(user.password)
 			})
+			.onConflictDoNothing()
 			.returning()
 		return [result]
 	}
 	static async invalidateRefreshToken(jti: string, user_id: number) {
 		const [result] = await db
 			.update(refreshTokensTable)
-			.set({ invalidated_at: new Date(),updated_at: new Date() })
+			.set({ invalidated_at: new Date(), updated_at: new Date() })
 			.where(
 				and(
 					eq(refreshTokensTable.id, jti),
 					eq(refreshTokensTable.created_by, user_id)
 				)
-			).returning()
+			)
+			.returning()
 		return result
 	}
 
@@ -59,7 +61,10 @@ export abstract class OAuthRepository {
 		return sudo_row
 	}
 
-	static async getRefreshTokenById(linked_refresh_token_id: string, user_id: number) {
+	static async getRefreshTokenById(
+		linked_refresh_token_id: string,
+		user_id: number
+	) {
 		const [refresh_token] = await db
 			.select()
 			.from(refreshTokensTable)
@@ -134,5 +139,4 @@ export abstract class OAuthRepository {
 			.limit(1)
 		return token_row
 	}
-
 }
