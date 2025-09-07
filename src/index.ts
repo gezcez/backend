@@ -41,34 +41,12 @@ import { GezcezResponse, IConfig, LoggerMiddleware } from "@gezcez/core"
 import { GezcezError } from "@gezcez/core"
 import { DashboardModule } from "@services/dashboard/dahboard.module"
 
-@Controller()
-class IndexController {
-	@Get("favicon.ico")
-	async favicon(@Req() request: Request, @Res() response: Response) {
-		if (!(request.headers["referer"]?.endsWith("/docs"))) {
-			console.log("favicon request but not from /docs, returning 404")
-			response.status(404).send(
-				GezcezError("NOT_FOUND",{})
-			)
-			return 
-			return GezcezError("NOT_FOUND",{__message:"default favicon is not set"})
-		}
-		const file = createReadStream(join(process.cwd(), "./src/assets/scalar-favicon.ico"))
-		response.setHeader("Content-Type", "image/x-icon")
-		response.setHeader("Cache-Control", "public, max-age=86400")
-		file.on("end", () => {
-			response.end()
-		})
-		file.pipe(response.status(200))
-	}
-}
 
 export var config: IConfig = buildConfig()
 @Module({
 	providers: [TerminalWsGateway],
 	imports: [DashboardModule],
 	controllers: [
-		IndexController,
 		OAuthController,
 		SystemController,
 		WebController,
