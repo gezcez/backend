@@ -140,6 +140,30 @@ export class DashboardController {
 	@UseAuthorization({
 		app_key: "dashboard",
 		scope: "scoped",
+		permission_key: "base.users.roles.list",
+		description: "Can user view user-role matrix",
+	})
+	@Get("/:network_id/users/get-role-matrix")
+	async getUserRoleMatrix(@Req() req: Request, @Query("user_ids") user_ids: string) {
+		const formatted_ids = (user_ids || "")
+			.split(",")
+			.map((e) => parseInt(e))
+			.filter((e) => isFinite(e))
+		
+		const user_roles = await UserRepository.getUserRoleMatrix(formatted_ids.length ? formatted_ids : undefined)
+		const users = await UserRepository.listAllUsers()
+		await RELOAD_SYNCED_CONFIG()
+		
+		return GezcezResponse({
+			user_roles: user_roles,
+			users: users,
+			roles: SYNCED_CONFIG.roles,
+		})
+	}
+
+	@UseAuthorization({
+		app_key: "dashboard",
+		scope: "scoped",
 		permission_key: "base.roles.list-permissions",
 	})
 	@Get("/:network_id/roles/get-permission-matrix")
