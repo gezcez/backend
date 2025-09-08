@@ -164,6 +164,65 @@ export class DashboardController {
 	@UseAuthorization({
 		app_key: "dashboard",
 		scope: "scoped",
+		permission_key: "base.users.roles.write",
+		description: "Can user modify user roles",
+	})
+	@Post("/:network_id/users/write-roles")
+	async writeRolesToUser(@Req() req: Request, @Body() body: DashboardModels.WriteRolesToUserDTO) {
+		const { operations, user_id } = body
+		const network_id = req["network_id"]
+		const executor_id = req.payload["sub"]
+		const results: { error: string | undefined; role_id: number }[] = []
+
+		for (const operation of operations) {
+			if (operation.operation_type === "add") {
+				const [op_result, op_err] = await UserRepository.addRoleToUser({
+					user_id: user_id,
+					role_id: operation.role_id,
+					network_id: network_id,
+					executor_id: executor_id,
+				})
+				if (op_err) results.push({ error: op_err, role_id: operation.role_id })
+			} else if (operation.operation_type === "remove") {
+				const [op_result, op_err] = await UserRepository.removeRoleFromUser({
+					user_id: user_id,
+					role_id: operation.role_id,
+					network_id: network_id,
+					executor_id: executor_id,
+				})
+				if (op_err) results.push({ error: op_err, role_id: operation.role_id })
+			}
+		}
+
+		return GezcezResponse({
+			results: results,
+			__message: results.length ? "Some operations failed" : "All operations completed successfully",
+		})
+	}
+
+	@UseAuthorization({
+		app_key: "dashboard",
+		scope: "scoped",
+		permission_key: "base.users.write",
+	})
+	@Post("/:network_id/users/check-edit-permission")
+	async checkUserEditPermission(@Req() req: Request, @Body() body: DashboardModels.CheckUserEditPermissionDTO) {
+		const { user_id } = body
+		const network_id = req["network_id"]
+		const executor_id = req.payload["sub"]
+
+		const [canEdit, error] = await UserRepository.canEditUser(executor_id, user_id, network_id)
+
+		return GezcezResponse({
+			can_edit: canEdit,
+			error: error,
+			user_id: user_id
+		})
+	}
+
+	@UseAuthorization({
+		app_key: "dashboard",
+		scope: "scoped",
 		permission_key: "base.roles.list-permissions",
 	})
 	@Get("/:network_id/roles/get-permission-matrix")

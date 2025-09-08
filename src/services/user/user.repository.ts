@@ -177,4 +177,185 @@ export abstract class UserRepository {
 
 		return await query
 	}
+
+	static async getUserHighestRoleLevel(user_id: number, network_id: number): Promise<number> {
+		const user_roles = await db
+			.select({
+				role: rolesTable
+			})
+			.from(userRolesTable)
+			.leftJoin(rolesTable, eq(rolesTable.id, userRolesTable.role_id))
+			.where(
+				and(
+					eq(userRolesTable.user_id, user_id),
+					eq(userRolesTable.network_id, network_id),
+					eq(userRolesTable.status, true)
+				)
+			)
+
+		// Return the highest role level (roles with higher numbers have more authority)
+		return Math.max(...user_roles.map(({ role }) => role?.level ?? 0), 0)
+	}
+
+	static async hasProtectedRole(user_id: number, network_id: number): Promise<boolean> {
+		const user_roles = await db
+			.select({
+				role: rolesTable
+			})
+			.from(userRolesTable)
+			.leftJoin(rolesTable, eq(rolesTable.id, userRolesTable.role_id))
+			.where(
+				and(
+					eq(userRolesTable.user_id, user_id),
+					eq(userRolesTable.network_id, network_id),
+					eq(userRolesTable.status, true)
+				)
+			)
+
+		// Check if user has network_admin or root role
+		return user_roles.some(({ role }) => 
+			role?.name === "network_admin" || 
+			role?.name === "root" ||
+			role?.name === "admin"
+		)
+	}
+
+	static async canEditUser(executor_id: number, target_user_id: number, network_id: number): Promise<[boolean, string | undefined]> {
+		try {
+			// Get executor's highest role level
+			const executorLevel = await UserRepository.getUserHighestRoleLevel(executor_id, network_id)
+			
+			// Get target user's highest role level
+			const targetLevel = await UserRepository.getUserHighestRoleLevel(target_user_id, network_id)
+			
+			// Check if target user has protected roles (admin/root/network_admin)
+			const targetHasProtected = await UserRepository.hasProtectedRole(target_user_id, network_id)
+			if (targetHasProtected) {
+				return [false, "Cannot modify roles for users with admin/root privileges"]
+			}
+			
+			// Executor cannot edit users with higher or equal role levels
+			if (targetLevel >= executorLevel && targetLevel > 0) {
+				return [false, "Cannot modify roles for users with higher or equal authority level"]
+			}
+			
+			return [true, undefined]
+		} catch (error) {
+			return [false, `Error checking user permissions: ${error instanceof Error ? error.message : String(error)}`]
+		}
+	}
+
+	static async addRoleToUser(params: {
+		user_id: number
+		role_id: number
+		network_id: number
+		executor_id: number
+	}): Promise<[any, string | undefined]> {
+		const { user_id, role_id, network_id, executor_id } = params
+
+		try {
+			// Check if executor can edit this user based on role hierarchy
+			const [canEdit, editError] = await UserRepository.canEditUser(executor_id, user_id, network_id)
+			if (!canEdit) {
+				return [null, editError]
+			}
+
+			// Check if role assignment already exists
+			const existing = await db
+				.select()
+				.from(userRolesTable)
+				.where(
+					and(
+						eq(userRolesTable.user_id, user_id),
+						eq(userRolesTable.role_id, role_id),
+						eq(userRolesTable.network_id, network_id)
+					)
+				)
+
+			if (existing.length > 0) {
+				// If exists but inactive, reactivate it
+				if (!existing[0].status) {
+					const [updated] = await db
+						.update(userRolesTable)
+						.set({
+							status: true,
+							updated_at: new Date(),
+							updated_by: executor_id
+						})
+						.where(eq(userRolesTable.id, existing[0].id))
+						.returning()
+					return [updated, undefined]
+				}
+				return [null, "Role already assigned to user"]
+			}
+
+			// Create new role assignment
+			const [created] = await db
+				.insert(userRolesTable)
+				.values({
+					user_id,
+					role_id,
+					network_id,
+					status: true,
+					created_by: executor_id,
+					updated_by: executor_id,
+					created_at: new Date(),
+					updated_at: new Date()
+				})
+				.returning()
+
+			return [created, undefined]
+		} catch (error) {
+			return [null, `Database error: ${error instanceof Error ? error.message : String(error)}`]
+		}
+	}
+
+	static async removeRoleFromUser(params: {
+		user_id: number
+		role_id: number
+		network_id: number
+		executor_id: number
+	}): Promise<[any, string | undefined]> {
+		const { user_id, role_id, network_id, executor_id } = params
+
+		try {
+			// Check if executor can edit this user based on role hierarchy
+			const [canEdit, editError] = await UserRepository.canEditUser(executor_id, user_id, network_id)
+			if (!canEdit) {
+				return [null, editError]
+			}
+
+			// Find the role assignment
+			const existing = await db
+				.select()
+				.from(userRolesTable)
+				.where(
+					and(
+						eq(userRolesTable.user_id, user_id),
+						eq(userRolesTable.role_id, role_id),
+						eq(userRolesTable.network_id, network_id),
+						eq(userRolesTable.status, true)
+					)
+				)
+
+			if (existing.length === 0) {
+				return [null, "Role assignment not found"]
+			}
+
+			// Deactivate the role assignment
+			const [updated] = await db
+				.update(userRolesTable)
+				.set({
+					status: false,
+					updated_at: new Date(),
+					updated_by: executor_id
+				})
+				.where(eq(userRolesTable.id, existing[0].id))
+				.returning()
+
+			return [updated, undefined]
+		} catch (error) {
+			return [null, `Database error: ${error instanceof Error ? error.message : String(error)}`]
+		}
+	}
 }
