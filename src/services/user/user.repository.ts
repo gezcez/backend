@@ -138,4 +138,43 @@ export abstract class UserRepository {
 			.where(and(eq(moderationLogs.id, record_id)))
 		return found[0]
 	}
+
+	static async listAllUsers() {
+		const users = await db
+			.select({
+				id: usersTable.id,
+				username: usersTable.username,
+				email: usersTable.email,
+				created_at: usersTable.created_at,
+				updated_at: usersTable.updated_at,
+				activated_at: usersTable.activated_at,
+				ban_record: usersTable.ban_record,
+			})
+			.from(usersTable)
+			.orderBy(usersTable.created_at)
+		return users
+	}
+
+	static async getUserRoleMatrix(filter_users?: number[]) {
+		const query = db
+			.select({
+				user_role: userRolesTable,
+				user: {
+					id: usersTable.id,
+					username: usersTable.username
+				},
+				role: rolesTable,
+			})
+			.from(userRolesTable)
+			.leftJoin(usersTable, eq(usersTable.id, userRolesTable.user_id))
+			.leftJoin(rolesTable, eq(rolesTable.id, userRolesTable.role_id))
+			.where(eq(userRolesTable.status, true))
+
+		if (filter_users && filter_users.length > 0) {
+			const result = await query
+			return result.filter((row) => filter_users.includes(row.user_role.user_id))
+		}
+
+		return await query
+	}
 }

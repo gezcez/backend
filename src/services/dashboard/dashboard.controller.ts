@@ -126,6 +126,20 @@ export class DashboardController {
 	@UseAuthorization({
 		app_key: "dashboard",
 		scope: "scoped",
+		permission_key: "base.users.list",
+		description: "Can user list all users in the system",
+	})
+	@Get("/:network_id/users/list-all")
+	async listAllUsers(@Req() req: Request) {
+		const users = await UserRepository.listAllUsers()
+		return GezcezResponse({
+			users: users,
+		})
+	}
+
+	@UseAuthorization({
+		app_key: "dashboard",
+		scope: "scoped",
 		permission_key: "base.roles.list-permissions",
 	})
 	@Get("/:network_id/roles/get-permission-matrix")
