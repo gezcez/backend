@@ -15,7 +15,8 @@
 		"test:e2e": "jest --config ./test/jest-e2e.json"
 	},
 	"dependencies": {
-		"@gezcez/core":"workspace:core",
+		"@aws-sdk/client-ses": "^3.883.0",
+		"@gezcez/core": "workspace:core",
 		"@libsql/client": "^0.15.9",
 		"@nestjs/common": "^11.0.1",
 		"@nestjs/core": "^11.0.1",
@@ -25,11 +26,13 @@
 		"@nestjs/swagger": "^11.2.0",
 		"@nestjs/websockets": "^11.1.3",
 		"@scalar/nestjs-api-reference": "^0.5.6",
+		"@types/nodemailer": "^7.0.1",
 		"@types/supertest": "^6.0.3",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.2",
 		"drizzle-orm": "^0.44.2",
 		"jose": "^6.0.11",
+		"nodemailer": "^7.0.6",
 		"rxjs": "^7.8.2",
 		"swagger-ui-express": "^5.0.1"
 	},

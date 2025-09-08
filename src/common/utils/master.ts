@@ -1,7 +1,5 @@
 import { and, eq, gte, isNotNull } from "drizzle-orm"
 
-
-
 import { LibSQLDatabase } from "drizzle-orm/libsql"
 
 import { logger } from "@gezcez/core"
@@ -11,10 +9,9 @@ import {
 	permissionsTable,
 	refreshTokensTable,
 	rolePermissionsTable,
-	rolesTable,
+	rolesTable
 } from "@schemas"
-import { db as iDB} from "@db"
-
+import { db as iDB } from "@db"
 
 export let SYNCED_CONFIG: {
 	roles: (typeof rolesTable.$inferSelect)[]
@@ -29,12 +26,16 @@ export let SYNCED_CONFIG: {
 	role_permissions: [],
 	permissions: [],
 	networks: [],
-	path_registries:[],
+	path_registries: [],
 	__DANGEROURS_ACCESS_DB: undefined,
-	invalid_tokens: [],
+	invalid_tokens: []
 }
-
+let LAST_RELOAD = 0
 export async function RELOAD_SYNCED_CONFIG(args?: { db: LibSQLDatabase }) {
+	if (Date.now() - LAST_RELOAD < 1000) {
+		return SYNCED_CONFIG
+	}
+	LAST_RELOAD = Date.now()
 	logger.log("refreshing sync config!")
 	let db = args?.db || iDB
 	const networks_promise = db.select().from(networksTable)
@@ -51,7 +52,14 @@ export async function RELOAD_SYNCED_CONFIG(args?: { db: LibSQLDatabase }) {
 			)
 		)
 	const role_permissions_promise = db.select().from(rolePermissionsTable)
-	const [networks, permissions, roles, invalid_tokens, role_permissions,path_registries] = await Promise.all([
+	const [
+		networks,
+		permissions,
+		roles,
+		invalid_tokens,
+		role_permissions,
+		path_registries
+	] = await Promise.all([
 		networks_promise.all(),
 		permissions_promise.all(),
 		roles_promise.all(),
@@ -65,7 +73,7 @@ export async function RELOAD_SYNCED_CONFIG(args?: { db: LibSQLDatabase }) {
 	SYNCED_CONFIG.roles = roles
 	SYNCED_CONFIG.role_permissions = role_permissions
 	SYNCED_CONFIG.invalid_tokens = invalid_tokens.map((e) => "invalid")
-	SYNCED_CONFIG.path_registries=path_registries
+	SYNCED_CONFIG.path_registries = path_registries
 	logger.log(
 		"sync successfull",
 		`networks:${networks.length}`,

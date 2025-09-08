@@ -1,6 +1,6 @@
 import { db } from "../../db"
 import { eq } from "drizzle-orm"
-import { emailsTable } from "@schemas"
+import { emailsTable, sesLogsTable } from "@schemas"
 
 export abstract class EmailRepository {
 	static async selectEmailById(uuid: string) {
@@ -11,8 +11,12 @@ export abstract class EmailRepository {
 		if (!result) return [undefined,"email not found"]
 		return [result]
 	}
-	static async insertEmails(args: typeof emailsTable.$inferInsert) {
+	static async insertEmail(args: typeof emailsTable.$inferInsert) {
 		const [result] = await db.insert(emailsTable).values(args).returning()
+		return result
+	}
+	static async insertSesLog(args: typeof sesLogsTable.$inferInsert) {
+		const [result] = await db.insert(sesLogsTable).values(args).returning()
 		return result
 	}
 }

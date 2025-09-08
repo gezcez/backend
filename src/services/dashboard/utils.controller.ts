@@ -4,6 +4,7 @@ import { GezcezResponse } from "@gezcez/core"
 import { Body, Controller, Get, Post, Req } from "@nestjs/common"
 import { DashboardUtilsDTO } from "./utils.dto"
 import { SignJWT } from "jose"
+import { EmailService } from "@services/email/email.service"
 
 @UseAuthorization({
 	app_key: "dashboard",
@@ -31,7 +32,7 @@ export class DashboardUtilitiesController {
 
    @UseAuthorization({
       app_key: "dashboard",
-      permission_key: "dashboard.utils.sign-token",
+      permission_key: "utils.sign-token",
       scope: "global",
       description: "User can sign JWT tokens for dashboard",
    })
@@ -47,4 +48,34 @@ export class DashboardUtilitiesController {
          token
       })
    }
+
+   @UseAuthorization({
+      app_key: "dashboard",
+      permission_key: "utils.send-test-email",
+      scope: "global",
+      description: "User can send test email to verify email settings",
+   })
+   @Post("/send-test-email")
+   async sendTestEmail(@Req() req: Request) {
+      const {email_result,email_uuid,error,insert_result,log_result} = await EmailService.sendEmail({
+         target_user_id: 1,
+         target_email: "contact@phasenull.dev",
+         subject: "Test Email from Gezcez",
+         content: "This is a test email sent from Gezcez to verify email config.",
+         type: "other"
+      })
+      if (error) {
+         return GezcezResponse({
+            __message: "Failed to send test email.",
+            error
+         },500)
+      }
+      return GezcezResponse({
+         email_result,
+         email_uuid,
+         insert_result,
+         log_result
+      })
+   }
+
 }

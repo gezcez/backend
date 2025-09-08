@@ -1,15 +1,10 @@
 import {
 	CallHandler,
-	Controller,
 	ExecutionContext,
-	Get,
 	Injectable,
 	Logger,
 	Module,
 	NestInterceptor,
-	Req,
-	Res,
-	StreamableFile,
 	ValidationPipe
 } from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
@@ -23,23 +18,18 @@ import {
 	ArgumentsHost,
 	Catch,
 	ExceptionFilter,
-	HttpException,
 	HttpStatus
 } from "@nestjs/common"
-import { createReadStream } from "fs"
-import { join } from "path"
 
+import { buildConfig, RELOAD_SYNCED_CONFIG } from "@common/utils"
+import { GezcezError, IConfig, LoggerMiddleware } from "@gezcez/core"
 import { WsAdapter } from "@nestjs/platform-ws"
-import { type Request, type Response } from "express"
+import { DashboardModule } from "@services/dashboard/dahboard.module"
+import { type Response } from "express"
 import { map } from "rxjs"
+import { SharedController } from "./services/shared/shared.controller"
 import { SystemController } from "./services/system/system.controller"
 import { WebController } from "./services/web/web.controller"
-import { SharedController } from "./services/shared/shared.controller"
-import { DashboardController } from "./services/dashboard/dashboard.controller"
-import { buildConfig, logger, RELOAD_SYNCED_CONFIG } from "@common/utils"
-import { GezcezResponse, IConfig, LoggerMiddleware } from "@gezcez/core"
-import { GezcezError } from "@gezcez/core"
-import { DashboardModule } from "@services/dashboard/dahboard.module"
 
 
 export var config: IConfig = buildConfig()
@@ -70,7 +60,8 @@ export async function bootstrap(ignore_listen?: boolean) {
 
 	Logger.log("Project init successfull, bootstrapping server", "bootstrap")
 	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-		cors: true
+		cors: true,
+		logger: ["error", "warn", "debug", "verbose"]
 	})
 	app.enableCors({
 		origin: [
@@ -86,7 +77,7 @@ export async function bootstrap(ignore_listen?: boolean) {
 	app.use(LoggerMiddleware)
 	app.useWebSocketAdapter(new WsAdapter(app))
 	const openapi_doc = new DocumentBuilder()
-		.setTitle("Gezcez.com Public API Documentation")
+		.setTitle(`${process.env.NODE_ENV !== "production" ? "[DEV] " : null}Gezcez.com Public API Documentation`)
 		.setDescription("Public API docs for Gezcez.com")
 		.setVersion("1.0.0")
 		.setContact(
@@ -102,7 +93,7 @@ export async function bootstrap(ignore_listen?: boolean) {
 		apiReference({
 			theme: "bluePlanet",
 			content: document,
-			title: "Gezcez Public API Documentation",
+			title: `${process.env.NODE_ENV !== "production" ? "[DEV] " : null}Gezcez Public API Documentation`,
 		})
 	)
 	SwaggerModule.setup("swagger", app, document)

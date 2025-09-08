@@ -1,6 +1,5 @@
 import { db } from "@db"
 import { logger } from "@gezcez/core"
-import { config } from "@index"
 import { permissionsTable } from "@schemas"
 
 export abstract class PermissionsRepository {
@@ -8,12 +7,12 @@ export abstract class PermissionsRepository {
 		await db
 			.insert(permissionsTable)
 			.values({
-				app: config.app_key,
-				key: config.permission_key
+				app: app,
+				key: key
 			})
 			.then((e) => {
 				logger.success(
-					`Created permission '${config.app_key}/${config.permission_key}'`
+					`Created permission '${app}/${key}'`
 				)
 			})
 		return true
