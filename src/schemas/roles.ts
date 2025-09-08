@@ -8,6 +8,7 @@ export const rolesTable = sqliteTable("roles", {
 	description: text(),
 	name: text().notNull().unique(),
 	level: int().notNull().default(0),
+	immutable: int({ mode: "boolean" }).default(false),
 	...TABLE_ACTIONS,
 })
 
