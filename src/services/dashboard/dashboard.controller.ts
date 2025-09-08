@@ -117,9 +117,17 @@ export class DashboardController {
 		const network_id = req["network_id"]
 		const roles = await UserRepository.listUserRolesWithLeftJoin(user_id)
 		const user = await OAuthRepository.getUserById(user_id)
+		
+		// Fetch ban details if user has a ban record
+		let banDetails = null
+		if (user?.ban_record) {
+			banDetails = await UserRepository.getBanDetails(user.ban_record)
+		}
+		
 		return GezcezResponse({
 			user: user,
 			roles: roles,
+			ban_details: banDetails,
 		})
 	}
 
@@ -150,7 +158,8 @@ export class DashboardController {
 			.map((e) => parseInt(e))
 			.filter((e) => isFinite(e))
 		
-		const user_roles = await UserRepository.getUserRoleMatrix(formatted_ids.length ? formatted_ids : undefined)
+		const network_id = req["network_id"]
+		const user_roles = await UserRepository.getUserRoleMatrix(formatted_ids.length ? formatted_ids : undefined, network_id)
 		const users = await UserRepository.listAllUsers()
 		await RELOAD_SYNCED_CONFIG()
 		

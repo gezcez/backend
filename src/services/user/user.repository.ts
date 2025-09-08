@@ -155,20 +155,28 @@ export abstract class UserRepository {
 		return users
 	}
 
-	static async getUserRoleMatrix(filter_users?: number[]) {
+	static async getUserRoleMatrix(filter_users?: number[], network_id?: number) {
+		// Build where conditions
+		let whereConditions = [eq(userRolesTable.status, true)]
+		
+		if (network_id) {
+			whereConditions.push(eq(userRolesTable.network_id, network_id))
+		}
+
 		const query = db
 			.select({
 				user_role: userRolesTable,
 				user: {
 					id: usersTable.id,
-					username: usersTable.username
+					username: usersTable.username,
+					ban_record: usersTable.ban_record
 				},
 				role: rolesTable,
 			})
 			.from(userRolesTable)
 			.leftJoin(usersTable, eq(usersTable.id, userRolesTable.user_id))
 			.leftJoin(rolesTable, eq(rolesTable.id, userRolesTable.role_id))
-			.where(eq(userRolesTable.status, true))
+			.where(and(...whereConditions))
 
 		if (filter_users && filter_users.length > 0) {
 			const result = await query
@@ -260,6 +268,17 @@ export abstract class UserRepository {
 				return [null, editError]
 			}
 
+			// Check if the role is immutable
+			const role = await db
+				.select()
+				.from(rolesTable)
+				.where(eq(rolesTable.id, role_id))
+				.limit(1)
+
+			if (role.length > 0 && role[0].immutable) {
+				return [null, "Cannot assign immutable role to user"]
+			}
+
 			// Check if role assignment already exists
 			const existing = await db
 				.select()
@@ -325,6 +344,17 @@ export abstract class UserRepository {
 				return [null, editError]
 			}
 
+			// Check if the role is immutable
+			const role = await db
+				.select()
+				.from(rolesTable)
+				.where(eq(rolesTable.id, role_id))
+				.limit(1)
+
+			if (role.length > 0 && role[0].immutable) {
+				return [null, "Cannot remove immutable role from user"]
+			}
+
 			// Find the role assignment
 			const existing = await db
 				.select()
@@ -356,6 +386,25 @@ export abstract class UserRepository {
 			return [updated, undefined]
 		} catch (error) {
 			return [null, `Database error: ${error instanceof Error ? error.message : String(error)}`]
+		}
+	}
+
+	static async getBanDetails(ban_record_id: number) {
+		try {
+			const banRecord = await db
+				.select()
+				.from(moderationLogs)
+				.where(eq(moderationLogs.id, ban_record_id))
+				.limit(1)
+
+			if (banRecord.length === 0) {
+				return null
+			}
+
+			return banRecord[0]
+		} catch (error) {
+			console.error("Error fetching ban details:", error)
+			return null
 		}
 	}
 }
