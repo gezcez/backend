@@ -196,6 +196,15 @@ export class TokenService {
 		}
 		if (row.expires_at <= now)
 			throw new OAuthProtocolError("invalid_grant", "Refresh token expired")
+		// The client's hard cap on a family's age, however often it rotated.
+		const started = this.repository.familyStartedAt(row.family_id) ?? row.created_at
+		if (now.getTime() - started.getTime() > app.refresh_max_s * 1000) {
+			this.repository.revokeFamily(row.family_id, "max_age", now)
+			throw new OAuthProtocolError(
+				"invalid_grant",
+				"Refresh token family reached its maximum age",
+			)
+		}
 
 		const plaintext = randomToken()
 		const successor = this.refreshRow(app, plaintext, {

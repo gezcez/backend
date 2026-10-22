@@ -79,19 +79,26 @@ export class AuthorizationGuard implements CanActivate {
 	}
 }
 
+/**
+ * Throws AUTH_STEP_UP_REQUIRED unless the token's auth_time is within the step-up window. Used by
+ * StepUpGuard and by services where only some fields of a request need sudo.
+ */
+export function assertStepUp(req: Request, config: Pick<AppConfig, "stepUpMaxAgeS">): void {
+	if (!req.auth) throw new GezcezError("AUTH_REQUIRED")
+	const ageS = Date.now() / 1000 - req.auth.authTime
+	if (ageS > config.stepUpMaxAgeS) {
+		throw new GezcezError("AUTH_STEP_UP_REQUIRED", undefined, {
+			max_age: config.stepUpMaxAgeS,
+		})
+	}
+}
+
 @Injectable()
 export class StepUpGuard implements CanActivate {
 	constructor(@InjectConfig() private readonly config: AppConfig) {}
 
 	canActivate(context: ExecutionContext): boolean {
-		const req = context.switchToHttp().getRequest<Request>()
-		if (!req.auth) throw new GezcezError("AUTH_REQUIRED")
-		const ageS = Date.now() / 1000 - req.auth.authTime
-		if (ageS > this.config.stepUpMaxAgeS) {
-			throw new GezcezError("AUTH_STEP_UP_REQUIRED", undefined, {
-				max_age: this.config.stepUpMaxAgeS,
-			})
-		}
+		assertStepUp(context.switchToHttp().getRequest<Request>(), this.config)
 		return true
 	}
 }

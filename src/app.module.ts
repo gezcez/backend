@@ -22,6 +22,7 @@ import { AccountModule } from "@services/account/account.module"
 import { AnalyticsModule } from "@services/analytics/analytics.module"
 import { DuckDbModule } from "@services/analytics/duckdb.module"
 import { ArchiveModule } from "@services/archive/archive.module"
+import { AppsModule } from "@services/apps/apps.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
@@ -78,6 +79,7 @@ export class AppModule {
 				RolesModule,
 				UsersModule,
 				ModerationModule,
+				AppsModule,
 				// Transit catalog, providers and static data (P3).
 				// This process writes vts.db (and so persists upstream tokens) only with an
 				// in-process tracker; with the worker, the worker owns them.
