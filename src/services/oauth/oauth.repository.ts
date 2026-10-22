@@ -2,7 +2,7 @@
 // Clients, consent grants, authorization requests, authorization codes and refresh families.
 
 import { Injectable } from "@nestjs/common"
-import { and, eq, isNull } from "drizzle-orm"
+import { and, eq, isNull, min } from "drizzle-orm"
 import { InjectCoreDb, type CoreDatabase } from "@db"
 import {
 	appsTable,
@@ -157,6 +157,17 @@ export class OAuthRepository {
 			.from(refreshTokensTable)
 			.where(eq(refreshTokensTable.token_hash, tokenHash))
 			.get()
+	}
+
+	/** When the family's first token was issued (its age cap counts from here). */
+	familyStartedAt(familyId: string): Date | undefined {
+		return (
+			this.db
+				.select({ started: min(refreshTokensTable.created_at) })
+				.from(refreshTokensTable)
+				.where(eq(refreshTokensTable.family_id, familyId))
+				.get()?.started ?? undefined
+		)
 	}
 
 	findRefresh(id: string): RefreshTokenRow | undefined {

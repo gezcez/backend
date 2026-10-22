@@ -9,7 +9,7 @@ import { loadConfig } from "@common/config"
 import { AuthorizationGuard, UseAuthorization } from "@common/middlewares/authorization.guard"
 import { emptyPermissions } from "@common/authorization"
 import { DatabaseService } from "@db"
-import { sessionsTable, usersTable } from "@schemas/core"
+import { refreshTokensTable, sessionsTable, usersTable } from "@schemas/core"
 import { createTestApp, type TestApp } from "../helpers/app"
 import { TestBrowser } from "../helpers/browser"
 import { DashClient, FIXTURE } from "../helpers/dash"
@@ -188,26 +188,49 @@ describe("F3 max_age=0 never completes", () => {
 })
 
 describe("F4 refresh families outlive their SSO session", () => {
-	test.failing(
-		"a refresh token keeps working after the session expired (not revoked)",
-		async () => {
-			const browser = await signedIn()
-			const client = new TestOAuthClient(t)
-			const { code } = await client.signInAndAuthorize(browser)
-			const token = await client.exchange(code!)
-			const sid = claims(token.body.access_token).sid
-			const past = new Date(Date.now() - 1000)
-			db()
-				.update(sessionsTable)
-				.set({ expires_at: past, absolute_expires_at: past })
-				.where(eq(sessionsTable.id, sid))
-				.run()
-			const session = await browser.get("/v1/account/session")
-			expect(session.status).toBe(401) // the SSO session is dead
-			const refresh = await client.refresh(token.body.refresh_token!)
-			expect(refresh.body.error).toBe("invalid_grant") // actual: 200, new tokens for a dead session
-		},
-	)
+	test("a refresh token keeps working after the session expired (not revoked)", async () => {
+		const browser = await signedIn()
+		const client = new TestOAuthClient(t)
+		const { code } = await client.signInAndAuthorize(browser)
+		const token = await client.exchange(code!)
+		const sid = claims(token.body.access_token).sid
+		const past = new Date(Date.now() - 1000)
+		db()
+			.update(sessionsTable)
+			.set({ expires_at: past, absolute_expires_at: past })
+			.where(eq(sessionsTable.id, sid))
+			.run()
+		const session = await browser.get("/v1/account/session")
+		expect(session.status).toBe(401) // the SSO session is dead
+		const refresh = await client.refresh(token.body.refresh_token!)
+		expect(refresh.body.error).toBe("invalid_grant") // actual: 200, new tokens for a dead session
+	})
+
+	test("a refresh never outlives the session's absolute expiry and keeps the session alive", async () => {
+		const browser = await signedIn()
+		const client = new TestOAuthClient(t)
+		const { code } = await client.signInAndAuthorize(browser)
+		const token = await client.exchange(code!)
+		const sid = claims(token.body.access_token).sid
+		const absolute = new Date(Date.now() + 3_600_000)
+		const stale = new Date(Date.now() - 3_600_000)
+		db()
+			.update(sessionsTable)
+			.set({ absolute_expires_at: absolute, expires_at: absolute, last_seen_at: stale })
+			.where(eq(sessionsTable.id, sid))
+			.run()
+		const refresh = await client.refresh(token.body.refresh_token!)
+		expect(refresh.status).toBe(200)
+		const rows = db()
+			.select()
+			.from(refreshTokensTable)
+			.where(eq(refreshTokensTable.session_id, sid))
+			.all()
+		const head = rows.find((row) => row.replaced_by === null)!
+		expect(head.expires_at.getTime()).toBeLessThanOrEqual(absolute.getTime())
+		const session = db().select().from(sessionsTable).where(eq(sessionsTable.id, sid)).get()!
+		expect(session.last_seen_at.getTime()).toBeGreaterThan(stale.getTime())
+	})
 })
 
 describe("F5 email-change oracle runs before Turnstile and rate limits", () => {

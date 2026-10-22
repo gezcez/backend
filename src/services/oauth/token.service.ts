@@ -11,7 +11,8 @@ import { normaliseOrigin, refreshCookieOrigins } from "@common/middlewares"
 import { formatScope, parseScope } from "@common/scopes"
 import { newId, randomToken, safeEqual, sha256Hex } from "@common/utils"
 import { AuditService } from "@services/audit/audit.service"
-import { SessionService } from "@services/account/session.service"
+import type { SessionWithUser } from "@services/account/session.repository"
+import { isLive, SessionService } from "@services/account/session.service"
 import { ClientsService } from "./clients.service"
 import { KeysService } from "./keys.service"
 import type { LogoutDto, LogoutResultDto, TokenResponseDto } from "./oauth.dto"
@@ -108,7 +109,7 @@ export class TokenService {
 			throw new OAuthProtocolError("invalid_grant", "PKCE verification failed")
 
 		const session = this.sessions.find(row.session_id)
-		if (!session || session.revoked_at || !this.userCanHoldTokens(session.user.status))
+		if (!session || !this.sessionCanHoldTokens(session, now))
 			throw new OAuthProtocolError("invalid_grant", "Session has ended")
 
 		const issued: Issued = {
@@ -128,6 +129,7 @@ export class TokenService {
 				sessionId: row.session_id,
 				scope: row.scope,
 				now,
+				capAt: this.familyCap(app, session, now),
 			})
 			this.repository.setCodeFamily(codeHash, familyId)
 		}
@@ -164,9 +166,11 @@ export class TokenService {
 		if (viaCookie) this.checkOrigin(req, app)
 		if (row.revoked_at) throw new OAuthProtocolError("invalid_grant", "Refresh token revoked")
 
+		// The family lives inside its SSO session: once the session expires (sliding or absolute)
+		// or ends, so do its refresh tokens.
 		const session = this.sessions.find(row.session_id)
 		const user = session?.user
-		if (!session || !user || session.revoked_at || !this.userCanHoldTokens(user.status))
+		if (!session || !user || !this.sessionCanHoldTokens(session, now))
 			throw new OAuthProtocolError("invalid_grant", "Session has ended")
 
 		const requested = param(body, "scope")
@@ -200,6 +204,7 @@ export class TokenService {
 		if (row.expires_at <= now)
 			throw new OAuthProtocolError("invalid_grant", "Refresh token expired")
 
+		const started = this.repository.familyStartedAt(row.family_id) ?? row.created_at
 		const plaintext = randomToken()
 		const successor = this.refreshRow(app, plaintext, {
 			familyId: row.family_id,
@@ -208,9 +213,12 @@ export class TokenService {
 			sessionId: row.session_id,
 			scope: row.scope,
 			now,
+			capAt: this.familyCap(app, session, started),
 		})
 		if (!this.repository.rotateRefresh(row.id, successor, now))
 			throw new OAuthProtocolError("invalid_grant", "Refresh token was rotated concurrently")
+		// Using the app keeps the SSO session alive (sliding window, never past its absolute end).
+		this.sessions.keepAlive(session, now)
 		this.grace.remember(tokenHash, plaintext, now.getTime())
 		return this.respond(res, {
 			...base,
@@ -333,8 +341,11 @@ export class TokenService {
 			session_id: input.sessionId,
 			scope: input.scope,
 			created_at: input.now,
-			// Sliding: every rotation starts a new lifetime of the app's refresh TTL.
-			expires_at: new Date(input.now.getTime() + app.refresh_ttl_s * 1000),
+			// Sliding: every rotation starts a new lifetime of the app's refresh TTL, but never past
+			// the family's cap (session absolute expiry, family age limit).
+			expires_at: new Date(
+				Math.min(input.now.getTime() + app.refresh_ttl_s * 1000, input.capAt.getTime()),
+			),
 			last_used_at: null,
 			replaced_by: null,
 			replaced_at: null,
@@ -343,8 +354,19 @@ export class TokenService {
 		}
 	}
 
-	private userCanHoldTokens(status: string): boolean {
-		return status === "active" || status === "pending_deletion"
+	/** Same rule as a live cookie session: not revoked, not expired, user not banned. */
+	private sessionCanHoldTokens(session: SessionWithUser, now: Date): boolean {
+		return isLive(session, now)
+	}
+
+	/** A family ends at the session's absolute expiry or after the app's refresh_max_s. */
+	private familyCap(app: AppRow, session: SessionWithUser, familyStart: Date): Date {
+		return new Date(
+			Math.min(
+				session.absolute_expires_at.getTime(),
+				familyStart.getTime() + app.refresh_max_s * 1000,
+			),
+		)
 	}
 
 	private refreshCookie(req: Request): string | undefined {
@@ -392,4 +414,5 @@ interface RefreshInput {
 	sessionId: string
 	scope: string
 	now: Date
+	capAt: Date
 }

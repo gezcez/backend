@@ -95,14 +95,19 @@ export class SessionService {
 		const session = this.repository.findByTokenHash(sha256Hex(token))
 		const now = new Date()
 		if (!session || session.device_id_hash !== device.hash || !isLive(session, now)) return null
-		if (now.getTime() - session.last_seen_at.getTime() > TOUCH_INTERVAL_MS) {
-			const expires = new Date(
-				Math.min(now.getTime() + SESSION_SLIDING_MS, session.absolute_expires_at.getTime()),
-			)
-			this.repository.touch(session.id, now, expires)
-			session.expires_at = expires
-		}
+		this.keepAlive(session, now)
 		return toContext(session)
+	}
+
+	/** Slides the 30 day expiry (at most every few minutes, never past the absolute end). */
+	keepAlive(session: SessionWithUser, now: Date): void {
+		if (now.getTime() - session.last_seen_at.getTime() <= TOUCH_INTERVAL_MS) return
+		const expires = new Date(
+			Math.min(now.getTime() + SESSION_SLIDING_MS, session.absolute_expires_at.getTime()),
+		)
+		this.repository.touch(session.id, now, expires)
+		session.expires_at = expires
+		session.last_seen_at = now
 	}
 
 	find(id: string): SessionWithUser | undefined {
