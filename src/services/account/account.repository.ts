@@ -50,6 +50,31 @@ export class AccountRepository {
 			.get()
 	}
 
+	/**
+	 * Sets a new password only if the current one was last changed at `expected` (null: never).
+	 * False when another request replaced it first, which keeps a reset_token single use.
+	 */
+	replacePasswordIf(
+		id: number,
+		expected: Date | null,
+		values: Pick<NewUserRow, "password_hash" | "password_algo" | "password_updated_at">,
+	): boolean {
+		const changed = this.db
+			.update(usersTable)
+			.set({ ...values, updated_at: new Date() })
+			.where(
+				and(
+					eq(usersTable.id, id),
+					expected
+						? eq(usersTable.password_updated_at, expected)
+						: isNull(usersTable.password_updated_at),
+				),
+			)
+			.returning({ id: usersTable.id })
+			.all()
+		return changed.length === 1
+	}
+
 	/** Lifts a ban that has run out; returns the user as it is now (lifted or not). */
 	liftExpiredBan(id: number, now: Date): UserRow | undefined {
 		const lifted = this.db

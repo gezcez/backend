@@ -72,9 +72,14 @@ export class PasswordService implements OnModuleInit {
 		)
 		const user = payload ? this.repository.findUserById(payload.uid) : undefined
 		// The token names the password it replaces, so it works once.
+		const expired = () =>
+			new GezcezError("AUTH_CODE_EXPIRED", "Reset link expired, start again")
 		if (!payload || !user || (user.password_updated_at?.getTime() ?? 0) !== payload.pwu)
-			throw new GezcezError("AUTH_CODE_EXPIRED", "Reset link expired, start again")
-		await this.store(user, body.new_password)
+			throw expired()
+		// Compare-and-set after the slow hash: of two concurrent uses only one replaces it.
+		const values = await this.hashNew(body.new_password)
+		if (!this.repository.replacePasswordIf(user.id, user.password_updated_at, values))
+			throw expired()
 		this.sessions.revokeAllForUser(user.id, "password_reset")
 		this.audit.record("auth.password_reset", {
 			req,
@@ -148,12 +153,16 @@ export class PasswordService implements OnModuleInit {
 	}
 
 	private async store(user: UserRow, password: string): Promise<void> {
+		this.repository.updateUser(user.id, await this.hashNew(password))
+	}
+
+	private async hashNew(password: string) {
 		await this.assertAcceptable(password)
-		this.repository.updateUser(user.id, {
+		return {
 			password_hash: await Bun.password.hash(password, { algorithm: "argon2id" }),
-			password_algo: "argon2id",
+			password_algo: "argon2id" as const,
 			password_updated_at: new Date(),
-		})
+		}
 	}
 
 	/** Constant-ish time: always runs one hash verification. Rehashes legacy bcrypt. */

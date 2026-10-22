@@ -425,40 +425,37 @@ describe("F8 ban erases pending deletion", () => {
 })
 
 describe("F9 reset token race", () => {
-	test.failing(
-		"one reset_token used twice concurrently sets two passwords and signs in twice",
-		async () => {
-			const email = "resetrace@example.com"
-			const browser = await signedIn(email)
-			await browser.request("PUT", "/v1/account/password", {
-				new_password: "correct horse battery 1",
-			})
-			const fresh = new TestBrowser(t)
-			await fresh.csrf()
-			const start = await fresh.post<{ flow_id: string }>("/v1/account/email/start", {
-				email,
-				intent: "reset",
-				locale: "en",
-			})
-			const code = await fresh.lastCode(email)
-			const verify = await fresh.post<{ reset_token: string }>("/v1/account/email/verify", {
-				flow_id: start.data.flow_id,
-				code,
-			})
-			const token = verify.data.reset_token
-			const [a, b] = await Promise.all([
-				fresh.post("/v1/account/password/reset", {
-					reset_token: token,
-					new_password: "first new password A",
-				}),
-				fresh.post("/v1/account/password/reset", {
-					reset_token: token,
-					new_password: "second new password B",
-				}),
-			])
-			expect([a.status, b.status].filter((s) => s === 200).length).toBe(1)
-		},
-	)
+	test("one reset_token used twice concurrently sets two passwords and signs in twice", async () => {
+		const email = "resetrace@example.com"
+		const browser = await signedIn(email)
+		await browser.request("PUT", "/v1/account/password", {
+			new_password: "correct horse battery 1",
+		})
+		const fresh = new TestBrowser(t)
+		await fresh.csrf()
+		const start = await fresh.post<{ flow_id: string }>("/v1/account/email/start", {
+			email,
+			intent: "reset",
+			locale: "en",
+		})
+		const code = await fresh.lastCode(email)
+		const verify = await fresh.post<{ reset_token: string }>("/v1/account/email/verify", {
+			flow_id: start.data.flow_id,
+			code,
+		})
+		const token = verify.data.reset_token
+		const [a, b] = await Promise.all([
+			fresh.post("/v1/account/password/reset", {
+				reset_token: token,
+				new_password: "first new password A",
+			}),
+			fresh.post("/v1/account/password/reset", {
+				reset_token: token,
+				new_password: "second new password B",
+			}),
+		])
+		expect([a.status, b.status].filter((s) => s === 200).length).toBe(1)
+	})
 })
 
 describe("F10 class-level @UseAuthorization is silently ignored", () => {
