@@ -145,6 +145,12 @@ export class AppsService {
 					fields: { scopes: unknown.join(", ") },
 				})
 		}
+		// dash grants staff API access: first-party apps only (the bearer check strips it too).
+		const firstParty = body.first_party ?? app.first_party
+		if (!firstParty && (body.scopes ?? app.allowed_scopes).includes("dash"))
+			throw new GezcezError("VALIDATION_FAILED", "The dash scope is for first-party apps", {
+				fields: { scopes: "dash needs first_party" },
+			})
 		const refreshTtl = body.refresh_ttl_s ?? app.refresh_ttl_s
 		const refreshMax = body.refresh_max_s ?? app.refresh_max_s
 		if (refreshMax < refreshTtl)

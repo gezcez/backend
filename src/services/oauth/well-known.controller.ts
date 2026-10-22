@@ -45,7 +45,7 @@ export class WellKnownController {
 				"client_secret_post",
 			],
 			subject_types_supported: ["public"],
-			id_token_signing_alg_values_supported: ["ES256"],
+			authorization_response_iss_parameter_supported: true,
 			claims_supported: [
 				"iss",
 				"sub",

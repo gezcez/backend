@@ -3,10 +3,11 @@
 // working at once instead of living until they expire. Rebuilt from the database at boot and
 // pruned after the longest access token lifetime.
 
+import { MAX_ACCESS_TTL_S } from "@common/constants"
 import { Injectable, type OnModuleInit } from "@nestjs/common"
 import { SessionRepository } from "./session.repository"
 
-export const REVOKED_SID_WINDOW_MS = 15 * 60_000 + 60_000
+export const REVOKED_SID_WINDOW_MS = MAX_ACCESS_TTL_S * 1000 + 60_000
 
 @Injectable()
 export class RevokedSessionsService implements OnModuleInit {

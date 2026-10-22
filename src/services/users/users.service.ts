@@ -19,9 +19,32 @@ export class UsersService {
 		private readonly permissions: PermissionCacheService,
 	) {}
 
+	/**
+	 * Scoped by the token: staff roles and permissions need `dash`, the name and username need
+	 * `profile`, the masked email needs `email`. A third-party token with only `openid` gets the
+	 * subject id, locale and auth facts.
+	 */
 	me(auth: RequestAuth): MeDto {
 		const user = this.repository.findById(auth.userId)
 		if (!user) throw new GezcezError("AUTH_SESSION_REVOKED")
+		const profile = auth.scopes.includes("profile")
+		const email = auth.scopes.includes("email")
+		if (!auth.scopes.includes("dash")) {
+			return {
+				user: {
+					id: user.public_id,
+					display_name: profile ? user.display_name : "",
+					username: profile ? user.username : null,
+					email_masked: email ? maskEmail(user.email) : "",
+					locale: user.locale,
+					avatar_initials: profile ? initials(user.display_name) : "",
+				},
+				auth_time: auth.authTime,
+				amr: auth.amr,
+				global: { roles: [], permissions: [] },
+				networks: [],
+			}
+		}
 		const permissions = this.permissions.forUser(user.id)
 		const assignments = this.roles.assignments(user.id)
 

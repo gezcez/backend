@@ -6,10 +6,12 @@ import { eq } from "drizzle-orm"
 import { Controller, Get, type ExecutionContext } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
 import { loadConfig } from "@common/config"
+import { isScope } from "@common/scopes"
 import { AuthorizationGuard, UseAuthorization } from "@common/middlewares/authorization.guard"
 import { emptyPermissions } from "@common/authorization"
 import { DatabaseService } from "@db"
-import { refreshTokensTable, sessionsTable, usersTable } from "@schemas/core"
+import { KeysService } from "@services/oauth/keys.service"
+import { appsTable, refreshTokensTable, sessionsTable, usersTable } from "@schemas/core"
 import { createTestApp, type TestApp } from "../helpers/app"
 import { TestBrowser } from "../helpers/browser"
 import { DashClient, FIXTURE } from "../helpers/dash"
@@ -543,6 +545,78 @@ describe("F11 distributed code guessing is capped per address and per network", 
 			`/v1/__test/mailbox?to=${encodeURIComponent(email)}`,
 		)
 		expect(mailbox.body.data.messages.map((m) => m.template)).toContain("codes_locked")
+	})
+})
+
+describe("section 12 hardening", () => {
+	async function thirdPartyToken(scope: string) {
+		const browser = await signedIn(FIXTURE.admin)
+		const client = new TestOAuthClient(t, "e2e_third_party")
+		const start = await client.authorize(browser, { scope })
+		let redirect = start.data.redirect_to
+		if (start.data.next === "consent") {
+			const approved = await browser.post<{ redirect_to: string }>(
+				`/v1/oauth/authorize/${start.data.request_id}/decision`,
+				{ decision: "approve" },
+			)
+			redirect = approved.data.redirect_to
+		}
+		return client.exchange(client.callback(redirect!).code!)
+	}
+
+	test("a third-party openid-only token sees no name, email, roles or permissions", async () => {
+		const token = await thirdPartyToken("openid")
+		const me = await t.json<{
+			data: {
+				user: { display_name: string; email_masked: string }
+				global: { roles: unknown[]; permissions: unknown[] }
+			}
+		}>("/v1/me", { headers: { authorization: `Bearer ${token.body.access_token}` } })
+		expect(me.status).toBe(200)
+		expect(me.body.data.user).toMatchObject({ display_name: "", email_masked: "" })
+		expect(me.body.data.global).toEqual({ roles: [], permissions: [] })
+	})
+
+	test("dash is refused for third-party clients at authorize and on bearer routes", async () => {
+		const browser = await signedIn(FIXTURE.admin)
+		const where = eq(appsTable.client_id, "e2e_third_party")
+		const original = db().select().from(appsTable).where(where).get()!.allowed_scopes
+		db()
+			.update(appsTable)
+			.set({ allowed_scopes: [...original, "dash"] })
+			.where(where)
+			.run()
+		try {
+			const client = new TestOAuthClient(t, "e2e_third_party")
+			const start = await client.authorize(browser, { scope: "openid dash" })
+			expect(client.callback(start.data.redirect_to!).error).toBe("invalid_scope")
+		} finally {
+			db().update(appsTable).set({ allowed_scopes: original }).where(where).run()
+		}
+		// A dash token minted for a third-party audience (say, before a flag change) is useless.
+		const forged = await t.app.get(KeysService).sign(
+			{
+				sub: dash.publicId(FIXTURE.admin),
+				aud: "e2e_third_party",
+				scope: "openid dash",
+				sid: claims(await dash.token(FIXTURE.admin)).sid,
+				auth_time: Math.floor(Date.now() / 1000),
+				amr: ["otp"],
+			},
+			300,
+		)
+		const res = await t.json<{ error: { code: string } }>("/v1/dash/users", {
+			headers: { authorization: `Bearer ${forged}` },
+		})
+		expect(res.status).toBe(403)
+	})
+
+	test("scope lookups ignore prototype keys; discovery advertises iss, no ID tokens", async () => {
+		expect(isScope("constructor")).toBe(false)
+		expect(isScope("toString")).toBe(false)
+		const discovery = await t.json<Record<string, unknown>>("/.well-known/openid-configuration")
+		expect(discovery.body.authorization_response_iss_parameter_supported).toBe(true)
+		expect(discovery.body.id_token_signing_alg_values_supported).toBeUndefined()
 	})
 })
 

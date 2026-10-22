@@ -5,6 +5,7 @@
 import { Injectable } from "@nestjs/common"
 import type { Request, Response } from "express"
 import { InjectConfig, type AppConfig } from "@common/config"
+import { MAX_ACCESS_TTL_S } from "@common/constants"
 import { OAuthProtocolError } from "@common/errors"
 import type { AuthMethod } from "@common/jwt.types"
 import { normaliseOrigin, refreshCookieOrigins } from "@common/middlewares"
@@ -304,7 +305,8 @@ export class TokenService {
 	}
 
 	private async respond(res: Response, issued: Issued): Promise<TokenResponseDto> {
-		const ttl = issued.app.access_ttl_s
+		// Never longer than the revoked-sid window, whatever the row says.
+		const ttl = Math.min(issued.app.access_ttl_s, MAX_ACCESS_TTL_S)
 		const accessToken = await this.keys.sign(
 			{
 				sub: issued.publicId,

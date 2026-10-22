@@ -5567,6 +5567,9 @@
 					"authorization_endpoint": {
 						"type": "string"
 					},
+					"authorization_response_iss_parameter_supported": {
+						"type": "boolean"
+					},
 					"claims_supported": {
 						"items": {
 							"type": "string"
@@ -5583,12 +5586,6 @@
 						"type": "string"
 					},
 					"grant_types_supported": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"id_token_signing_alg_values_supported": {
 						"items": {
 							"type": "string"
 						},
@@ -5667,7 +5664,7 @@
 					"code_challenge_methods_supported",
 					"token_endpoint_auth_methods_supported",
 					"subject_types_supported",
-					"id_token_signing_alg_values_supported",
+					"authorization_response_iss_parameter_supported",
 					"claims_supported",
 					"prompt_values_supported",
 					"ui_locales_supported"
@@ -16692,6 +16689,7 @@
 		},
 		"/v1/me": {
 			"get": {
+				"description": "Scoped by the token: roles and permissions need `dash`, display_name, username and avatar_initials need `profile` (else empty), email_masked needs `email` (else empty).",
 				"operationId": "Users_me",
 				"parameters": [],
 				"responses": {

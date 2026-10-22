@@ -1,6 +1,7 @@
 // apps.dto.ts
 // OAuth client administration (plan 6.2). Names follow the dashboard's components.
 
+import { MAX_ACCESS_TTL_S } from "@common/constants"
 import { z } from "zod"
 import { DateTime, ReasonSchema } from "@common/models/dash.models"
 import { pageSchema, PageQuerySchema, zodDto } from "@common/response"
@@ -98,7 +99,7 @@ export class UpdateAppDto extends zodDto(
 			redirect_uris: RedirectUris.min(1),
 			scopes: z.array(z.string()).min(1).max(20),
 			first_party: z.boolean(),
-			access_ttl_s: z.number().int().min(300).max(3600),
+			access_ttl_s: z.number().int().min(300).max(MAX_ACCESS_TTL_S),
 			refresh_ttl_s: z.number().int().min(3600).max(7_776_000),
 			refresh_max_s: z.number().int().min(3600).max(31_536_000),
 		})

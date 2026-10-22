@@ -15,7 +15,11 @@ export class UsersController {
 
 	@Get()
 	@Bearer()
-	@ApiOperation({ summary: "The signed-in user, auth_time, amr, roles and permissions" })
+	@ApiOperation({
+		summary: "The signed-in user, auth_time, amr, roles and permissions",
+		description:
+			"Scoped by the token: roles and permissions need `dash`, display_name, username and avatar_initials need `profile` (else empty), email_masked needs `email` (else empty).",
+	})
 	@ApiEnvelope(MeDto)
 	me(@CurrentAuth() auth: RequestAuth): MeDto {
 		return this.users.me(auth)

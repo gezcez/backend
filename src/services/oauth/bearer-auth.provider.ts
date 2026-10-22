@@ -25,11 +25,18 @@ export class OAuthBearerAuth implements BearerAuthProvider {
 		const user = this.repository.findUserByPublicId(claims.sub)
 		if (!user || (user.status !== "active" && user.status !== "pending_deletion"))
 			throw new GezcezError("AUTH_SESSION_REVOKED")
+		// Audience: the token's client must still exist and be enabled, and only first-party
+		// clients carry `dash` (staff API), whatever the token says.
+		const app = this.repository.findApp(claims.aud)
+		if (!app || app.status !== "active") throw new GezcezError("AUTH_SESSION_REVOKED")
+		const scopes = parseScope(claims.scope).filter(
+			(scope) => scope !== "dash" || app.first_party,
+		)
 		return {
 			userId: user.id,
 			publicId: user.public_id,
 			clientId: claims.aud,
-			scopes: parseScope(claims.scope),
+			scopes,
 			sid: claims.sid,
 			authTime: claims.auth_time,
 			amr: claims.amr ?? [],

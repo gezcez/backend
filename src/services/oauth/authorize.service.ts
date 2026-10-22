@@ -75,7 +75,11 @@ export class AuthorizeService {
 		if (!state || state.length > 512) return reject("invalid_request", "state is required")
 		const scopes = parseScope(params.scope)
 		if (scopes.length === 0) return reject("invalid_scope", "scope is required")
-		if (!scopes.every((scope) => isScope(scope) && app.allowed_scopes.includes(scope)))
+		const allowed = (scope: string) =>
+			isScope(scope) &&
+			app.allowed_scopes.includes(scope) &&
+			(scope !== "dash" || app.first_party)
+		if (!scopes.every(allowed))
 			return reject("invalid_scope", "scope is not allowed for this client")
 		const prompt = parsePrompt(params.prompt)
 		if (prompt === null) return reject("invalid_request", "prompt is malformed")

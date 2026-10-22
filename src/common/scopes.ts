@@ -15,7 +15,8 @@ export type Scope = keyof typeof SCOPES
 export const SCOPE_KEYS = Object.keys(SCOPES) as Scope[]
 
 export function isScope(value: string): value is Scope {
-	return value in SCOPES
+	// Own keys only: "constructor" or "toString" are not scopes.
+	return Object.hasOwn(SCOPES, value)
 }
 
 export function parseScope(value: string | undefined | null): string[] {
