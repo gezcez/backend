@@ -3,7 +3,7 @@
 
 import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
-import { ERROR_CODE_LIST, type ErrorCode, type ErrorDetails } from "./errors"
+import { ERROR_CODE_LIST, GezcezError, type ErrorCode, type ErrorDetails } from "./errors"
 
 export interface ApiError {
 	code: ErrorCode
@@ -72,4 +72,43 @@ export function namedZodDto<T extends z.ZodType>(name: string, schema: T) {
 	const dto = createZodDto(schema)
 	Object.defineProperty(dto, "name", { value: name })
 	return dto
+}
+
+export type SortDirection = "asc" | "desc"
+export interface SortTerm<F extends string> {
+	field: F
+	dir: SortDirection
+}
+
+/**
+ * Parses `sort` (comma list of `field:asc|desc`, direction optional and ascending by default)
+ * against the endpoint's whitelist. Unknown fields and repeated fields are VALIDATION_FAILED.
+ */
+export function parseSort<F extends string>(
+	sort: string | undefined,
+	allowed: readonly F[],
+	fallback: string,
+): SortTerm<F>[] {
+	const source = sort?.trim() ? sort : fallback
+	const terms: SortTerm<F>[] = []
+	for (const part of source.split(",")) {
+		const [field = "", dir = "asc", ...rest] = part.trim().split(":")
+		if (
+			rest.length > 0 ||
+			!(allowed as readonly string[]).includes(field) ||
+			(dir !== "asc" && dir !== "desc") ||
+			terms.some((term) => term.field === field)
+		) {
+			throw new GezcezError("VALIDATION_FAILED", `Cannot sort by "${part.trim()}"`, {
+				fields: { sort: `allowed: ${allowed.join(", ")}` },
+			})
+		}
+		terms.push({ field: field as F, dir })
+	}
+	return terms
+}
+
+/** `total` of the list contract: exact up to PAGE_TOTAL_CAP, else null. */
+export function cappedTotal(count: number): number | null {
+	return count > PAGE_TOTAL_CAP ? null : count
 }

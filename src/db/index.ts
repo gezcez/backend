@@ -3,3 +3,4 @@
 export * from "./database.module"
 export { openSqlite } from "./open-sqlite"
 export { runMigrations } from "./migrate"
+export { paginate, type PaginateOptions } from "./paginate"

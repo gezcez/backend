@@ -177,13 +177,14 @@ export class RolesRepository {
 		return this.db.transaction((tx) => {
 			for (const key of keys) {
 				tx.insert(permissionsTable)
-					.values({ ...key, first_seen_at: now, orphaned_at: null })
+					.values({ ...key, first_seen_at: now, last_seen_at: now, orphaned_at: null })
 					.onConflictDoUpdate({
 						target: permissionsTable.key,
 						set: {
 							scope: key.scope,
 							description: key.description,
 							sudo: key.sudo,
+							last_seen_at: now,
 							orphaned_at: null,
 						},
 					})
