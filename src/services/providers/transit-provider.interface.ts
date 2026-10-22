@@ -181,6 +181,24 @@ export interface VehicleFeed {
 	invalid: number
 }
 
+/** Card balance by number (capability `card`, no provider account). */
+export interface CardBalance {
+	balance: number
+	currency: string
+	/** Unix seconds of the upstream balance. */
+	asOf: number
+	cardType: string | null
+}
+
+export interface CardTransaction {
+	/** Unix seconds. */
+	at: number
+	kind: "boarding" | "topup" | "transfer" | "other"
+	amount: number
+	balanceAfter: number | null
+	routeShortName: string | null
+}
+
 export interface ServiceAlert {
 	externalId: string
 	title: string
@@ -228,6 +246,19 @@ export interface TransitProvider {
 	listRegions?(): Promise<ExternalRegion[]>
 	fetchStatic(binding: BindingContext, signal?: AbortSignal): AsyncIterable<StaticChunk>
 	fetchVehicles(binding: BindingContext, signal: AbortSignal): Promise<VehicleFeed>
+	/** Balance of a card; null when upstream does not know the number. Never persisted. */
+	cardBalance?(
+		binding: BindingContext,
+		cardNumber: string,
+		signal: AbortSignal,
+	): Promise<CardBalance | null>
+	/** A month (YYYY-MM) of card transactions; null when the number is unknown. */
+	cardHistory?(
+		binding: BindingContext,
+		cardNumber: string,
+		month: string,
+		signal: AbortSignal,
+	): Promise<{ currency: string; items: CardTransaction[] } | null>
 	/** Service alerts, only for providers declaring the `alerts` capability. */
 	fetchAlerts?(binding: BindingContext, signal: AbortSignal): Promise<ServiceAlert[]>
 	/** Upstream rules that drop a vehicle entirely (staff duty routes, test devices). */

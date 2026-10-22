@@ -1405,6 +1405,125 @@
 				],
 				"type": "object"
 			},
+			"CardHistoryBodyDto": {
+				"properties": {
+					"card_number": {
+						"type": "string"
+					},
+					"month": {
+						"pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+						"type": "string"
+					}
+				},
+				"required": [
+					"card_number",
+					"month"
+				],
+				"type": "object"
+			},
+			"CardHistoryDto": {
+				"properties": {
+					"currency": {
+						"type": "string"
+					},
+					"items": {
+						"items": {
+							"properties": {
+								"amount": {
+									"type": "number"
+								},
+								"at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+									"type": "string"
+								},
+								"balance_after": {
+									"type": [
+										"number",
+										"null"
+									]
+								},
+								"kind": {
+									"enum": [
+										"boarding",
+										"topup",
+										"transfer",
+										"other"
+									],
+									"type": "string"
+								},
+								"route_short_name": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"at",
+								"kind",
+								"amount",
+								"balance_after",
+								"route_short_name"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"month": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"month",
+					"currency",
+					"items"
+				],
+				"type": "object"
+			},
+			"CardLookupBodyDto": {
+				"properties": {
+					"card_number": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"card_number"
+				],
+				"type": "object"
+			},
+			"CardLookupDto": {
+				"properties": {
+					"as_of": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"balance": {
+						"type": "number"
+					},
+					"card_type": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"currency": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"balance",
+					"currency",
+					"as_of",
+					"card_type"
+				],
+				"type": "object"
+			},
 			"CityDto": {
 				"properties": {
 					"bbox": {
@@ -17512,6 +17631,138 @@
 				},
 				"tags": [
 					"transit"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/cards/history": {
+			"post": {
+				"operationId": "Cards_history",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CardHistoryBodyDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/CardHistoryDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "One month of card transactions (capability card)",
+				"tags": [
+					"transit: cards"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/cards/lookup": {
+			"post": {
+				"operationId": "Cards_lookup",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CardLookupBodyDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/CardLookupDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Card balance by card number (capability card)",
+				"tags": [
+					"transit: cards"
 				]
 			}
 		},

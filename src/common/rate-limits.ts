@@ -34,6 +34,7 @@ export const RATE_LIMIT_PRESETS = {
 	"analytics-public": [{ by: "ip", limit: 30, windowMs: MINUTE }],
 	reports: [{ by: "ip", limit: 10, windowMs: HOUR }],
 	telemetry: [{ by: "ip", limit: 10, windowMs: HOUR }],
+	cards: [{ by: "ip", limit: 60, windowMs: HOUR }],
 } as const satisfies Record<string, readonly RateLimitRule[]>
 
 export type RateLimitPreset = keyof typeof RATE_LIMIT_PRESETS
