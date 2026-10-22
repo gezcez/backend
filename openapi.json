@@ -3496,6 +3496,181 @@
 				],
 				"type": "object"
 			},
+			"FavouritesDocDto": {
+				"properties": {
+					"groups": {
+						"items": {
+							"properties": {
+								"colour": {
+									"enum": [
+										"amber",
+										"navy",
+										"teal",
+										"rose",
+										"violet",
+										"green",
+										"orange",
+										"slate"
+									],
+									"type": "string"
+								},
+								"id": {
+									"maxLength": 64,
+									"minLength": 1,
+									"type": "string"
+								},
+								"items": {
+									"items": {
+										"properties": {
+											"added_at": {
+												"format": "date-time",
+												"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+												"type": "string"
+											},
+											"direction": {
+												"anyOf": [
+													{
+														"const": 0,
+														"type": "number"
+													},
+													{
+														"const": 1,
+														"type": "number"
+													}
+												]
+											},
+											"id": {
+												"maxLength": 64,
+												"minLength": 1,
+												"type": "string"
+											},
+											"kind": {
+												"enum": [
+													"stop",
+													"route"
+												],
+												"type": "string"
+											},
+											"label": {
+												"maxLength": 120,
+												"type": "string"
+											},
+											"network_id": {
+												"anyOf": [
+													{
+														"maxLength": 64,
+														"minLength": 1,
+														"type": "string"
+													},
+													{
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991,
+														"type": "integer"
+													}
+												],
+												"description": "Network slug (returned) or numeric id (accepted)"
+											},
+											"ref_id": {
+												"description": "Stable public stop or route id",
+												"maxLength": 200,
+												"minLength": 1,
+												"type": "string"
+											},
+											"updated_at": {
+												"format": "date-time",
+												"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+												"type": "string"
+											}
+										},
+										"required": [
+											"id",
+											"kind",
+											"network_id",
+											"ref_id",
+											"label",
+											"added_at"
+										],
+										"type": "object"
+									},
+									"maxItems": 500,
+									"type": "array"
+								},
+								"name": {
+									"maxLength": 60,
+									"type": "string"
+								},
+								"position": {
+									"maximum": 10000,
+									"minimum": 0,
+									"type": "integer"
+								},
+								"updated_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"name",
+								"colour",
+								"position",
+								"items"
+							],
+							"type": "object"
+						},
+						"maxItems": 50,
+						"type": "array"
+					},
+					"tombstones": {
+						"description": "Deletes from the last 30 days",
+						"items": {
+							"properties": {
+								"deleted_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+									"type": "string"
+								},
+								"id": {
+									"maxLength": 64,
+									"minLength": 1,
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"deleted_at"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"updated_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"version": {
+						"maximum": 9007199254740991,
+						"minimum": 0,
+						"type": "integer"
+					}
+				},
+				"required": [
+					"version",
+					"updated_at",
+					"groups",
+					"tombstones"
+				],
+				"type": "object"
+			},
 			"HealthDto": {
 				"properties": {
 					"status": {
@@ -5260,6 +5435,179 @@
 				],
 				"type": "object"
 			},
+			"PutFavouritesDto": {
+				"properties": {
+					"groups": {
+						"items": {
+							"properties": {
+								"colour": {
+									"enum": [
+										"amber",
+										"navy",
+										"teal",
+										"rose",
+										"violet",
+										"green",
+										"orange",
+										"slate"
+									],
+									"type": "string"
+								},
+								"id": {
+									"maxLength": 64,
+									"minLength": 1,
+									"type": "string"
+								},
+								"items": {
+									"items": {
+										"properties": {
+											"added_at": {
+												"format": "date-time",
+												"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+												"type": "string"
+											},
+											"direction": {
+												"anyOf": [
+													{
+														"const": 0,
+														"type": "number"
+													},
+													{
+														"const": 1,
+														"type": "number"
+													}
+												]
+											},
+											"id": {
+												"maxLength": 64,
+												"minLength": 1,
+												"type": "string"
+											},
+											"kind": {
+												"enum": [
+													"stop",
+													"route"
+												],
+												"type": "string"
+											},
+											"label": {
+												"maxLength": 120,
+												"type": "string"
+											},
+											"network_id": {
+												"anyOf": [
+													{
+														"maxLength": 64,
+														"minLength": 1,
+														"type": "string"
+													},
+													{
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991,
+														"type": "integer"
+													}
+												],
+												"description": "Network slug (returned) or numeric id (accepted)"
+											},
+											"ref_id": {
+												"description": "Stable public stop or route id",
+												"maxLength": 200,
+												"minLength": 1,
+												"type": "string"
+											},
+											"updated_at": {
+												"format": "date-time",
+												"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+												"type": "string"
+											}
+										},
+										"required": [
+											"id",
+											"kind",
+											"network_id",
+											"ref_id",
+											"label",
+											"added_at"
+										],
+										"type": "object"
+									},
+									"maxItems": 500,
+									"type": "array"
+								},
+								"name": {
+									"maxLength": 60,
+									"type": "string"
+								},
+								"position": {
+									"maximum": 10000,
+									"minimum": 0,
+									"type": "integer"
+								},
+								"updated_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"name",
+								"colour",
+								"position",
+								"items"
+							],
+							"type": "object"
+						},
+						"maxItems": 50,
+						"type": "array"
+					},
+					"tombstones": {
+						"default": [],
+						"items": {
+							"properties": {
+								"deleted_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+									"type": "string"
+								},
+								"id": {
+									"maxLength": 64,
+									"minLength": 1,
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"deleted_at"
+							],
+							"type": "object"
+						},
+						"maxItems": 2000,
+						"type": "array"
+					},
+					"updated_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"version": {
+						"maximum": 9007199254740991,
+						"minimum": 0,
+						"type": "integer"
+					}
+				},
+				"required": [
+					"groups"
+				],
+				"type": "object"
+			},
 			"ReadyDto": {
 				"properties": {
 					"checks": {
@@ -6728,6 +7076,73 @@
 					"next_cursor",
 					"prev_cursor",
 					"total"
+				],
+				"type": "object"
+			},
+			"TelemetryAcceptedDto": {
+				"properties": {
+					"accepted": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"accepted"
+				],
+				"type": "object"
+			},
+			"TelemetryCountersDto": {
+				"properties": {
+					"app_version": {
+						"maxLength": 32,
+						"minLength": 1,
+						"pattern": "^[0-9A-Za-z.+-]+$",
+						"type": "string"
+					},
+					"city": {
+						"anyOf": [
+							{
+								"maxLength": 64,
+								"minLength": 1,
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "City slug, or null before one is chosen"
+					},
+					"counters": {
+						"additionalProperties": {
+							"maximum": 10000,
+							"minimum": 0,
+							"type": "integer"
+						},
+						"propertyNames": {
+							"pattern": "^[a-z0-9_.]{1,64}$",
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"day": {
+						"description": "The app's local day, YYYY-MM-DD; within two days of today",
+						"format": "date",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+						"type": "string"
+					},
+					"platform": {
+						"enum": [
+							"ios",
+							"android"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"day",
+					"platform",
+					"app_version",
+					"city",
+					"counters"
 				],
 				"type": "object"
 			},
@@ -12728,6 +13143,136 @@
 				]
 			}
 		},
+		"/v1/me/favourites": {
+			"get": {
+				"operationId": "Favourites_get",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/FavouritesDocDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "The favourites document, with ETag \"<version>\"",
+				"tags": [
+					"me"
+				]
+			},
+			"put": {
+				"operationId": "Favourites_put",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "if-match",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The version last read, e.g. \"3\"",
+						"in": "header",
+						"name": "If-Match",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PutFavouritesDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/FavouritesDocDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Replace the favourites document; 412 VERSION_CONFLICT when If-Match is stale",
+				"tags": [
+					"me"
+				]
+			}
+		},
 		"/v1/networks/{networkId}": {
 			"get": {
 				"operationId": "Cities_network",
@@ -14446,6 +14991,63 @@
 				},
 				"tags": [
 					"system"
+				]
+			}
+		},
+		"/v1/telemetry/counters": {
+			"post": {
+				"operationId": "Telemetry_counters",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TelemetryCountersDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/TelemetryAcceptedDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Add a day's aggregate app counters (no identifiers)",
+				"tags": [
+					"telemetry"
 				]
 			}
 		},
