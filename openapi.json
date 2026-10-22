@@ -603,6 +603,33 @@
 				],
 				"type": "object"
 			},
+			"BanRequestDto": {
+				"properties": {
+					"duration": {
+						"enum": [
+							"1d",
+							"7d",
+							"30d",
+							"permanent"
+						],
+						"type": "string"
+					},
+					"private_reason": {
+						"maxLength": 2000,
+						"type": "string"
+					},
+					"public_reason": {
+						"maxLength": 500,
+						"minLength": 3,
+						"type": "string"
+					}
+				},
+				"required": [
+					"public_reason",
+					"duration"
+				],
+				"type": "object"
+			},
 			"CsrfDto": {
 				"properties": {
 					"token": {
@@ -1450,6 +1477,136 @@
 					"amr",
 					"global",
 					"networks"
+				],
+				"type": "object"
+			},
+			"ModerationAction": {
+				"properties": {
+					"action": {
+						"enum": [
+							"ban",
+							"unban",
+							"warn",
+							"note"
+						],
+						"type": "string"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"by": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"id": {
+						"type": "string"
+					},
+					"private_reason": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"public_reason": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"until": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"user": {
+						"$ref": "#/components/schemas/UserRef"
+					}
+				},
+				"required": [
+					"id",
+					"action",
+					"user",
+					"by",
+					"public_reason",
+					"private_reason",
+					"until",
+					"active",
+					"at"
+				],
+				"type": "object"
+			},
+			"ModerationPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/ModerationAction"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prev_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
 				],
 				"type": "object"
 			},
@@ -2632,6 +2789,30 @@
 					"token_type",
 					"expires_in",
 					"scope"
+				],
+				"type": "object"
+			},
+			"UnbanRequestDto": {
+				"properties": {
+					"reason": {
+						"maxLength": 500,
+						"minLength": 3,
+						"type": "string"
+					}
+				},
+				"required": [
+					"reason"
+				],
+				"type": "object"
+			},
+			"UnbanResultDto": {
+				"properties": {
+					"unbanned": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"unbanned"
 				],
 				"type": "object"
 			},
@@ -4749,6 +4930,136 @@
 				}
 			}
 		},
+		"/v1/dash/moderation": {
+			"get": {
+				"operationId": "Moderation_list",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "action",
+						"required": false,
+						"schema": {
+							"enum": [
+								"ban",
+								"unban",
+								"warn",
+								"note"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "active",
+						"required": false,
+						"schema": {
+							"enum": [
+								"true",
+								"false"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "user_id",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/ModerationPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Moderation log, newest first; `active=true` lists bans in force",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "moderation.read",
+					"scope": "global"
+				}
+			}
+		},
 		"/v1/dash/networks/{networkId}/audit": {
 			"get": {
 				"operationId": "Audit_network",
@@ -5275,6 +5586,83 @@
 				}
 			}
 		},
+		"/v1/dash/users/{userId}/ban": {
+			"post": {
+				"description": "Sets the user banned, ends every session and refresh family immediately and writes the moderation log.",
+				"operationId": "Moderation_ban",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BanRequestDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/Ban"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Ban a user",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "moderation.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
 		"/v1/dash/users/{userId}/reveal-email": {
 			"post": {
 				"operationId": "DashUsers_revealEmail",
@@ -5642,6 +6030,81 @@
 					"scope": "global"
 				},
 				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/users/{userId}/unban": {
+			"post": {
+				"operationId": "Moderation_unban",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UnbanRequestDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/UnbanResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Lift a ban",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "moderation.write",
+					"scope": "global"
+				}
 			}
 		},
 		"/v1/me": {

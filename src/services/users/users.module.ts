@@ -12,6 +12,6 @@ import { UsersService } from "./users.service"
 @Module({
 	controllers: [UsersController, DashUsersController],
 	providers: [UsersService, UsersRepository, DashUsersService, DashUsersRepository],
-	exports: [DashUsersService],
+	exports: [DashUsersService, DashUsersRepository],
 })
 export class UsersModule {}

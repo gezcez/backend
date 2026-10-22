@@ -22,6 +22,7 @@ import { AccountModule } from "@services/account/account.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { EmailModule } from "@services/email/email.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
+import { ModerationModule } from "@services/moderation/moderation.module"
 import { KeysModule } from "@services/oauth/keys.module"
 import { OAuthModule } from "@services/oauth/oauth.module"
 import { RefsModule } from "@services/refs/refs.module"
@@ -60,6 +61,7 @@ export class AppModule {
 				OAuthModule,
 				RolesModule,
 				UsersModule,
+				ModerationModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],
