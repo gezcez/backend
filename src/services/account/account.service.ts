@@ -488,10 +488,13 @@ export class AccountService {
 	async startEmailChange(req: Request, body: EmailChangeDto): Promise<EmailFlowDto> {
 		const user = this.repository.findUserById(req.session!.userId)!
 		const email = normaliseEmail(body.new_email)
+		// Bot gate and limits first: the "address taken" answer is an oracle, so it is only
+		// reachable at the same rate as sending a code.
+		await this.checkTurnstile(body.turnstile_token, "email_change", req, email)
+		await this.limits.consume("email-change", { user: String(user.id) })
+		await this.limits.consume("email-code-send", { email }, { only: ["email"] })
 		if (email === user.email || this.repository.findUserByEmail(email))
 			throw new GezcezError("EMAIL_TAKEN")
-		await this.checkTurnstile(body.turnstile_token, "email_change", req, email)
-		await this.limits.consume("email-code-send", { email }, { only: ["email"] })
 		const now = new Date()
 		const flowId = newId("fl")
 		const code = this.newCode(email)

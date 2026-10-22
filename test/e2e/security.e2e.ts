@@ -234,7 +234,7 @@ describe("F4 refresh families outlive their SSO session", () => {
 })
 
 describe("F5 email-change oracle runs before Turnstile and rate limits", () => {
-	test.failing("EMAIL_TAKEN answers without consuming the email-code-send limit", async () => {
+	test("EMAIL_TAKEN answers without consuming the email-code-send limit", async () => {
 		const strict = await createTestApp({ RATE_LIMIT_SCALE: "1" })
 		try {
 			const browser = new TestBrowser(strict)
@@ -248,6 +248,7 @@ describe("F5 email-change oracle runs before Turnstile and rate limits", () => {
 			}
 			// 12 probes of a taken address; the per-email limit is 5/h. Expected a 429 at some point.
 			expect(codes).toContain("RATE_LIMITED")
+			expect(codes.filter((code) => code === "EMAIL_TAKEN").length).toBeLessThanOrEqual(5)
 		} finally {
 			await strict.close()
 		}

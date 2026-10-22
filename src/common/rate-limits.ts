@@ -11,7 +11,7 @@ import { GezcezError } from "./errors"
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 
-export type RateLimitDimension = "ip" | "email" | "client"
+export type RateLimitDimension = "ip" | "email" | "client" | "user"
 
 export interface RateLimitRule {
 	by: RateLimitDimension
@@ -25,6 +25,8 @@ export const RATE_LIMIT_PRESETS = {
 		{ by: "ip", limit: 20, windowMs: HOUR },
 	],
 	"email-code-verify": [{ by: "ip", limit: 30, windowMs: 10 * MINUTE }],
+	/** Per signed-in user, on top of email-code-send for the new address. */
+	"email-change": [{ by: "user", limit: 5, windowMs: HOUR }],
 	"password-login": [
 		{ by: "email", limit: 10, windowMs: 15 * MINUTE },
 		{ by: "ip", limit: 50, windowMs: HOUR },
@@ -42,6 +44,8 @@ export interface RateLimitSubject {
 	ip?: string
 	email?: string
 	client?: string
+	/** Internal user id, for limits on signed-in actions. */
+	user?: string
 }
 
 @Injectable()
