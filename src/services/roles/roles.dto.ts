@@ -1,6 +1,6 @@
 // roles.dto.ts
 
-import { createZodDto } from "nestjs-zod"
+import { zodDto } from "@common/response"
 import { z } from "zod"
 import { PERMISSION_KEYS, type PermissionKey } from "@common/permission-keys"
 
@@ -8,12 +8,14 @@ export const PermissionKeySchema = z
 	.enum(PERMISSION_KEYS as [PermissionKey, ...PermissionKey[]])
 	.meta({ id: "PermissionKey" })
 
-export const RoleRefSchema = z.object({
-	id: z.number().int(),
-	key: z.string(),
-	name: z.string(),
-	level: z.number().int(),
-})
+export const RoleRefSchema = z
+	.object({
+		id: z.number().int(),
+		key: z.string(),
+		name: z.string(),
+		level: z.number().int(),
+	})
+	.meta({ id: "RoleRef" })
 export type RoleRef = z.infer<typeof RoleRefSchema>
 
 export const PermissionListSchema = z.object({
@@ -37,4 +39,4 @@ export const PermissionListSchema = z.object({
 		}),
 	),
 })
-export class PermissionListDto extends createZodDto(PermissionListSchema) {}
+export class PermissionListDto extends zodDto(PermissionListSchema) {}

@@ -1,6 +1,6 @@
 // well-known.dto.ts
 
-import { createZodDto } from "nestjs-zod"
+import { zodDto } from "@common/response"
 import { z } from "zod"
 
 export const JwksSchema = z.object({
@@ -16,7 +16,7 @@ export const JwksSchema = z.object({
 		}),
 	),
 })
-export class JwksDto extends createZodDto(JwksSchema) {}
+export class JwksDto extends zodDto(JwksSchema) {}
 
 export const OpenIdConfigurationSchema = z.object({
 	issuer: z.string(),
@@ -38,4 +38,4 @@ export const OpenIdConfigurationSchema = z.object({
 	prompt_values_supported: z.array(z.string()),
 	ui_locales_supported: z.array(z.string()),
 })
-export class OpenIdConfigurationDto extends createZodDto(OpenIdConfigurationSchema) {}
+export class OpenIdConfigurationDto extends zodDto(OpenIdConfigurationSchema) {}

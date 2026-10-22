@@ -1,9 +1,8 @@
 // account.dto.ts
 // Shapes of oauth.md section 4 (bootstrap, sign-in and sign-up).
 
-import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
-import { namedZodDto } from "@common/response"
+import { namedZodDto, zodDto } from "@common/response"
 
 const Locale = z.enum(["tr", "en"])
 const Amr = z.array(z.enum(["otp", "pwd", "webauthn"]))
@@ -17,10 +16,10 @@ export const AccountSummarySchema = z.object({
 	avatar_initials: z.string(),
 	locale: Locale,
 })
-export class AccountSummaryDto extends createZodDto(AccountSummarySchema) {}
+export class AccountSummaryDto extends zodDto(AccountSummarySchema) {}
 
 export const CsrfSchema = z.object({ token: z.string() })
-export class CsrfDto extends createZodDto(CsrfSchema) {}
+export class CsrfDto extends zodDto(CsrfSchema) {}
 
 export const SessionInfoSchema = z.object({
 	account: AccountSummarySchema,
@@ -31,7 +30,7 @@ export const SessionInfoSchema = z.object({
 		expires_at: z.iso.datetime(),
 	}),
 })
-export class SessionInfoDto extends createZodDto(SessionInfoSchema) {}
+export class SessionInfoDto extends zodDto(SessionInfoSchema) {}
 
 export const DeviceAccountsSchema = z.object({
 	accounts: z.array(
@@ -43,13 +42,13 @@ export const DeviceAccountsSchema = z.object({
 		}),
 	),
 })
-export class DeviceAccountsDto extends createZodDto(DeviceAccountsSchema) {}
+export class DeviceAccountsDto extends zodDto(DeviceAccountsSchema) {}
 
 export const SwitchSessionBody = z.object({ session_id: z.string().min(1).max(64) })
-export class SwitchSessionDto extends createZodDto(SwitchSessionBody) {}
+export class SwitchSessionDto extends zodDto(SwitchSessionBody) {}
 
 export const AccountResultSchema = z.object({ account: AccountSummarySchema })
-export class AccountResultDto extends createZodDto(AccountResultSchema) {}
+export class AccountResultDto extends zodDto(AccountResultSchema) {}
 
 export const EmailIntent = z.enum(["signin", "signup", "reauth", "reset"])
 export type EmailIntent = z.infer<typeof EmailIntent>
@@ -61,7 +60,7 @@ export const EmailStartBody = z.object({
 	turnstile_token: z.string().max(4096).optional(),
 	locale: Locale.default("tr"),
 })
-export class EmailStartDto extends createZodDto(EmailStartBody) {}
+export class EmailStartDto extends zodDto(EmailStartBody) {}
 
 export const EmailFlowSchema = z.object({
 	flow_id: z.string(),
@@ -69,25 +68,25 @@ export const EmailFlowSchema = z.object({
 	resend_available_at: z.iso.datetime(),
 	code_length: z.literal(6),
 })
-export class EmailFlowDto extends createZodDto(EmailFlowSchema) {}
+export class EmailFlowDto extends zodDto(EmailFlowSchema) {}
 
 export const EmailResendBody = z.object({
 	flow_id: z.string().min(1).max(64),
 	turnstile_token: z.string().max(4096).optional(),
 })
-export class EmailResendDto extends createZodDto(EmailResendBody) {}
+export class EmailResendDto extends zodDto(EmailResendBody) {}
 
 export const EmailResendResultSchema = z.object({
 	resend_available_at: z.iso.datetime(),
 	expires_at: z.iso.datetime(),
 })
-export class EmailResendResultDto extends createZodDto(EmailResendResultSchema) {}
+export class EmailResendResultDto extends zodDto(EmailResendResultSchema) {}
 
 export const EmailVerifyBody = z.object({
 	flow_id: z.string().min(1).max(64),
 	code: z.string().regex(/^\d{6}$/, "must be 6 digits"),
 })
-export class EmailVerifyDto extends createZodDto(EmailVerifyBody) {}
+export class EmailVerifyDto extends zodDto(EmailVerifyBody) {}
 
 export const EmailVerifyResultSchema = z.discriminatedUnion("status", [
 	z.object({
@@ -108,7 +107,7 @@ export const SignupCompleteBody = z.object({
 	privacy_version: z.string().min(1).max(32),
 	locale: Locale,
 })
-export class SignupCompleteDto extends createZodDto(SignupCompleteBody) {}
+export class SignupCompleteDto extends zodDto(SignupCompleteBody) {}
 
 // Passwords (optional method, plan section 6.1.1). Length rules are checked by the service so
 // a too-short password is AUTH_PASSWORD_WEAK, not a validation error.
@@ -120,30 +119,30 @@ export const PasswordLoginBody = z.object({
 	request_id: z.string().max(64).optional(),
 	turnstile_token: z.string().max(4096).optional(),
 })
-export class PasswordLoginDto extends createZodDto(PasswordLoginBody) {}
+export class PasswordLoginDto extends zodDto(PasswordLoginBody) {}
 
 export const PasswordResetBody = z.object({
 	reset_token: z.string().min(1).max(2048),
 	new_password: Password,
 })
-export class PasswordResetDto extends createZodDto(PasswordResetBody) {}
+export class PasswordResetDto extends zodDto(PasswordResetBody) {}
 
 export const ReauthBody = z.object({ password: Password })
-export class ReauthDto extends createZodDto(ReauthBody) {}
+export class ReauthDto extends zodDto(ReauthBody) {}
 
 export const PasswordSetBody = z.object({
 	new_password: Password,
 	/** Other sessions are signed out unless this is true. */
 	keep_sessions: z.boolean().default(false),
 })
-export class PasswordSetDto extends createZodDto(PasswordSetBody) {}
+export class PasswordSetDto extends zodDto(PasswordSetBody) {}
 
 export const SignedInSchema = z.object({
 	status: z.literal("signed_in"),
 	account: AccountSummarySchema,
 	auth_time: z.iso.datetime(),
 })
-export class SignedInDto extends createZodDto(SignedInSchema) {}
+export class SignedInDto extends zodDto(SignedInSchema) {}
 
 // Account self-service (oauth.md section 4.4)
 
@@ -160,7 +159,7 @@ export const ProfileSchema = z.object({
 	passkey_count: z.number().int(),
 	deletion: z.object({ delete_at: z.iso.datetime() }).optional(),
 })
-export class ProfileDto extends createZodDto(ProfileSchema) {}
+export class ProfileDto extends zodDto(ProfileSchema) {}
 
 export const ProfilePatchBody = z
 	.object({
@@ -170,17 +169,17 @@ export const ProfilePatchBody = z
 	.refine((body) => body.display_name !== undefined || body.locale !== undefined, {
 		message: "Nothing to update",
 	})
-export class ProfilePatchDto extends createZodDto(ProfilePatchBody) {}
+export class ProfilePatchDto extends zodDto(ProfilePatchBody) {}
 
 export const EmailChangeBody = z.object({
 	new_email: Email,
 	turnstile_token: z.string().max(4096).optional(),
 	locale: Locale.optional(),
 })
-export class EmailChangeDto extends createZodDto(EmailChangeBody) {}
+export class EmailChangeDto extends zodDto(EmailChangeBody) {}
 
 export const EmailChangeResultSchema = z.object({ email: z.string() })
-export class EmailChangeResultDto extends createZodDto(EmailChangeResultSchema) {}
+export class EmailChangeResultDto extends zodDto(EmailChangeResultSchema) {}
 
 export const SessionListSchema = z.object({
 	sessions: z.array(
@@ -201,10 +200,10 @@ export const SessionListSchema = z.object({
 		}),
 	),
 })
-export class SessionListDto extends createZodDto(SessionListSchema) {}
+export class SessionListDto extends zodDto(SessionListSchema) {}
 
 export const RevokedCountSchema = z.object({ revoked: z.number().int() })
-export class RevokedCountDto extends createZodDto(RevokedCountSchema) {}
+export class RevokedCountDto extends zodDto(RevokedCountSchema) {}
 
 export const AuthorizedAppsSchema = z.object({
 	apps: z.array(
@@ -220,7 +219,7 @@ export const AuthorizedAppsSchema = z.object({
 		}),
 	),
 })
-export class AuthorizedAppsDto extends createZodDto(AuthorizedAppsSchema) {}
+export class AuthorizedAppsDto extends zodDto(AuthorizedAppsSchema) {}
 
 export const SecuritySchema = z.object({
 	has_password: z.boolean(),
@@ -243,13 +242,13 @@ export const SecuritySchema = z.object({
 		}),
 	),
 })
-export class SecurityDto extends createZodDto(SecuritySchema) {}
+export class SecurityDto extends zodDto(SecuritySchema) {}
 
 export const PrivacySchema = z.object({
 	location_history_opt_in: z.boolean(),
 	product_emails: z.boolean(),
 })
-export class PrivacyDto extends createZodDto(PrivacySchema) {}
+export class PrivacyDto extends zodDto(PrivacySchema) {}
 
 export const PrivacyPatchBody = PrivacySchema.partial()
-export class PrivacyPatchDto extends createZodDto(PrivacyPatchBody) {}
+export class PrivacyPatchDto extends zodDto(PrivacyPatchBody) {}

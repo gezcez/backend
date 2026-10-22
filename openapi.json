@@ -122,6 +122,194 @@
 				],
 				"type": "object"
 			},
+			"AuditEntry": {
+				"properties": {
+					"action": {
+						"type": "string"
+					},
+					"actor": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"after": {
+						"anyOf": [
+							{
+								"additionalProperties": {},
+								"propertyNames": {
+									"type": "string"
+								},
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"before": {
+						"anyOf": [
+							{
+								"additionalProperties": {},
+								"propertyNames": {
+									"type": "string"
+								},
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"id": {
+						"type": "string"
+					},
+					"ip_prefix": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"network_id": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"request_id": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"severity": {
+						"enum": [
+							"info",
+							"warn",
+							"critical"
+						],
+						"type": "string"
+					},
+					"target_id": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"target_label": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"target_type": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"at",
+					"action",
+					"severity",
+					"actor",
+					"target_type",
+					"target_id",
+					"target_label",
+					"network_id",
+					"ip_prefix",
+					"request_id",
+					"before",
+					"after"
+				],
+				"type": "object"
+			},
+			"AuditPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/AuditEntry"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prev_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
 			"AuthorizeContinueDto": {
 				"properties": {
 					"session_id": {
@@ -324,10 +512,14 @@
 						"type": "string"
 					},
 					"request_id": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"scopes": {
 						"items": {
@@ -356,6 +548,85 @@
 					"client",
 					"scopes",
 					"next"
+				],
+				"type": "object"
+			},
+			"Ban": {
+				"properties": {
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"created_by": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"private_reason": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"public_reason": {
+						"type": "string"
+					},
+					"until": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"public_reason",
+					"private_reason",
+					"until",
+					"created_at",
+					"created_by"
+				],
+				"type": "object"
+			},
+			"BanRequestDto": {
+				"properties": {
+					"duration": {
+						"enum": [
+							"1d",
+							"7d",
+							"30d",
+							"permanent"
+						],
+						"type": "string"
+					},
+					"private_reason": {
+						"maxLength": 2000,
+						"type": "string"
+					},
+					"public_reason": {
+						"maxLength": 500,
+						"minLength": 3,
+						"type": "string"
+					}
+				},
+				"required": [
+					"public_reason",
+					"duration"
 				],
 				"type": "object"
 			},
@@ -2386,6 +2657,219 @@
 				],
 				"type": "object"
 			},
+			"DashUser": {
+				"properties": {
+					"ban": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/Ban"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"display_name": {
+						"type": "string"
+					},
+					"email_masked": {
+						"type": "string"
+					},
+					"email_verified": {
+						"type": "boolean"
+					},
+					"id": {
+						"type": "string"
+					},
+					"last_active_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"locale": {
+						"enum": [
+							"tr",
+							"en"
+						],
+						"type": "string"
+					},
+					"methods": {
+						"properties": {
+							"email_code": {
+								"type": "boolean"
+							},
+							"passkeys": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"password": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"email_code",
+							"password",
+							"passkeys"
+						],
+						"type": "object"
+					},
+					"roles": {
+						"items": {
+							"$ref": "#/components/schemas/RoleAssignment"
+						},
+						"type": "array"
+					},
+					"status": {
+						"$ref": "#/components/schemas/UserStatus"
+					},
+					"username": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"display_name",
+					"username",
+					"email_masked",
+					"status",
+					"locale",
+					"created_at",
+					"last_active_at",
+					"email_verified",
+					"methods",
+					"roles",
+					"ban"
+				],
+				"type": "object"
+			},
+			"DashUserListItem": {
+				"properties": {
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"display_name": {
+						"type": "string"
+					},
+					"email_masked": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"last_active_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"role_count": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"status": {
+						"$ref": "#/components/schemas/UserStatus"
+					},
+					"username": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"display_name",
+					"username",
+					"email_masked",
+					"status",
+					"created_at",
+					"last_active_at",
+					"role_count"
+				],
+				"type": "object"
+			},
+			"DashUserPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/DashUserListItem"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prev_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
 			"DeparturesDto": {
 				"properties": {
 					"generated_at": {
@@ -3240,31 +3724,7 @@
 							},
 							"roles": {
 								"items": {
-									"properties": {
-										"id": {
-											"maximum": 9007199254740991,
-											"minimum": -9007199254740991,
-											"type": "integer"
-										},
-										"key": {
-											"type": "string"
-										},
-										"level": {
-											"maximum": 9007199254740991,
-											"minimum": -9007199254740991,
-											"type": "integer"
-										},
-										"name": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"id",
-										"key",
-										"name",
-										"level"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/RoleRef"
 								},
 								"type": "array"
 							}
@@ -3315,31 +3775,7 @@
 								},
 								"roles": {
 									"items": {
-										"properties": {
-											"id": {
-												"maximum": 9007199254740991,
-												"minimum": -9007199254740991,
-												"type": "integer"
-											},
-											"key": {
-												"type": "string"
-											},
-											"level": {
-												"maximum": 9007199254740991,
-												"minimum": -9007199254740991,
-												"type": "integer"
-											},
-											"name": {
-												"type": "string"
-											}
-										},
-										"required": [
-											"id",
-											"key",
-											"name",
-											"level"
-										],
-										"type": "object"
+										"$ref": "#/components/schemas/RoleRef"
 									},
 									"type": "array"
 								},
@@ -3381,9 +3817,13 @@
 								"type": "string"
 							},
 							"username": {
-								"type": [
-									"string",
-									"null"
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"type": "null"
+									}
 								]
 							}
 						},
@@ -3404,6 +3844,136 @@
 					"amr",
 					"global",
 					"networks"
+				],
+				"type": "object"
+			},
+			"ModerationAction": {
+				"properties": {
+					"action": {
+						"enum": [
+							"ban",
+							"unban",
+							"warn",
+							"note"
+						],
+						"type": "string"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"by": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"id": {
+						"type": "string"
+					},
+					"private_reason": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"public_reason": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"until": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"user": {
+						"$ref": "#/components/schemas/UserRef"
+					}
+				},
+				"required": [
+					"id",
+					"action",
+					"user",
+					"by",
+					"public_reason",
+					"private_reason",
+					"until",
+					"active",
+					"at"
+				],
+				"type": "object"
+			},
+			"ModerationPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/ModerationAction"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prev_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
 				],
 				"type": "object"
 			},
@@ -3748,6 +4318,27 @@
 					"attribution",
 					"privacy",
 					"freshness"
+				],
+				"type": "object"
+			},
+			"NetworkRef": {
+				"properties": {
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					},
+					"slug": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"slug",
+					"name"
 				],
 				"type": "object"
 			},
@@ -4464,6 +5055,19 @@
 				],
 				"type": "object"
 			},
+			"ReasonDto": {
+				"properties": {
+					"reason": {
+						"maxLength": 500,
+						"minLength": 3,
+						"type": "string"
+					}
+				},
+				"required": [
+					"reason"
+				],
+				"type": "object"
+			},
 			"ReauthDto": {
 				"properties": {
 					"password": {
@@ -4474,6 +5078,19 @@
 				},
 				"required": [
 					"password"
+				],
+				"type": "object"
+			},
+			"RevealEmailDto": {
+				"properties": {
+					"email": {
+						"format": "email",
+						"pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+						"type": "string"
+					}
+				},
+				"required": [
+					"email"
 				],
 				"type": "object"
 			},
@@ -4505,6 +5122,153 @@
 						"type": "string"
 					}
 				},
+				"type": "object"
+			},
+			"RoleAssignment": {
+				"properties": {
+					"granted_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"granted_by": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"network": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/NetworkRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"role": {
+						"$ref": "#/components/schemas/RoleRef"
+					}
+				},
+				"required": [
+					"network",
+					"role",
+					"granted_at",
+					"granted_by"
+				],
+				"type": "object"
+			},
+			"RoleOperationResultsDto": {
+				"properties": {
+					"results": {
+						"items": {
+							"properties": {
+								"error_code": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ErrorCode"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"ok": {
+									"type": "boolean"
+								},
+								"op": {
+									"enum": [
+										"grant",
+										"revoke"
+									],
+									"type": "string"
+								},
+								"role_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								}
+							},
+							"required": [
+								"role_id",
+								"op",
+								"ok",
+								"error_code"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"results"
+				],
+				"type": "object"
+			},
+			"RoleOperationsDto": {
+				"properties": {
+					"operations": {
+						"items": {
+							"properties": {
+								"op": {
+									"enum": [
+										"grant",
+										"revoke"
+									],
+									"type": "string"
+								},
+								"role_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								}
+							},
+							"required": [
+								"role_id",
+								"op"
+							],
+							"type": "object"
+						},
+						"maxItems": 50,
+						"minItems": 1,
+						"type": "array"
+					}
+				},
+				"required": [
+					"operations"
+				],
+				"type": "object"
+			},
+			"RoleRef": {
+				"properties": {
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"key": {
+						"type": "string"
+					},
+					"level": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"key",
+					"name",
+					"level"
+				],
 				"type": "object"
 			},
 			"RouteDetailDto": {
@@ -4987,9 +5751,13 @@
 									"type": "string"
 								},
 								"device_hint": {
-									"type": [
-										"string",
-										"null"
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"type": "null"
+										}
 									]
 								},
 								"id": {
@@ -6121,6 +6889,147 @@
 				],
 				"type": "object"
 			},
+			"UnbanRequestDto": {
+				"properties": {
+					"reason": {
+						"maxLength": 500,
+						"minLength": 3,
+						"type": "string"
+					}
+				},
+				"required": [
+					"reason"
+				],
+				"type": "object"
+			},
+			"UnbanResultDto": {
+				"properties": {
+					"unbanned": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"unbanned"
+				],
+				"type": "object"
+			},
+			"UserRef": {
+				"properties": {
+					"display_name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"username": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"display_name",
+					"username"
+				],
+				"type": "object"
+			},
+			"UserSession": {
+				"properties": {
+					"app": {
+						"anyOf": [
+							{
+								"properties": {
+									"client_id": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"client_id",
+									"name"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"device": {
+						"type": "string"
+					},
+					"expires_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"ip_prefix": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"kind": {
+						"enum": [
+							"sso",
+							"refresh"
+						],
+						"type": "string"
+					},
+					"last_used_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"kind",
+					"app",
+					"device",
+					"ip_prefix",
+					"created_at",
+					"last_used_at",
+					"expires_at"
+				],
+				"type": "object"
+			},
+			"UserStatus": {
+				"enum": [
+					"active",
+					"unverified",
+					"banned",
+					"pending_deletion"
+				],
+				"type": "string"
+			},
 			"VehicleDetailDto": {
 				"properties": {
 					"accessible": {
@@ -6613,10 +7522,14 @@
 			"VersionDto": {
 				"properties": {
 					"build_time": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"env": {
 						"type": "string"
@@ -9227,6 +10140,167 @@
 				]
 			}
 		},
+		"/v1/dash/audit": {
+			"get": {
+				"operationId": "Audit_list",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "actor",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "action",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "target_type",
+						"required": false,
+						"schema": {
+							"maxLength": 32,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "target_id",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "network_id",
+						"required": false,
+						"schema": {
+							"maximum": 9007199254740991,
+							"minimum": -9007199254740991,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AuditPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Audit log, newest first; before/after redacted",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "audit.read",
+					"scope": "global"
+				}
+			}
+		},
 		"/v1/dash/cities": {
 			"get": {
 				"operationId": "Networks_cities",
@@ -9281,6 +10355,136 @@
 				],
 				"x-gezcez-permission": {
 					"key": "catalog.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/moderation": {
+			"get": {
+				"operationId": "Moderation_list",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "action",
+						"required": false,
+						"schema": {
+							"enum": [
+								"ban",
+								"unban",
+								"warn",
+								"note"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "active",
+						"required": false,
+						"schema": {
+							"enum": [
+								"true",
+								"false"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "user_id",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/ModerationPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Moderation log, newest first; `active=true` lists bans in force",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "moderation.read",
 					"scope": "global"
 				}
 			}
@@ -9390,6 +10594,165 @@
 				],
 				"x-gezcez-permission": {
 					"key": "catalog.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/audit": {
+			"get": {
+				"operationId": "Audit_network",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "actor",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "action",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "target_type",
+						"required": false,
+						"schema": {
+							"maxLength": 32,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "target_id",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AuditPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Audit entries of one network",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "audit.read",
 					"scope": "network"
 				}
 			}
@@ -10184,6 +11547,838 @@
 					"scope": "global"
 				},
 				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/users": {
+			"get": {
+				"description": "`q` matches the display name, a username prefix or a public id; with users.pii.read also an email prefix. Sort: created_at, display_name, last_active_at.",
+				"operationId": "DashUsers_list",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/UserStatus"
+						}
+					},
+					{
+						"in": "query",
+						"name": "role",
+						"required": false,
+						"schema": {
+							"maxLength": 32,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "network_id",
+						"required": false,
+						"schema": {
+							"maximum": 9007199254740991,
+							"minimum": -9007199254740991,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DashUserPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "User search",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "users.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/users/{userId}": {
+			"get": {
+				"operationId": "DashUsers_detail",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DashUser"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "User detail with roles everywhere and the active ban",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "users.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/users/{userId}/activity": {
+			"get": {
+				"operationId": "DashUsers_activity",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AuditPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Audit entries where the user is the actor or the target",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "audit.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/users/{userId}/ban": {
+			"post": {
+				"description": "Sets the user banned, ends every session and refresh family immediately and writes the moderation log.",
+				"operationId": "Moderation_ban",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BanRequestDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/Ban"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Ban a user",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "moderation.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/users/{userId}/reveal-email": {
+			"post": {
+				"operationId": "DashUsers_revealEmail",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RevealEmailDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Unmasked email of one user; writes an audit row",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "users.pii.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/users/{userId}/roles": {
+			"post": {
+				"description": "Level rules apply per operation: your level must be above the role's and the user's, and nobody edits themselves.",
+				"operationId": "DashUsers_assignRoles",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RoleOperationsDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RoleOperationResultsDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Grant or revoke global roles in a batch",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "roles.assign",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/users/{userId}/sessions": {
+			"get": {
+				"operationId": "DashUsers_sessions",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/UserSession"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Live SSO sessions (sso_*) and refresh families per app (rf_*)",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "users.sessions.revoke",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/users/{userId}/sessions/{sessionId}": {
+			"delete": {
+				"operationId": "DashUsers_revokeSession",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ReasonDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RevokedCountDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Revoke one session (and the refresh families issued under it) or one family",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "users.sessions.revoke",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/users/{userId}/sessions/revoke-all": {
+			"post": {
+				"operationId": "DashUsers_revokeAll",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ReasonDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RevokedCountDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Revoke every session and refresh family of the user",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "users.sessions.revoke",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/users/{userId}/unban": {
+			"post": {
+				"operationId": "Moderation_unban",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UnbanRequestDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/UnbanResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Lift a ban",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "moderation.write",
+					"scope": "global"
+				}
 			}
 		},
 		"/v1/me": {

@@ -23,11 +23,13 @@ import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
+import { ModerationModule } from "@services/moderation/moderation.module"
 import { NetworksCoreModule } from "@services/networks/networks-core.module"
 import { NetworksModule } from "@services/networks/networks.module"
 import { KeysModule } from "@services/oauth/keys.module"
 import { OAuthModule } from "@services/oauth/oauth.module"
 import { ProvidersModule } from "@services/providers/providers.module"
+import { RefsModule } from "@services/refs/refs.module"
 import { RolesModule } from "@services/roles/roles.module"
 import { SystemModule } from "@services/system/system.module"
 import { trackerRunner } from "@services/tracker/tracker-host.service"
@@ -64,6 +66,7 @@ export class AppModule {
 				SystemModule,
 				KeysModule,
 				EmailModule,
+				RefsModule,
 				AuditModule,
 				AccountModule,
 				OAuthModule,
@@ -82,6 +85,7 @@ export class AppModule {
 				TrackerModule.forRoot(config),
 				VehiclesModule,
 				WsModule,
+				ModerationModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],
