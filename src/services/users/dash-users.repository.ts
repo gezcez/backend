@@ -19,6 +19,7 @@ import {
 	type SQL,
 } from "drizzle-orm"
 import type { Page, PageQuery } from "@common/response"
+import { escapeLike } from "@common/utils"
 import { InjectCoreDb, paginate, type CoreDatabase } from "@db"
 import {
 	moderationActionsTable,
@@ -67,10 +68,6 @@ export interface AssignmentRow {
 	network_id: number | null
 	granted_at: Date
 	granted_by: number | null
-}
-
-function escapeLike(value: string): string {
-	return value.replace(/[\\%_]/g, (c) => `\\${c}`)
 }
 
 @Injectable()

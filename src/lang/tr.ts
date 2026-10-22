@@ -36,4 +36,12 @@ export const tr: Record<LangKey, string> = {
 	"email.email_changed.title": "E-posta adresi değiştirildi",
 	"email.email_changed.intro":
 		"gezcez hesabınızın e-posta adresi {email} olarak değiştirildi. Bu işlemi siz yapmadıysanız {security_url} adresinden hesap güvenliğinizi kontrol edin ve info@gezcez.com ile iletişime geçin.",
+	"email.deletion_scheduled.subject": "gezcez hesabınız silinecek",
+	"email.deletion_scheduled.title": "Hesap silme planlandı",
+	"email.deletion_scheduled.intro":
+		"gezcez hesabınız ve verileriniz {delete_at} tarihinde silinecek. Tüm oturumlar kapatıldı. Fikrinizi değiştirdiyseniz bu tarihten önce giriş yapıp {cancel_url} adresinden silmeyi iptal edebilirsiniz.",
+	"email.export_ready.subject": "gezcez veri dışa aktarımınız hazır",
+	"email.export_ready.title": "Veri dışa aktarımınız hazır",
+	"email.export_ready.intro":
+		"İstediğiniz gezcez veri kopyası hazır. {expires_at} tarihinden önce {download_url} adresinden indirin; bu tarihten sonra silinir.",
 }

@@ -15,6 +15,8 @@ const BASE_RETRY_MS = 30_000
 
 export interface SendOptions {
 	userId?: number | null
+	/** Dashboard test sends mark the subject, for example "[TEST] ". */
+	subjectPrefix?: string
 }
 
 @Injectable()
@@ -44,7 +46,9 @@ export class EmailService implements OnApplicationShutdown {
 		options: SendOptions = {},
 	): { id: string; done: Promise<void> } {
 		const address = to.toLowerCase()
-		const rendered = renderTemplate(template, locale, vars)
+		const prefix = options.subjectPrefix ?? ""
+		const body = renderTemplate(template, locale, vars)
+		const rendered = { ...body, subject: prefix + body.subject }
 		const id = newId()
 		this.repository.insertQueued({
 			id,
@@ -55,7 +59,7 @@ export class EmailService implements OnApplicationShutdown {
 			// Codes never reach the database, not even inside the subject line.
 			subject:
 				"code" in (vars as object)
-					? renderTemplate(template, locale, { ...vars, code: "******" }).subject
+					? prefix + renderTemplate(template, locale, { ...vars, code: "******" }).subject
 					: rendered.subject,
 		})
 		if (this.repository.isSuppressed(sha256Hex(address))) {
