@@ -12,6 +12,16 @@ describe("loadConfig", () => {
 		expect(config.issuer).toBe("http://localhost:8080")
 		expect(config.stepUpMaxAgeS).toBe(600)
 		expect(config.refreshGraceS).toBe(10)
+		expect(config.privacy.deletionGraceMs).toBe(14 * 86_400_000)
+		expect(config.privacy.exportTtlMs).toBe(7 * 86_400_000)
+		expect(config.privacy.jobsIntervalMs).toBe(60_000)
+		expect(config.privacy.exportsDir.endsWith("exports")).toBe(true)
+	})
+
+	test("privacy lifetimes are bounded", () => {
+		expect(() => loadConfig({ DELETION_GRACE_DAYS: "0" })).toThrow(ConfigError)
+		expect(() => loadConfig({ EXPORT_TTL_DAYS: "31" })).toThrow(ConfigError)
+		expect(loadConfig({ PRIVACY_JOBS_INTERVAL_S: "0" }).privacy.jobsIntervalMs).toBe(0)
 	})
 
 	test("production refuses missing secrets and lists every problem", () => {

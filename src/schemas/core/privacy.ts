@@ -20,10 +20,14 @@ export const dataExportsTable = sqliteTable(
 		file_path: text(),
 		size_bytes: int(),
 		error: text(),
+		/** Build attempts; the job gives up after 3 and marks the export failed. */
+		attempts: int().notNull().default(0),
 		created_at: int({ mode: "timestamp_ms" }).notNull(),
 		ready_at: int({ mode: "timestamp_ms" }),
 		/** Download window end (7 days after ready); the file is deleted after it. */
 		expires_at: int({ mode: "timestamp_ms" }),
+		/** Last download, shown on the privacy page. */
+		downloaded_at: int({ mode: "timestamp_ms" }),
 	},
 	(t) => [
 		index("data_exports_user_idx").on(t.user_id, t.created_at),
@@ -35,7 +39,7 @@ export type DataExportRow = typeof dataExportsTable.$inferSelect
 
 /**
  * One row per deletion request. `user_id` has no foreign key: completed rows outlive the user
- * and keep only dates.
+ * and keep only dates and the tombstone id that replaced the user in audit_log.
  */
 export const accountDeletionsTable = sqliteTable(
 	"account_deletions",
@@ -46,6 +50,8 @@ export const accountDeletionsTable = sqliteTable(
 		delete_after: int({ mode: "timestamp_ms" }).notNull(),
 		cancelled_at: int({ mode: "timestamp_ms" }),
 		completed_at: int({ mode: "timestamp_ms" }),
+		/** `del_` + ULID, set when the deletion ran. */
+		tombstone: text(),
 	},
 	(t) => [
 		index("account_deletions_user_idx").on(t.user_id, t.requested_at),

@@ -66,6 +66,12 @@ export const EnvSchema = z
 			.optional(),
 		STEP_UP_MAX_AGE_S: z.coerce.number().int().positive().default(600),
 		REFRESH_GRACE_S: z.coerce.number().int().min(0).max(60).default(10),
+		/** Account deletion grace period (plan 6.1.7, 14 days pending legal review). */
+		DELETION_GRACE_DAYS: z.coerce.number().int().min(1).max(30).default(14),
+		/** Data export download window (plan section 4 of _decisions: 7 days). */
+		EXPORT_TTL_DAYS: z.coerce.number().int().min(1).max(30).default(7),
+		/** How often the privacy job queue sweeps (exports, expiry, due deletions); 0 = no timer. */
+		PRIVACY_JOBS_INTERVAL_S: z.coerce.number().int().min(0).max(86_400).default(60),
 		/** Multiplies every rate limit (tests raise it; 0 is not allowed). */
 		RATE_LIMIT_SCALE: z.coerce.number().positive().default(1),
 		/** Defaults to memory under NODE_ENV=test (test mailbox), console elsewhere. */
@@ -220,6 +226,7 @@ export interface AppConfig {
 	stagingTestOtp?: string
 	stepUpMaxAgeS: number
 	refreshGraceS: number
+	privacy: PrivacyConfig
 	rateLimitScale: number
 	email: {
 		transport: NonNullable<Env["EMAIL_TRANSPORT"]>
@@ -232,6 +239,15 @@ export interface AppConfig {
 	version: { gitSha: string; buildTime?: string; packageVersion: string }
 	transit: TransitConfig
 	analytics: AnalyticsConfig
+}
+
+export interface PrivacyConfig {
+	deletionGraceMs: number
+	exportTtlMs: number
+	/** Sweep interval of the privacy job queue in ms; 0 disables the timer (tests drive it). */
+	jobsIntervalMs: number
+	/** data/exports: finished export archives. */
+	exportsDir: string
 }
 
 export interface AnalyticsConfig {
@@ -325,6 +341,12 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 		stagingTestOtp: env.STAGING_TEST_OTP,
 		stepUpMaxAgeS: env.STEP_UP_MAX_AGE_S,
 		refreshGraceS: env.REFRESH_GRACE_S,
+		privacy: {
+			deletionGraceMs: env.DELETION_GRACE_DAYS * 86_400_000,
+			exportTtlMs: env.EXPORT_TTL_DAYS * 86_400_000,
+			jobsIntervalMs: env.PRIVACY_JOBS_INTERVAL_S * 1000,
+			exportsDir: path.join(path.resolve(env.DATA_DIR), "exports"),
+		},
 		rateLimitScale: env.RATE_LIMIT_SCALE,
 		email: {
 			transport: env.EMAIL_TRANSPORT ?? (env.NODE_ENV === "test" ? "memory" : "console"),
