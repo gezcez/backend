@@ -43,6 +43,65 @@
 				],
 				"type": "object"
 			},
+			"AlertDto": {
+				"properties": {
+					"active_from": {
+						"type": "string"
+					},
+					"active_to": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"body": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"route_ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"severity": {
+						"enum": [
+							"info",
+							"warning",
+							"severe"
+						],
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"url": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"network_id",
+					"title",
+					"body",
+					"severity",
+					"route_ids",
+					"active_from",
+					"active_to",
+					"url"
+				],
+				"type": "object"
+			},
 			"ApiError": {
 				"additionalProperties": false,
 				"properties": {
@@ -4465,6 +4524,182 @@
 					"claims_supported",
 					"prompt_values_supported",
 					"ui_locales_supported"
+				],
+				"type": "object"
+			},
+			"PackDto": {
+				"properties": {
+					"built_at": {
+						"type": "string"
+					},
+					"network": {
+						"description": "Network slug",
+						"type": "string"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"pack_version": {
+						"description": "Same value as the manifest's pack_version",
+						"type": "string"
+					},
+					"routes": {
+						"items": {
+							"properties": {
+								"colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"directions": {
+									"items": {
+										"properties": {
+											"direction": {
+												"anyOf": [
+													{
+														"const": 0,
+														"type": "number"
+													},
+													{
+														"const": 1,
+														"type": "number"
+													}
+												]
+											},
+											"headsign": {
+												"type": "string"
+											},
+											"stop_ids": {
+												"description": "Ordered stops of the main pattern",
+												"items": {
+													"type": "string"
+												},
+												"type": "array"
+											}
+										},
+										"required": [
+											"direction",
+											"headsign",
+											"stop_ids"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"id": {
+									"type": "string"
+								},
+								"long_name": {
+									"type": "string"
+								},
+								"mode": {
+									"enum": [
+										"tram",
+										"metro",
+										"rail",
+										"bus",
+										"ferry",
+										"cable_tram",
+										"aerial_lift",
+										"funicular",
+										"trolleybus",
+										"monorail"
+									],
+									"type": "string"
+								},
+								"short_name": {
+									"type": "string"
+								},
+								"text_colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"id",
+								"short_name",
+								"long_name",
+								"mode",
+								"colour",
+								"text_colour",
+								"directions"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"stops": {
+						"items": {
+							"properties": {
+								"code": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"type": "string"
+								},
+								"lat": {
+									"type": "number"
+								},
+								"lon": {
+									"type": "number"
+								},
+								"modes": {
+									"items": {
+										"enum": [
+											"tram",
+											"metro",
+											"rail",
+											"bus",
+											"ferry",
+											"cable_tram",
+											"aerial_lift",
+											"funicular",
+											"trolleybus",
+											"monorail"
+										],
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"name": {
+									"type": "string"
+								},
+								"route_ids": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								}
+							},
+							"required": [
+								"id",
+								"name",
+								"code",
+								"lat",
+								"lon",
+								"modes",
+								"route_ids"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"network",
+					"network_id",
+					"pack_version",
+					"built_at",
+					"stops",
+					"routes"
 				],
 				"type": "object"
 			},
@@ -12531,6 +12766,127 @@
 							}
 						},
 						"description": "One network's slice of the city manifest"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/alerts": {
+			"get": {
+				"operationId": "Transit_networkAlerts",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/AlertDto"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Active service alerts; an empty list unless the network has the alerts capability"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/pack": {
+			"get": {
+				"operationId": "Pack_pack",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "header",
+						"name": "If-None-Match",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PackDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Offline pack of a network; re-download when the manifest's pack_version changes. Strong ETag, 304 on If-None-Match, gzip when accepted."
 					},
 					"default": {
 						"content": {
