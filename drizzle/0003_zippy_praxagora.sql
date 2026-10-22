@@ -1,1 +1,0 @@
-ALTER TABLE `user_permissions` ADD `permission_id` integer REFERENCES permissions(id);

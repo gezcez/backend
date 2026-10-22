@@ -1,1 +1,0 @@
-ALTER TABLE `permissions` ADD `always_check_in_db` integer DEFAULT false NOT NULL;

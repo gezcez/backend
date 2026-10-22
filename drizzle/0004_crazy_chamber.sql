@@ -1,1 +1,0 @@
-CREATE INDEX `user_permissions_idx` ON `user_permissions` (`user_id`,`permission_id`);

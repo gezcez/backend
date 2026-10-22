@@ -1,1 +1,0 @@
-ALTER TABLE `providers` ADD `image_url` text;
