@@ -234,7 +234,7 @@ describe("tracker engine with the fake provider", () => {
 		const dir = dataDir()
 		const now = Math.floor(Date.now() / 1000)
 		const old = now - 10 * 86400
-		let h = await boot(dir)
+		const h = await boot(dir)
 		h.script([feed(old, [vehicle("R", old)]), feed(now - 20, [vehicle("R", now - 20)])])
 		await h.engine.pollOnce(h.bindingId)
 		await h.engine.pollOnce(h.bindingId)
