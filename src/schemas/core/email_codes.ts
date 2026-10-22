@@ -16,6 +16,8 @@ export const emailCodesTable = sqliteTable(
 		/** The user the code proves, when the address belongs to one at start time. */
 		user_id: int(),
 		auth_request_id: text(),
+		/** Language of the emails sent for this flow (resends reuse it). */
+		locale: text().$type<"tr" | "en">().notNull().default("tr"),
 		code_hash: text().notNull(),
 		attempts: int().notNull().default(0),
 		max_attempts: int().notNull().default(5),

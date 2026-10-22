@@ -12,8 +12,15 @@
     {
       "idx": 1,
       "version": "6",
-      "when": 1792681200384,
-      "tag": "0001_catalog_providers",
+      "when": 1792680741881,
+      "tag": "0001_email_code_locale",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792682680496,
+      "tag": "0002_catalog_providers",
       "breakpoints": true
     }
   ]

@@ -63,3 +63,18 @@ describe("ip utils", () => {
 		expect(a).not.toBe(c)
 	})
 })
+
+describe("text utils", () => {
+	test("maskEmail", async () => {
+		const { maskEmail } = await import("./text.utils")
+		expect(maskEmail("ece@gmail.com")).toBe("e***@gmail.com")
+		expect(maskEmail("broken")).toBe("***")
+	})
+
+	test("initials use Turkish upper-casing", async () => {
+		const { initials } = await import("./text.utils")
+		expect(initials("ilker yılmaz")).toBe("İY")
+		expect(initials("  Ada  ")).toBe("A")
+		expect(initials("Ali Veli Deli")).toBe("AD")
+	})
+})

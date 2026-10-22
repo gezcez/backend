@@ -1,6 +1,7 @@
 // response.ts
 // Response envelope and pagination shapes (plan sections 3.2 and 7.0).
 
+import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
 import { ERROR_CODE_LIST, type ErrorCode, type ErrorDetails } from "./errors"
 
@@ -61,4 +62,14 @@ export function pageSchema<T extends z.ZodType>(item: T) {
 		prev_cursor: z.string().nullable(),
 		total: z.number().int().nullable(),
 	})
+}
+
+/**
+ * createZodDto for schemas TypeScript cannot extend as a class (unions). The class is named so
+ * the OpenAPI component gets a stable name.
+ */
+export function namedZodDto<T extends z.ZodType>(name: string, schema: T) {
+	const dto = createZodDto(schema)
+	Object.defineProperty(dto, "name", { value: name })
+	return dto
 }

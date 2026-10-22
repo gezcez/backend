@@ -10,6 +10,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from "nestjs-zod"
 import { ConfigModule, type AppConfig } from "@common/config"
 import { pinoHttpParams } from "@common/logger"
 import {
+	AuthenticationGuard,
 	GezcezExceptionFilter,
 	GezcezThrottlerGuard,
 	ResponseInterceptor,
@@ -17,14 +18,19 @@ import {
 import { RATE_LIMIT_PRESETS, RateLimitModule } from "@common/rate-limits"
 import { clientIp } from "@common/utils"
 import { DatabaseModule } from "@db"
+import { AccountModule } from "@services/account/account.module"
+import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
-import { KeysModule } from "@services/oauth/keys.module"
 import { NetworksModule } from "@services/networks/networks.module"
+import { KeysModule } from "@services/oauth/keys.module"
+import { OAuthModule } from "@services/oauth/oauth.module"
 import { ProvidersModule } from "@services/providers/providers.module"
+import { RolesModule } from "@services/roles/roles.module"
 import { SystemModule } from "@services/system/system.module"
 import { TransitModule } from "@services/transit/transit.module"
+import { UsersModule } from "@services/users/users.module"
 
 @Module({})
 export class AppModule {
@@ -51,6 +57,11 @@ export class AppModule {
 				SystemModule,
 				KeysModule,
 				EmailModule,
+				AuditModule,
+				AccountModule,
+				OAuthModule,
+				RolesModule,
+				UsersModule,
 				// Transit catalog, providers and static data (P3).
 				ProvidersModule,
 				NetworksModule,
@@ -61,7 +72,9 @@ export class AppModule {
 			],
 			providers: [
 				{ provide: APP_FILTER, useClass: GezcezExceptionFilter },
+				// Guards run in this order: the default IP limit, then the bearer token check.
 				{ provide: APP_GUARD, useClass: GezcezThrottlerGuard },
+				{ provide: APP_GUARD, useClass: AuthenticationGuard },
 				{ provide: APP_PIPE, useClass: ZodValidationPipe },
 				// Order matters: the serializer strips the return value first, then the envelope wraps it.
 				{ provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },

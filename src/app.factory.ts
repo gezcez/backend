@@ -11,11 +11,12 @@ import cookieParser from "cookie-parser"
 import type { Request, Response } from "express"
 import { Logger as PinoLogger } from "nestjs-pino"
 import type { AppConfig } from "@common/config"
+import { API_PREFIX } from "@common/constants"
 import { requestIdMiddleware } from "@common/middlewares"
 import { buildOpenApiDocument } from "@common/openapi"
 import { AppModule } from "./app.module"
 
-export const API_PREFIX = "v1"
+export { API_PREFIX }
 
 // Brand colours (cream, navy, amber) for the API reference page.
 const DOCS_CSS = `

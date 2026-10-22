@@ -2,6 +2,7 @@
 
 export * from "./crypto.utils"
 export * from "./ip.utils"
+export * from "./text.utils"
 export * from "./geo.utils"
 export * from "./time.utils"
 export * from "./pagination.utils"
