@@ -85,10 +85,11 @@ export class ModerationService {
 			throw new GezcezError("CONFLICT", "The user is not banned")
 		this.assertCanModerate(executorId, user.id)
 		this.repository.unban({ userId: user.id, by: executorId, reason, now: new Date() })
+		const after = user.deletion_due_at ? "pending_deletion" : "active"
 		this.audit.record("moderation.unban", {
 			req,
 			target: { type: "user", id: user.id },
-			data: { before: { status: "banned" }, after: { status: "active", reason } },
+			data: { before: { status: "banned" }, after: { status: after, reason } },
 		})
 		return { unbanned: true }
 	}

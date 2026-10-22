@@ -281,7 +281,7 @@ describe("F7 re-auth keeps the same session token", () => {
 })
 
 describe("F8 ban erases pending deletion", () => {
-	test.failing("banning a pending_deletion account cancels the deletion state", async () => {
+	test("banning a pending_deletion account cancels the deletion state", async () => {
 		const target = await signedIn("deleting@example.com")
 		void target
 		const user = db()
@@ -316,6 +316,62 @@ describe("F8 ban erases pending deletion", () => {
 		expect(unban.status).toBe(200)
 		const after = db().select().from(usersTable).where(eq(usersTable.id, user.id)).get()!
 		expect(after.status).toBe("pending_deletion") // actual: active, deletion silently cancelled
+	})
+
+	test("an expired ban on a pending_deletion account resumes the deletion at sign-in", async () => {
+		const email = "deleting-expired@example.com"
+		await signedIn(email)
+		const user = db().select().from(usersTable).where(eq(usersTable.email, email)).get()!
+		const due = new Date(Date.now() + 14 * 86_400_000)
+		db()
+			.update(usersTable)
+			.set({ status: "pending_deletion", deletion_due_at: due })
+			.where(eq(usersTable.id, user.id))
+			.run()
+		await dash.call(FIXTURE.moderator, "POST", `/v1/dash/users/${user.public_id}/ban`, {
+			public_reason: "spam spam",
+			duration: "1d",
+		})
+		db()
+			.update(usersTable)
+			.set({ banned_until: new Date(Date.now() - 1000) })
+			.where(eq(usersTable.id, user.id))
+			.run()
+		const detail = await dash.call<{ status: string }>(
+			FIXTURE.moderator,
+			"GET",
+			`/v1/dash/users/${user.public_id}`,
+		)
+		expect(detail.body.data.status).toBe("pending_deletion")
+		const browser = new TestBrowser(t)
+		await expect(browser.signIn(email)).rejects.toThrow("USER_PENDING_DELETION")
+		const after = db().select().from(usersTable).where(eq(usersTable.id, user.id)).get()!
+		expect(after).toMatchObject({ status: "pending_deletion", banned_until: null })
+		expect(after.deletion_due_at?.getTime()).toBe(due.getTime())
+	})
+
+	test("an active account returns to active, and deleted accounts are not found for a ban", async () => {
+		const email = "banned-plain@example.com"
+		await signedIn(email)
+		const user = db().select().from(usersTable).where(eq(usersTable.email, email)).get()!
+		const path = `/v1/dash/users/${user.public_id}`
+		await dash.call(FIXTURE.moderator, "POST", `${path}/ban`, {
+			public_reason: "spam spam",
+			duration: "1d",
+		})
+		await dash.call(FIXTURE.moderator, "POST", `${path}/unban`, { reason: "mistake" })
+		expect(db().select().from(usersTable).where(eq(usersTable.id, user.id)).get()!.status).toBe(
+			"active",
+		)
+		db().update(usersTable).set({ status: "deleted" }).where(eq(usersTable.id, user.id)).run()
+		const ban = await dash.call(FIXTURE.moderator, "POST", `${path}/ban`, {
+			public_reason: "spam spam",
+			duration: "1d",
+		})
+		expect(ban.body.error.code).toBe("NOT_FOUND")
+		expect(db().select().from(usersTable).where(eq(usersTable.id, user.id)).get()!.status).toBe(
+			"deleted",
+		)
 	})
 })
 

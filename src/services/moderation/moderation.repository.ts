@@ -1,10 +1,15 @@
 // moderation.repository.ts
 
 import { Injectable } from "@nestjs/common"
-import { and, eq, sql, type SQL } from "drizzle-orm"
+import { and, eq, ne, sql, type SQL } from "drizzle-orm"
 import type { Page, PageQuery } from "@common/response"
 import { InjectCoreDb, paginate, type CoreDatabase } from "@db"
-import { moderationActionsTable, usersTable, type ModerationActionRow } from "@schemas/core"
+import {
+	moderationActionsTable,
+	statusAfterBan,
+	usersTable,
+	type ModerationActionRow,
+} from "@schemas/core"
 
 export interface ModerationFilter {
 	action?: ModerationActionRow["action"]
@@ -39,9 +44,10 @@ export class ModerationRepository {
 		now: Date
 	}): ModerationActionRow {
 		return this.db.transaction((tx) => {
+			// Never over a deleted account (the service refuses it too).
 			tx.update(usersTable)
 				.set({ status: "banned", banned_until: input.until, updated_at: input.now })
-				.where(eq(usersTable.id, input.userId))
+				.where(and(eq(usersTable.id, input.userId), ne(usersTable.status, "deleted")))
 				.run()
 			return tx
 				.insert(moderationActionsTable)
@@ -62,8 +68,8 @@ export class ModerationRepository {
 	unban(input: { userId: number; by: number; reason: string; now: Date }): void {
 		this.db.transaction((tx) => {
 			tx.update(usersTable)
-				.set({ status: "active", banned_until: null, updated_at: input.now })
-				.where(eq(usersTable.id, input.userId))
+				.set({ status: statusAfterBan, banned_until: null, updated_at: input.now })
+				.where(and(eq(usersTable.id, input.userId), eq(usersTable.status, "banned")))
 				.run()
 			tx.insert(moderationActionsTable)
 				.values({

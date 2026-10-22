@@ -619,8 +619,9 @@ export class AccountService {
 	private assertNotBanned(user: UserRow, now: Date): void {
 		if (user.status !== "banned") return
 		if (user.banned_until && user.banned_until <= now) {
-			this.repository.updateUser(user.id, { status: "active", banned_until: null })
-			user.status = "active"
+			// Back to the lifecycle state the ban interrupted (a pending deletion survives).
+			user.status = this.repository.liftExpiredBan(user.id, now)?.status ?? user.status
+			if (user.status === "banned") throw new GezcezError("USER_BANNED")
 			return
 		}
 		const ban = this.repository.latestBan(user.id)

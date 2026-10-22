@@ -54,6 +54,7 @@ export interface UserListRow {
 	status: UserRow["status"]
 	email_verified_at: Date | null
 	banned_until: Date | null
+	deletion_due_at: Date | null
 	created_at: Date
 	last_active_ms: number | null
 	role_count: number
@@ -154,6 +155,7 @@ export class DashUsersRepository {
 						status: u.status,
 						email_verified_at: u.email_verified_at,
 						banned_until: u.banned_until,
+						deletion_due_at: u.deletion_due_at,
 						created_at: u.created_at,
 						last_active_ms: this.lastActive,
 						role_count: this.roleCount,
@@ -333,6 +335,7 @@ export class DashUsersRepository {
 				status: usersTable.status,
 				email_verified_at: usersTable.email_verified_at,
 				banned_until: usersTable.banned_until,
+				deletion_due_at: usersTable.deletion_due_at,
 				created_at: usersTable.created_at,
 				last_active_ms: this.lastActive,
 				role_count: this.roleCount,

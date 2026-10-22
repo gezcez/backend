@@ -50,3 +50,13 @@ export const usersTable = sqliteTable(
 
 export type UserRow = typeof usersTable.$inferSelect
 export type NewUserRow = typeof usersTable.$inferInsert
+
+/**
+ * The lifecycle state a lifted ban returns to. A ban interrupts the lifecycle (active or
+ * pending_deletion) without erasing it: deletion_due_at survives the ban, so an unban or an
+ * expired ban resumes a pending deletion instead of cancelling it. Deletion jobs key on
+ * deletion_due_at, never on status alone.
+ */
+export const statusAfterBan = sql<
+	"active" | "pending_deletion"
+>`(case when ${usersTable.deletion_due_at} is not null then 'pending_deletion' else 'active' end)`

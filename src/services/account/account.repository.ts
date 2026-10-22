@@ -2,11 +2,12 @@
 // Users and email-code flows.
 
 import { Injectable } from "@nestjs/common"
-import { and, desc, eq, isNull, lt, sql } from "drizzle-orm"
+import { and, desc, eq, isNull, lt, lte, sql } from "drizzle-orm"
 import { InjectCoreDb, type CoreDatabase } from "@db"
 import {
 	emailCodesTable,
 	moderationActionsTable,
+	statusAfterBan,
 	usersTable,
 	type EmailCodeRow,
 	type ModerationActionRow,
@@ -47,6 +48,23 @@ export class AccountRepository {
 			.where(eq(usersTable.id, id))
 			.returning()
 			.get()
+	}
+
+	/** Lifts a ban that has run out; returns the user as it is now (lifted or not). */
+	liftExpiredBan(id: number, now: Date): UserRow | undefined {
+		const lifted = this.db
+			.update(usersTable)
+			.set({ status: statusAfterBan, banned_until: null, updated_at: now })
+			.where(
+				and(
+					eq(usersTable.id, id),
+					eq(usersTable.status, "banned"),
+					lte(usersTable.banned_until, now),
+				),
+			)
+			.returning()
+			.get()
+		return lifted ?? this.findUserById(id)
 	}
 
 	setLastLogin(id: number, at: Date): void {

@@ -29,13 +29,15 @@ type ListItem = Page<{
 }>
 
 export function dashStatus(
-	user: Pick<UserRow, "status" | "banned_until" | "email_verified_at">,
+	user: Pick<UserRow, "status" | "banned_until" | "email_verified_at" | "deletion_due_at">,
 	now = new Date(),
 ): DashUserStatus {
 	switch (user.status) {
 		case "banned":
-			// An expired ban is lifted on the user's next sign-in; show it as lifted already.
-			return user.banned_until && user.banned_until <= now ? "active" : "banned"
+			// An expired ban is lifted on the user's next sign-in; show it as lifted already. A
+			// lifted ban returns to the lifecycle state it interrupted (finding 4).
+			if (!user.banned_until || user.banned_until > now) return "banned"
+			return user.deletion_due_at ? "pending_deletion" : "active"
 		case "pending_deletion":
 			return "pending_deletion"
 		default:
