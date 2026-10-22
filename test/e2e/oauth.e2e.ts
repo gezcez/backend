@@ -89,7 +89,7 @@ describe("authorization code flow", () => {
 			next: "login",
 			client: { client_id: "e2e_client", first_party: true },
 		})
-		expect(start.data.request_id).toStartWith("ar_")
+		expect(start.data.request_id).toMatch(/^ar_[0-9A-HJKMNP-TV-Z]{26}$/)
 		expect(start.data.scopes.map((scope) => scope.key)).toEqual([
 			"openid",
 			"profile",

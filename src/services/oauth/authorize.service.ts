@@ -84,7 +84,7 @@ export class AuthorizeService {
 
 		const now = new Date()
 		const request: AuthRequestRow = {
-			id: newId("ar_"),
+			id: newId("ar"),
 			client_id: app.client_id,
 			redirect_uri: redirectUri,
 			scope: formatScope(scopes),
