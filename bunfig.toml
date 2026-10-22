@@ -1,3 +1,5 @@
 [test]
 preload = ["./test/setup.ts"]
 timeout = 20000
+# Applies to tests only: Bun takes hook timeouts (beforeAll booting the app) from the --timeout
+# flag, which the test scripts in package.json pass.
