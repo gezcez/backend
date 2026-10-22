@@ -1,6 +1,6 @@
 // roles.dto.ts
 
-import { createZodDto } from "nestjs-zod"
+import { zodDto } from "@common/response"
 import { z } from "zod"
 import { PERMISSION_KEYS, type PermissionKey } from "@common/permission-keys"
 
@@ -39,4 +39,4 @@ export const PermissionListSchema = z.object({
 		}),
 	),
 })
-export class PermissionListDto extends createZodDto(PermissionListSchema) {}
+export class PermissionListDto extends zodDto(PermissionListSchema) {}

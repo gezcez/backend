@@ -2,10 +2,9 @@
 // AuditEntry (dashboard shape) and the audit log query (plan 7.2: actor, action, target_type,
 // target_id, network_id, from, to).
 
-import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
 import { DateTime, UserRefSchema } from "@common/models/dash.models"
-import { pageSchema, PageQuerySchema } from "@common/response"
+import { pageSchema, PageQuerySchema, zodDto } from "@common/response"
 
 export const AuditEntrySchema = z
 	.object({
@@ -27,7 +26,7 @@ export const AuditEntrySchema = z
 	.meta({ id: "AuditEntry" })
 export type AuditEntry = z.infer<typeof AuditEntrySchema>
 
-export class AuditPageDto extends createZodDto(pageSchema(AuditEntrySchema)) {}
+export class AuditPageDto extends zodDto(pageSchema(AuditEntrySchema)) {}
 
 const AuditFilters = {
 	/** Actor public id. */
@@ -41,13 +40,13 @@ const AuditFilters = {
 	to: z.iso.datetime().optional(),
 }
 
-export class AuditQueryDto extends createZodDto(
+export class AuditQueryDto extends zodDto(
 	PageQuerySchema.extend({
 		...AuditFilters,
 		network_id: z.coerce.number().int().optional(),
 	}),
 ) {}
 
-export class NetworkAuditQueryDto extends createZodDto(PageQuerySchema.extend(AuditFilters)) {}
+export class NetworkAuditQueryDto extends zodDto(PageQuerySchema.extend(AuditFilters)) {}
 
-export class ActivityQueryDto extends createZodDto(PageQuerySchema) {}
+export class ActivityQueryDto extends zodDto(PageQuerySchema) {}

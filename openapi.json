@@ -174,9 +174,13 @@
 						"type": "string"
 					},
 					"ip_prefix": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
 						]
 					},
 					"network_id": {
@@ -192,9 +196,13 @@
 						]
 					},
 					"request_id": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
 						]
 					},
 					"severity": {
@@ -206,21 +214,33 @@
 						"type": "string"
 					},
 					"target_id": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
 						]
 					},
 					"target_label": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
 						]
 					},
 					"target_type": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
 						]
 					}
 				},
@@ -250,16 +270,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -484,10 +512,14 @@
 						"type": "string"
 					},
 					"request_id": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"scopes": {
 						"items": {
@@ -537,9 +569,13 @@
 						]
 					},
 					"private_reason": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
 						]
 					},
 					"public_reason": {
@@ -657,10 +693,14 @@
 						"$ref": "#/components/schemas/UserStatus"
 					},
 					"username": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -716,9 +756,13 @@
 						"$ref": "#/components/schemas/UserStatus"
 					},
 					"username": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
 						]
 					}
 				},
@@ -743,16 +787,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -1371,9 +1423,13 @@
 								"type": "string"
 							},
 							"username": {
-								"type": [
-									"string",
-									"null"
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"type": "null"
+									}
 								]
 							}
 						},
@@ -2155,9 +2211,13 @@
 									"type": "string"
 								},
 								"device_hint": {
-									"type": [
-										"string",
-										"null"
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"type": "null"
+										}
 									]
 								},
 								"id": {
@@ -2584,9 +2644,13 @@
 						"type": "string"
 					},
 					"username": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
 						]
 					}
 				},
@@ -2638,10 +2702,14 @@
 						"type": "string"
 					},
 					"ip_prefix": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"kind": {
 						"enum": [
@@ -2687,10 +2755,14 @@
 			"VersionDto": {
 				"properties": {
 					"build_time": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"env": {
 						"type": "string"

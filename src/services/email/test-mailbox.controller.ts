@@ -4,14 +4,14 @@
 
 import { Controller, Get, Module, Query } from "@nestjs/common"
 import { ApiExcludeController } from "@nestjs/swagger"
-import { createZodDto } from "nestjs-zod"
+import { zodDto } from "@common/response"
 import { z } from "zod"
 import { GezcezError } from "@common/errors"
 import { Public } from "@common/middlewares"
 import { EmailService } from "./email.service"
 import { MemoryTransport } from "./email.transports"
 
-class MailboxQueryDto extends createZodDto(z.object({ to: z.string().min(3) })) {}
+class MailboxQueryDto extends zodDto(z.object({ to: z.string().min(3) })) {}
 
 @ApiExcludeController()
 @Public()

@@ -1,16 +1,16 @@
 // system.dto.ts
 
-import { createZodDto } from "nestjs-zod"
+import { zodDto } from "@common/response"
 import { z } from "zod"
 
 export const HealthSchema = z.object({ status: z.literal("ok") })
-export class HealthDto extends createZodDto(HealthSchema) {}
+export class HealthDto extends zodDto(HealthSchema) {}
 
 export const ReadySchema = z.object({
 	ready: z.boolean(),
 	checks: z.array(z.object({ name: z.string(), ok: z.boolean() })),
 })
-export class ReadyDto extends createZodDto(ReadySchema) {}
+export class ReadyDto extends zodDto(ReadySchema) {}
 
 export const VersionSchema = z.object({
 	version: z.string(),
@@ -20,4 +20,4 @@ export const VersionSchema = z.object({
 	env: z.string(),
 	uptime_s: z.number().int(),
 })
-export class VersionDto extends createZodDto(VersionSchema) {}
+export class VersionDto extends zodDto(VersionSchema) {}

@@ -1,7 +1,6 @@
 // dash-users.dto.ts
 // Dashboard user search, detail, admin sessions and global role assignment (plan 6.3, 7.2).
 
-import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
 import {
 	DateTime,
@@ -11,7 +10,7 @@ import {
 	RoleOperationsSchema,
 	UserRefSchema,
 } from "@common/models/dash.models"
-import { pageSchema, PageQuerySchema } from "@common/response"
+import { pageSchema, PageQuerySchema, zodDto } from "@common/response"
 import { RoleRefSchema } from "@services/roles/roles.dto"
 
 export const UserStatusSchema = z
@@ -32,9 +31,9 @@ export const DashUserListItemSchema = z
 	})
 	.meta({ id: "DashUserListItem" })
 
-export class DashUserPageDto extends createZodDto(pageSchema(DashUserListItemSchema)) {}
+export class DashUserPageDto extends zodDto(pageSchema(DashUserListItemSchema)) {}
 
-export class DashUserQueryDto extends createZodDto(
+export class DashUserQueryDto extends zodDto(
 	PageQuerySchema.extend({
 		status: UserStatusSchema.optional(),
 		/** Role key, held anywhere (or in `network_id` when both are given). */
@@ -55,7 +54,7 @@ const BanBase = z.object({
 })
 export const BanSchema = BanBase.meta({ id: "Ban" })
 /** Named after the component (class names become schema names). */
-export class Ban extends createZodDto(BanBase) {}
+export class Ban extends zodDto(BanBase) {}
 
 export const RoleAssignmentSchema = z
 	.object({
@@ -84,9 +83,9 @@ export const DashUserSchema = z.object({
 	roles: z.array(RoleAssignmentSchema),
 	ban: BanSchema.nullable(),
 })
-export class DashUser extends createZodDto(DashUserSchema) {}
+export class DashUser extends zodDto(DashUserSchema) {}
 
-export class RevealEmailDto extends createZodDto(z.object({ email: z.email() })) {}
+export class RevealEmailDto extends zodDto(z.object({ email: z.email() })) {}
 
 export const UserSessionSchema = z.object({
 	/** `sso_<session id>` or `rf_<refresh family id>`. */
@@ -99,13 +98,13 @@ export const UserSessionSchema = z.object({
 	last_used_at: DateTime.nullable(),
 	expires_at: DateTime,
 })
-export class UserSession extends createZodDto(UserSessionSchema) {}
+export class UserSession extends zodDto(UserSessionSchema) {}
 
-export class ReasonDto extends createZodDto(ReasonSchema) {}
+export class ReasonDto extends zodDto(ReasonSchema) {}
 export { RevokedCountDto } from "@services/account/account.dto"
 
-export class RoleOperationsDto extends createZodDto(RoleOperationsSchema) {}
-export class RoleOperationResultsDto extends createZodDto(
+export class RoleOperationsDto extends zodDto(RoleOperationsSchema) {}
+export class RoleOperationResultsDto extends zodDto(
 	z.object({
 		results: z.array(
 			z.object({
