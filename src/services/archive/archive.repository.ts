@@ -78,7 +78,7 @@ export class ArchiveRepository {
 	private stmt(text: string): Statement<Row> {
 		let statement = this.statements.get(text)
 		if (!statement) {
-			statement = this.db.$client.query<Row, (string | number)[]>(text)
+			statement = this.db.$client.query<Row, (string | number | null)[]>(text)
 			this.statements.set(text, statement)
 		}
 		return statement
@@ -217,6 +217,29 @@ export class ArchiveRepository {
 			bindingId,
 		)
 		return row?.lo === null || row?.lo === undefined ? null : Number(row.lo)
+	}
+
+	/**
+	 * Id of a vehicle in vts.db, created or widened to [firstSeen, lastSeen] (history imports
+	 * share vehicle ids with live data).
+	 */
+	ensureVehicle(
+		bindingId: number,
+		externalId: string,
+		plate: string | null,
+		firstSeen: number,
+		lastSeen: number,
+	): number {
+		const row = this.stmt(
+			`INSERT INTO vehicles (binding_id, external_id, plate, first_seen_at, last_seen_at)
+			 VALUES (?, ?, ?, ?, ?)
+			 ON CONFLICT (binding_id, external_id) DO UPDATE SET
+			   plate = coalesce(vehicles.plate, excluded.plate),
+			   first_seen_at = min(vehicles.first_seen_at, excluded.first_seen_at),
+			   last_seen_at = max(vehicles.last_seen_at, excluded.last_seen_at)
+			 RETURNING id`,
+		).get(bindingId, externalId, plate, firstSeen, lastSeen)
+		return Number(row!.id)
 	}
 
 	// ---- archive_manifest ------------------------------------------------------------------------
