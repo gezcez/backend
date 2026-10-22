@@ -53,6 +53,10 @@ export type AuditAction =
 	| "account.deletion_scheduled"
 	| "account.deletion_cancelled"
 	| "users.deleted"
+	| "provider.kill"
+	| "provider.unkill"
+	| "catalog.sync"
+	| "tracker.control"
 
 export interface AuditContext {
 	req?: Request

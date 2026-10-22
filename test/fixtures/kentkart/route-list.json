@@ -1,0 +1,52 @@
+{
+	"result": { "code": 0, "message": "OK", "authType": "4", "cmd": "route/list" },
+	"routeList": [
+		{
+			"agencyId": "1",
+			"agencyName": "UlaşımPark",
+			"displayRouteCode": "41C",
+			"name": "UMUTTEPE - İZMİT - MAŞUKİYE",
+			"routeCode": "42041",
+			"type": "route",
+			"routeType": "3",
+			"routeColor": "0B4F8A",
+			"routeTextColor": "FFFFFF"
+		},
+		{
+			"agencyId": "1",
+			"agencyName": "UlaşımPark",
+			"displayRouteCode": "41K",
+			"name": "KURUÇEŞME - İZMİT",
+			"routeCode": "41041",
+			"type": "route",
+			"routeType": "3"
+		},
+		{
+			"agencyId": "2",
+			"agencyName": "Akçaray",
+			"displayRouteCode": "T1",
+			"name": "AKÇARAY TRAMVAY",
+			"routeCode": "40001",
+			"type": "route",
+			"routeType": "0",
+			"routeColor": "#E30613"
+		},
+		{
+			"agencyId": "1",
+			"agencyName": "UlaşımPark",
+			"displayRouteCode": "GÖREVLİ6",
+			"name": "GÖREVLİ6-GÖREVLİ6",
+			"routeCode": "41906",
+			"type": "route",
+			"routeType": "3"
+		},
+		{
+			"agencyId": "1",
+			"agencyName": "UlaşımPark",
+			"displayRouteCode": "X",
+			"name": "Bilet satış noktası",
+			"routeCode": "1",
+			"type": "poi"
+		}
+	]
+}

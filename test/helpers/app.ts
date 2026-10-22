@@ -48,6 +48,9 @@ export function testConfig(dataDir: string, env: Record<string, string> = {}): A
 		PORT: "0",
 		// Suites send many codes from one IP; ratelimit.e2e.ts tests the real limits.
 		RATE_LIMIT_SCALE: "50",
+		// Suites start the tracker and the static sync themselves when they need them.
+		TRACKER_RUNNER: "off",
+		TRANSIT_SYNC_AT: "off",
 		...env,
 	})
 }

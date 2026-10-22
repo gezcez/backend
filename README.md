@@ -54,6 +54,7 @@ src/
 drizzle/core/           generated SQL migrations (committed)
 eslint-rules/           repositories-only, no-orm-in-controllers, drizzle imports-only
 scripts/                seed, migrate, export-openapi
+infra/tiles/            tiles.gezcez.com Worker, map styles and basemap build (own package)
 test/helpers/app.ts     boots the real app on a temp DATA_DIR for e2e tests
 ```
 
@@ -102,6 +103,14 @@ Litestream replicating `core.db` to R2 (`litestream.yml`); a one-shot `restore` 
 restores from R2 when the volume is empty. Copy `deploy/.env.example` to `deploy/.env`, add
 `deploy/cloudflared-credentials.json`, then `docker compose up -d` in `deploy/`.
 `deploy/restore.md` is the restore runbook.
+
+## Tile service
+
+`infra/tiles/` holds the basemap the mobile app and the dashboard share: a Protomaps Turkey
+extract on R2 behind a Cloudflare Worker at `tiles.gezcez.com`, the `gezcez-light` and
+`gezcez-dark` MapLibre styles, and the build and upload scripts. It is a separate package with its
+own lockfile and workflow (`.github/workflows/tiles.yml`, deployed by `tiles-v*` tags). Setup and
+operation: [infra/tiles/README.md](infra/tiles/README.md).
 
 ## Test mode for client e2e suites
 

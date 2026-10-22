@@ -173,19 +173,27 @@ describe("GET and PATCH /v1/me", () => {
 describe("@UseAuthorization", () => {
 	test("dashboard routes need the dash scope and the permission", async () => {
 		const admin = await accessTokenFor(t, "admin@test.gezcez.com")
-		const list = await api<{
-			keys: { key: string; orphaned: boolean }[]
-			routes: { method: string; path: string; permission_key: string }[]
-		}>("/v1/dash/permissions", admin.accessToken)
+		const list = await api<
+			{ key: string; scope: string; sudo: boolean; description: string }[]
+		>("/v1/dash/permissions", admin.accessToken)
 		expect(list.status).toBe(200)
-		expect(list.body.data.keys.map((key) => key.key)).toContain("tracker.control")
-		expect(list.body.data.routes).toContainEqual(
-			expect.objectContaining({
-				method: "GET",
-				path: "/v1/dash/permissions",
-				permission_key: "permissions.read",
-			}),
-		)
+		expect(list.body.data).toContainEqual({
+			key: "tracker.control",
+			scope: "network",
+			sudo: expect.any(Boolean),
+			description: expect.any(String),
+		})
+		expect(list.body.data.find((key) => key.key === "roles.write")?.sudo).toBe(true)
+		const registry = await api<
+			{ key: string; routes: { method: string; path: string; sudo: boolean }[] }[]
+		>("/v1/dash/permissions/registry", admin.accessToken)
+		expect(
+			registry.body.data.find((entry) => entry.key === "permissions.read")?.routes,
+		).toContainEqual({
+			method: "GET",
+			path: "/v1/dash/permissions",
+			sudo: false,
+		})
 
 		const moderator = await accessTokenFor(t, "moderator@test.gezcez.com")
 		const missing = await api("/v1/dash/permissions", moderator.accessToken)
