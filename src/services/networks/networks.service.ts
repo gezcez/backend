@@ -64,6 +64,19 @@ export class NetworksService {
 		private readonly health: BindingHealthRegistry,
 	) {}
 
+	private readonly changeListeners: (() => void)[] = []
+
+	/** Called after catalog writes that affect pollers (kill switch, binding edits). */
+	onCatalogChanged(listener: () => void): void {
+		this.changeListeners.push(listener)
+	}
+
+	setProviderEnabled(key: string, enabled: boolean, reason: string, userId: number | null): void {
+		this.provider(key)
+		this.repository.setProviderEnabled(key, enabled, reason, userId)
+		for (const listener of this.changeListeners) listener()
+	}
+
 	listCities(publicOnly = true): CityRow[] {
 		return this.repository.listCities(publicOnly ? PUBLIC : undefined)
 	}

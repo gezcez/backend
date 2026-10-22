@@ -3,6 +3,7 @@
 // endpoints can derive network status without importing the tracker module.
 
 import { Injectable } from "@nestjs/common"
+import type { CredentialStatus } from "@services/providers/transit-provider.interface"
 
 export type BindingRuntimeState = "ok" | "degraded" | "down" | "paused" | "killed" | "unknown"
 
@@ -11,6 +12,8 @@ export interface BindingRuntime {
 	message?: string | null
 	/** Unix seconds of the last accepted feed. */
 	lastFeedTs?: number | null
+	/** Upstream token health as the tracker sees it (never the token). */
+	credentials?: CredentialStatus | null
 }
 
 export type BindingRuntimeSource = (bindingId: number) => BindingRuntime | undefined

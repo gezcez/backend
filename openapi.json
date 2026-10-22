@@ -952,6 +952,1114 @@
 				],
 				"type": "object"
 			},
+			"DashBindingDto": {
+				"properties": {
+					"capabilities": {
+						"properties": {
+							"alerts": {
+								"type": "boolean"
+							},
+							"bike_share": {
+								"const": false,
+								"type": "boolean"
+							},
+							"card": {
+								"anyOf": [
+									{
+										"properties": {
+											"balance": {
+												"type": "boolean"
+											},
+											"history": {
+												"type": "boolean"
+											},
+											"label": {
+												"properties": {
+													"en": {
+														"type": "string"
+													},
+													"tr": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"tr",
+													"en"
+												],
+												"type": "object"
+											},
+											"number_format": {
+												"type": [
+													"string",
+													"null"
+												]
+											},
+											"requires_provider_account": {
+												"type": "boolean"
+											}
+										},
+										"required": [
+											"balance",
+											"history",
+											"requires_provider_account",
+											"number_format",
+											"label"
+										],
+										"type": "object"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"realtime_departures": {
+								"enum": [
+									"none",
+									"estimated",
+									"live"
+								],
+								"type": "string"
+							},
+							"realtime_vehicles": {
+								"type": "boolean"
+							},
+							"routes": {
+								"type": "boolean"
+							},
+							"shapes": {
+								"type": "boolean"
+							},
+							"stops": {
+								"type": "boolean"
+							},
+							"timetables": {
+								"type": "boolean"
+							},
+							"trip_planner": {
+								"const": false,
+								"type": "boolean"
+							},
+							"trip_updates": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"stops",
+							"routes",
+							"timetables",
+							"shapes",
+							"realtime_vehicles",
+							"realtime_departures",
+							"trip_updates",
+							"alerts",
+							"card",
+							"trip_planner",
+							"bike_share"
+						],
+						"type": "object"
+					},
+					"config": {
+						"additionalProperties": {},
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"disabled_reason": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"external_ref": {
+						"type": "string"
+					},
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"idle_poll_interval_s": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"last_feed_at": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"poll_interval_s": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"provider_key": {
+						"type": "string"
+					},
+					"replayed": {
+						"description": "Served by the fake provider (PROVIDER_REPLAY)",
+						"type": "boolean"
+					},
+					"state": {
+						"enum": [
+							"ok",
+							"degraded",
+							"down",
+							"paused",
+							"killed",
+							"unknown"
+						],
+						"type": "string"
+					},
+					"state_message": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"status": {
+						"enum": [
+							"active",
+							"paused",
+							"disabled"
+						],
+						"type": "string"
+					},
+					"updated_at": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"network_id",
+					"provider_key",
+					"external_ref",
+					"config",
+					"capabilities",
+					"poll_interval_s",
+					"idle_poll_interval_s",
+					"status",
+					"disabled_reason",
+					"state",
+					"state_message",
+					"last_feed_at",
+					"replayed",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object"
+			},
+			"DashCityDto": {
+				"properties": {
+					"bbox": {
+						"anyOf": [
+							{
+								"description": "[west, south, east, north]",
+								"items": false,
+								"maxItems": 4,
+								"minItems": 4,
+								"prefixItems": [
+									{
+										"type": "number"
+									},
+									{
+										"type": "number"
+									},
+									{
+										"type": "number"
+									},
+									{
+										"type": "number"
+									}
+								],
+								"type": "array"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"center_lat": {
+						"items": {
+							"type": "number"
+						},
+						"type": "array"
+					},
+					"center_lon": {
+						"items": {
+							"type": "number"
+						},
+						"type": "array"
+					},
+					"country_code": {
+						"type": "string"
+					},
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"name": {
+						"properties": {
+							"en": {
+								"type": "string"
+							},
+							"tr": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"tr",
+							"en"
+						],
+						"type": "object"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"sort": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"status": {
+						"enum": [
+							"draft",
+							"public",
+							"hidden"
+						],
+						"type": "string"
+					},
+					"timezone": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"slug",
+					"name",
+					"country_code",
+					"timezone",
+					"center_lat",
+					"center_lon",
+					"bbox",
+					"status",
+					"sort"
+				],
+				"type": "object"
+			},
+			"DashNetworkDto": {
+				"properties": {
+					"bindings": {
+						"items": {
+							"properties": {
+								"capabilities": {
+									"properties": {
+										"alerts": {
+											"type": "boolean"
+										},
+										"bike_share": {
+											"const": false,
+											"type": "boolean"
+										},
+										"card": {
+											"anyOf": [
+												{
+													"properties": {
+														"balance": {
+															"type": "boolean"
+														},
+														"history": {
+															"type": "boolean"
+														},
+														"label": {
+															"properties": {
+																"en": {
+																	"type": "string"
+																},
+																"tr": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"tr",
+																"en"
+															],
+															"type": "object"
+														},
+														"number_format": {
+															"type": [
+																"string",
+																"null"
+															]
+														},
+														"requires_provider_account": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"balance",
+														"history",
+														"requires_provider_account",
+														"number_format",
+														"label"
+													],
+													"type": "object"
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"realtime_departures": {
+											"enum": [
+												"none",
+												"estimated",
+												"live"
+											],
+											"type": "string"
+										},
+										"realtime_vehicles": {
+											"type": "boolean"
+										},
+										"routes": {
+											"type": "boolean"
+										},
+										"shapes": {
+											"type": "boolean"
+										},
+										"stops": {
+											"type": "boolean"
+										},
+										"timetables": {
+											"type": "boolean"
+										},
+										"trip_planner": {
+											"const": false,
+											"type": "boolean"
+										},
+										"trip_updates": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"stops",
+										"routes",
+										"timetables",
+										"shapes",
+										"realtime_vehicles",
+										"realtime_departures",
+										"trip_updates",
+										"alerts",
+										"card",
+										"trip_planner",
+										"bike_share"
+									],
+									"type": "object"
+								},
+								"config": {
+									"additionalProperties": {},
+									"propertyNames": {
+										"type": "string"
+									},
+									"type": "object"
+								},
+								"created_at": {
+									"type": "string"
+								},
+								"disabled_reason": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"external_ref": {
+									"type": "string"
+								},
+								"id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"idle_poll_interval_s": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"last_feed_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"network_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"poll_interval_s": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"provider_key": {
+									"type": "string"
+								},
+								"replayed": {
+									"description": "Served by the fake provider (PROVIDER_REPLAY)",
+									"type": "boolean"
+								},
+								"state": {
+									"enum": [
+										"ok",
+										"degraded",
+										"down",
+										"paused",
+										"killed",
+										"unknown"
+									],
+									"type": "string"
+								},
+								"state_message": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"status": {
+									"enum": [
+										"active",
+										"paused",
+										"disabled"
+									],
+									"type": "string"
+								},
+								"updated_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"id",
+								"network_id",
+								"provider_key",
+								"external_ref",
+								"config",
+								"capabilities",
+								"poll_interval_s",
+								"idle_poll_interval_s",
+								"status",
+								"disabled_reason",
+								"state",
+								"state_message",
+								"last_feed_at",
+								"replayed",
+								"created_at",
+								"updated_at"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"city_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"colour": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					},
+					"network_status": {
+						"enum": [
+							"active",
+							"degraded",
+							"disabled"
+						],
+						"type": "string"
+					},
+					"network_status_message": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"operator_name": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"status": {
+						"enum": [
+							"draft",
+							"public",
+							"hidden"
+						],
+						"type": "string"
+					},
+					"updated_at": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"city_id",
+					"slug",
+					"name",
+					"operator_name",
+					"colour",
+					"status",
+					"network_status",
+					"network_status_message",
+					"bindings",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object"
+			},
+			"DashProviderDetailDto": {
+				"properties": {
+					"adapter": {
+						"description": "An adapter for this key exists in this build",
+						"type": "boolean"
+					},
+					"binding_count": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"capabilities": {
+						"anyOf": [
+							{
+								"properties": {
+									"alerts": {
+										"type": "boolean"
+									},
+									"bike_share": {
+										"const": false,
+										"type": "boolean"
+									},
+									"card": {
+										"anyOf": [
+											{
+												"properties": {
+													"balance": {
+														"type": "boolean"
+													},
+													"history": {
+														"type": "boolean"
+													},
+													"label": {
+														"properties": {
+															"en": {
+																"type": "string"
+															},
+															"tr": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"tr",
+															"en"
+														],
+														"type": "object"
+													},
+													"number_format": {
+														"type": [
+															"string",
+															"null"
+														]
+													},
+													"requires_provider_account": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"balance",
+													"history",
+													"requires_provider_account",
+													"number_format",
+													"label"
+												],
+												"type": "object"
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"realtime_departures": {
+										"enum": [
+											"none",
+											"estimated",
+											"live"
+										],
+										"type": "string"
+									},
+									"realtime_vehicles": {
+										"type": "boolean"
+									},
+									"routes": {
+										"type": "boolean"
+									},
+									"shapes": {
+										"type": "boolean"
+									},
+									"stops": {
+										"type": "boolean"
+									},
+									"timetables": {
+										"type": "boolean"
+									},
+									"trip_planner": {
+										"const": false,
+										"type": "boolean"
+									},
+									"trip_updates": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"stops",
+									"routes",
+									"timetables",
+									"shapes",
+									"realtime_vehicles",
+									"realtime_departures",
+									"trip_updates",
+									"alerts",
+									"card",
+									"trip_planner",
+									"bike_share"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"config_schema": {
+						"anyOf": [
+							{
+								"additionalProperties": {},
+								"propertyNames": {
+									"type": "string"
+								},
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"credentials": {
+						"items": {
+							"properties": {
+								"expires_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"failures": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"realm": {
+									"type": "string"
+								},
+								"refreshed_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"secrets_set": {
+									"additionalProperties": {
+										"type": "boolean"
+									},
+									"propertyNames": {
+										"type": "string"
+									},
+									"type": "object"
+								},
+								"state": {
+									"enum": [
+										"ok",
+										"missing",
+										"refreshing",
+										"auth_failed",
+										"unknown"
+									],
+									"type": "string"
+								}
+							},
+							"required": [
+								"realm",
+								"state",
+								"expires_at",
+								"refreshed_at",
+								"failures",
+								"secrets_set"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"disabled_reason": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"enabled": {
+						"description": "Dashboard kill switch (providers.enabled)",
+						"type": "boolean"
+					},
+					"env_enabled": {
+						"description": "PROVIDER_<KEY>_ENABLED hard kill",
+						"type": "boolean"
+					},
+					"image_url": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"key": {
+						"type": "string"
+					},
+					"legal_note": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"name": {
+						"type": "string"
+					},
+					"pulled_data": {
+						"items": {
+							"properties": {
+								"can_optout": {
+									"type": "boolean"
+								},
+								"details": {
+									"type": "string"
+								},
+								"is_collected": {
+									"type": "boolean"
+								},
+								"key": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"key",
+								"is_collected",
+								"can_optout",
+								"details"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"rate_hint": {
+						"anyOf": [
+							{
+								"properties": {
+									"host": {
+										"type": "string"
+									},
+									"requests_per_second": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"host",
+									"requests_per_second"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"replayed": {
+						"type": "boolean"
+					},
+					"url": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"key",
+					"name",
+					"url",
+					"image_url",
+					"enabled",
+					"env_enabled",
+					"disabled_reason",
+					"adapter",
+					"replayed",
+					"capabilities",
+					"pulled_data",
+					"legal_note",
+					"binding_count",
+					"config_schema",
+					"rate_hint",
+					"credentials"
+				],
+				"type": "object"
+			},
+			"DashProviderDto": {
+				"properties": {
+					"adapter": {
+						"description": "An adapter for this key exists in this build",
+						"type": "boolean"
+					},
+					"binding_count": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"capabilities": {
+						"anyOf": [
+							{
+								"properties": {
+									"alerts": {
+										"type": "boolean"
+									},
+									"bike_share": {
+										"const": false,
+										"type": "boolean"
+									},
+									"card": {
+										"anyOf": [
+											{
+												"properties": {
+													"balance": {
+														"type": "boolean"
+													},
+													"history": {
+														"type": "boolean"
+													},
+													"label": {
+														"properties": {
+															"en": {
+																"type": "string"
+															},
+															"tr": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"tr",
+															"en"
+														],
+														"type": "object"
+													},
+													"number_format": {
+														"type": [
+															"string",
+															"null"
+														]
+													},
+													"requires_provider_account": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"balance",
+													"history",
+													"requires_provider_account",
+													"number_format",
+													"label"
+												],
+												"type": "object"
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"realtime_departures": {
+										"enum": [
+											"none",
+											"estimated",
+											"live"
+										],
+										"type": "string"
+									},
+									"realtime_vehicles": {
+										"type": "boolean"
+									},
+									"routes": {
+										"type": "boolean"
+									},
+									"shapes": {
+										"type": "boolean"
+									},
+									"stops": {
+										"type": "boolean"
+									},
+									"timetables": {
+										"type": "boolean"
+									},
+									"trip_planner": {
+										"const": false,
+										"type": "boolean"
+									},
+									"trip_updates": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"stops",
+									"routes",
+									"timetables",
+									"shapes",
+									"realtime_vehicles",
+									"realtime_departures",
+									"trip_updates",
+									"alerts",
+									"card",
+									"trip_planner",
+									"bike_share"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"disabled_reason": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"enabled": {
+						"description": "Dashboard kill switch (providers.enabled)",
+						"type": "boolean"
+					},
+					"env_enabled": {
+						"description": "PROVIDER_<KEY>_ENABLED hard kill",
+						"type": "boolean"
+					},
+					"image_url": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"key": {
+						"type": "string"
+					},
+					"legal_note": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"name": {
+						"type": "string"
+					},
+					"pulled_data": {
+						"items": {
+							"properties": {
+								"can_optout": {
+									"type": "boolean"
+								},
+								"details": {
+									"type": "string"
+								},
+								"is_collected": {
+									"type": "boolean"
+								},
+								"key": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"key",
+								"is_collected",
+								"can_optout",
+								"details"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"replayed": {
+						"type": "boolean"
+					},
+					"url": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"key",
+					"name",
+					"url",
+					"image_url",
+					"enabled",
+					"env_enabled",
+					"disabled_reason",
+					"adapter",
+					"replayed",
+					"capabilities",
+					"pulled_data",
+					"legal_note",
+					"binding_count"
+				],
+				"type": "object"
+			},
 			"DeviceAccountsDto": {
 				"properties": {
 					"accounts": {
@@ -2265,6 +3373,23 @@
 				],
 				"type": "object"
 			},
+			"ProviderKillDto": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"reason": {
+						"maxLength": 500,
+						"minLength": 3,
+						"type": "string"
+					}
+				},
+				"required": [
+					"enabled",
+					"reason"
+				],
+				"type": "object"
+			},
 			"ProviderPublicDto": {
 				"properties": {
 					"enabled": {
@@ -3223,6 +4348,204 @@
 				},
 				"required": [
 					"session_id"
+				],
+				"type": "object"
+			},
+			"SyncResultDto": {
+				"properties": {
+					"binding_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"counts": {
+						"additionalProperties": {
+							"type": "number"
+						},
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"error": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"run_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"status": {
+						"enum": [
+							"ok",
+							"unchanged",
+							"failed"
+						],
+						"type": "string"
+					},
+					"version_id": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"warnings": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"binding_id",
+					"run_id",
+					"status",
+					"version_id",
+					"counts",
+					"warnings",
+					"error"
+				],
+				"type": "object"
+			},
+			"SyncRunPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"properties": {
+								"binding_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"counts": {
+									"anyOf": [
+										{
+											"additionalProperties": {
+												"type": "number"
+											},
+											"propertyNames": {
+												"type": "string"
+											},
+											"type": "object"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"error": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"finished_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"started_at": {
+									"type": "string"
+								},
+								"status": {
+									"enum": [
+										"running",
+										"ok",
+										"unchanged",
+										"failed"
+									],
+									"type": "string"
+								},
+								"trigger": {
+									"type": "string"
+								},
+								"version_id": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"warnings": {
+									"anyOf": [
+										{
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										{
+											"type": "null"
+										}
+									]
+								}
+							},
+							"required": [
+								"id",
+								"binding_id",
+								"version_id",
+								"trigger",
+								"status",
+								"started_at",
+								"finished_at",
+								"counts",
+								"warnings",
+								"error"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"prev_cursor": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
 				],
 				"type": "object"
 			},
@@ -4551,6 +5874,435 @@
 				]
 			}
 		},
+		"/v1/dash/cities": {
+			"get": {
+				"operationId": "Networks_cities",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/DashCityDto"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "catalog.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/networks": {
+			"get": {
+				"operationId": "Networks_networks",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/DashNetworkDto"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Networks where the caller holds a role, or all with networks.read.all"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				]
+			}
+		},
+		"/v1/dash/networks/{networkId}": {
+			"get": {
+				"operationId": "Networks_network",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DashNetworkDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "catalog.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/bindings": {
+			"get": {
+				"operationId": "Networks_bindings",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/DashBindingDto"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "catalog.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/bindings/{bindingId}": {
+			"get": {
+				"operationId": "Networks_binding",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "bindingId",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DashBindingDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "catalog.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/bindings/{bindingId}/sync": {
+			"post": {
+				"operationId": "TransitAdmin_run",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "bindingId",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SyncResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "catalog.sync",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/sync-runs": {
+			"get": {
+				"operationId": "TransitAdmin_runs",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SyncRunPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "catalog.read",
+					"scope": "network"
+				}
+			}
+		},
 		"/v1/dash/permissions": {
 			"get": {
 				"operationId": "Roles_list",
@@ -4605,6 +6357,203 @@
 					"key": "permissions.read",
 					"scope": "global"
 				}
+			}
+		},
+		"/v1/dash/providers": {
+			"get": {
+				"operationId": "Networks_providers",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/DashProviderDto"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "providers.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/providers/{key}": {
+			"get": {
+				"operationId": "Networks_provider",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "key",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DashProviderDetailDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "providers.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/providers/{key}/kill": {
+			"post": {
+				"operationId": "Networks_kill",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "key",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ProviderKillDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DashProviderDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: catalog"
+				],
+				"x-gezcez-permission": {
+					"key": "providers.kill",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
 			}
 		},
 		"/v1/me": {

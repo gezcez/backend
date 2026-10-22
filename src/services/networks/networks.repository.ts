@@ -86,6 +86,19 @@ export class NetworksRepository {
 		return this.db.select().from(providersTable).where(eq(providersTable.key, key)).get()
 	}
 
+	setProviderEnabled(key: string, enabled: boolean, reason: string, userId: number | null): void {
+		this.db
+			.update(providersTable)
+			.set({
+				enabled,
+				disabled_reason: enabled ? null : reason,
+				updated_at: new Date(),
+				updated_by: userId,
+			})
+			.where(eq(providersTable.key, key))
+			.run()
+	}
+
 	listBindings(networkId?: number): ProviderBindingRow[] {
 		const conditions = [isNull(providerBindingsTable.deleted_at)]
 		if (networkId !== undefined)

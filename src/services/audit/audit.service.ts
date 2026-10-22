@@ -27,6 +27,10 @@ export type AuditAction =
 	| "keys.rotated"
 	| "roles.grant"
 	| "roles.revoke"
+	| "provider.kill"
+	| "provider.unkill"
+	| "catalog.sync"
+	| "tracker.control"
 
 export interface AuditContext {
 	req?: Request
