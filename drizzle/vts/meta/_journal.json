@@ -8,6 +8,13 @@
       "when": 1792681661406,
       "tag": "0000_vts_hot_window",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792706407069,
+      "tag": "0001_provider_accounts",
+      "breakpoints": true
     }
   ]
 }

@@ -210,3 +210,59 @@ export type PositionRow = typeof positionsTable.$inferInsert
 export type VehicleStateRow = typeof vehicleStateTable.$inferSelect
 export type TripRunRow = typeof tripRunsTable.$inferSelect
 export type PollRow = typeof pollsTable.$inferSelect
+
+/** Kentkart accounts this backend registered or was given (KENTKART_AUTO_AUTH). Tracker-owned. */
+export type ProviderAccountState =
+	"provisioning" | "active" | "refresh_failed" | "login_failed" | "disabled" | "retired"
+
+export const providerAccountsTable = sqliteTable(
+	"provider_accounts",
+	{
+		id: int().primaryKey({ autoIncrement: true }),
+		/** Same key as provider_tokens.realm (kentkart:<auth_realm>:<region>). */
+		realm: text().notNull(),
+		provider: text().notNull(),
+		email: text().notNull(),
+		/** AES-GCM sealed with KEY_ENCRYPTION_SECRET (purpose provider-account); never logged. */
+		password_enc: text(),
+		refresh_token_enc: text(),
+		state: text().$type<ProviderAccountState>().notNull(),
+		/** env: KENTKART_REFRESH_TOKEN; auto: registered by this backend. */
+		origin: text().$type<"env" | "auto">().notNull(),
+		created_at: int().notNull(),
+		registered_at: int(),
+		last_login_at: int(),
+		last_refresh_at: int(),
+		failures: int().notNull().default(0),
+		/** Redacted, no tokens or codes. */
+		last_error: text(),
+		retired_at: int(),
+	},
+	(t) => [
+		index("provider_accounts_realm_idx").on(t.realm, t.state),
+		uniqueIndex("provider_accounts_email_unique").on(t.provider, t.email),
+	],
+)
+
+/**
+ * Inbound mail for provider OTPs (MAILBOX_READER=webhook|smtp). Written by whichever process
+ * receives the mail, read by the tracker. Rows expire after an hour.
+ */
+export const inboundEmailsTable = sqliteTable(
+	"inbound_emails",
+	{
+		id: text().primaryKey(),
+		received_at: int().notNull(),
+		to_addr: text().notNull(),
+		from_addr: text().notNull(),
+		subject: text().notNull(),
+		/** Plain-text body, truncated to 64 KiB. */
+		body_text: text().notNull(),
+		consumed_at: int(),
+		expires_at: int().notNull(),
+	},
+	(t) => [
+		index("inbound_emails_to_idx").on(t.to_addr, t.received_at),
+		index("inbound_emails_expires_idx").on(t.expires_at),
+	],
+)

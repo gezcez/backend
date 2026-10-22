@@ -84,6 +84,34 @@ export const EnvSchema = z
 		KENTKART_CLIENT_ID: z.string().optional(),
 		KENTKART_CLIENT_SECRET: z.string().optional(),
 		KENTKART_REFRESH_TOKEN: z.string().optional(),
+		// Kentkart automatic account provisioning (register by email OTP, log in, refresh,
+		// re-register). Off by default: with it off only KENTKART_REFRESH_TOKEN is used.
+		KENTKART_AUTO_AUTH: boolFlag(false),
+		/** Domain whose mail this backend can read (MAILBOX_READER); accounts get <prefix>-<realm slug>-<n>@<domain>. */
+		KENTKART_ACCOUNT_EMAIL_DOMAIN: z.string().optional(),
+		KENTKART_ACCOUNT_EMAIL_PREFIX: z
+			.string()
+			.regex(/^[a-z0-9][a-z0-9.-]*$/)
+			.default("vts"),
+		/** Politeness budget: new Kentkart accounts per realm per rolling 24 h. */
+		KENTKART_MAX_REGISTRATIONS_PER_DAY: z.coerce.number().int().min(0).max(10).default(2),
+		/** How long to wait for an OTP email before giving up. */
+		KENTKART_OTP_TIMEOUT_S: z.coerce.number().int().min(30).max(1800).default(300),
+		/** JSON object overriding Kentkart auth endpoint paths, e.g. {"register":"/oauth/register"}. */
+		KENTKART_AUTH_PATHS: z.string().optional(),
+		// ---- mailbox readers (inbound mail for provider OTPs) ----
+		/** none: no inbound mail; memory: tests; imap: poll a mailbox; webhook: POST /v1/internal/inbound-email; smtp: built-in receiver. */
+		MAILBOX_READER: z.enum(["none", "memory", "imap", "webhook", "smtp"]).optional(),
+		IMAP_HOST: z.string().optional(),
+		IMAP_PORT: z.coerce.number().int().positive().default(993),
+		IMAP_TLS: boolFlag(true),
+		IMAP_USER: z.string().optional(),
+		IMAP_PASSWORD: z.string().optional(),
+		IMAP_MAILBOX: z.string().default("INBOX"),
+		/** HMAC-SHA256 key shared with the inbound email Worker (infra/email-inbound). */
+		INBOUND_EMAIL_SECRET: secret.optional(),
+		SMTP_INBOUND_HOST: z.string().default("0.0.0.0"),
+		SMTP_INBOUND_PORT: z.coerce.number().int().positive().default(2525),
 		/** Env hard kill per provider (plan 8.9); needs a restart. */
 		PROVIDER_KENTKART_ENABLED: boolFlag(true),
 		PROVIDER_FAKE_ENABLED: boolFlag(true),
@@ -183,6 +211,51 @@ export const EnvSchema = z
 				message: "must not be set on the production API",
 			})
 		}
+		if (env.KENTKART_AUTO_AUTH) {
+			if (!env.KENTKART_ACCOUNT_EMAIL_DOMAIN)
+				ctx.addIssue({
+					code: "custom",
+					path: ["KENTKART_ACCOUNT_EMAIL_DOMAIN"],
+					message: "required when KENTKART_AUTO_AUTH=true",
+				})
+			if (!env.MAILBOX_READER || env.MAILBOX_READER === "none")
+				ctx.addIssue({
+					code: "custom",
+					path: ["MAILBOX_READER"],
+					message: "required when KENTKART_AUTO_AUTH=true",
+				})
+		}
+		if (env.KENTKART_AUTH_PATHS !== undefined && parsePaths(env.KENTKART_AUTH_PATHS) === null) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["KENTKART_AUTH_PATHS"],
+				message: "must be a JSON object of string paths",
+			})
+		}
+		if (env.MAILBOX_READER === "imap") {
+			for (const key of ["IMAP_HOST", "IMAP_USER", "IMAP_PASSWORD"] as const) {
+				if (!env[key])
+					ctx.addIssue({
+						code: "custom",
+						path: [key],
+						message: "required when MAILBOX_READER=imap",
+					})
+			}
+		}
+		if (env.MAILBOX_READER === "webhook" && !env.INBOUND_EMAIL_SECRET) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["INBOUND_EMAIL_SECRET"],
+				message: "required when MAILBOX_READER=webhook",
+			})
+		}
+		if (env.MAILBOX_READER === "memory" && env.NODE_ENV !== "test") {
+			ctx.addIssue({
+				code: "custom",
+				path: ["MAILBOX_READER"],
+				message: "memory mailbox is only allowed when NODE_ENV=test",
+			})
+		}
 		if (env.EMAIL_TRANSPORT === "memory" && env.NODE_ENV !== "test") {
 			ctx.addIssue({
 				code: "custom",
@@ -231,6 +304,7 @@ export interface AppConfig {
 	alertWebhookUrl?: string
 	version: { gitSha: string; buildTime?: string; packageVersion: string }
 	transit: TransitConfig
+	mailbox: MailboxConfig
 	analytics: AnalyticsConfig
 }
 
@@ -259,8 +333,33 @@ export interface AnalyticsConfig {
 	maxConcurrent: number
 }
 
+export interface KentkartAutoAuthConfig {
+	enabled: boolean
+	emailDomain?: string
+	emailPrefix: string
+	maxRegistrationsPerDay: number
+	otpTimeoutS: number
+	/** Overrides for KentkartAuthApi endpoint paths (keys: otp, register, authorize, token). */
+	paths: Record<string, string>
+}
+
+export interface MailboxConfig {
+	reader: NonNullable<Env["MAILBOX_READER"]>
+	imap: {
+		host?: string
+		port: number
+		tls: boolean
+		user?: string
+		password?: string
+		mailbox: string
+	}
+	inboundSecret?: string
+	smtp: { host: string; port: number }
+}
+
 export interface TransitConfig {
 	kentkart: { clientId?: string; clientSecret?: string; refreshToken?: string }
+	kentkartAutoAuth: KentkartAutoAuthConfig
 	/** Env level of the provider kill switch, by provider key. */
 	providerEnabled: Record<string, boolean>
 	providerReplay: string[]
@@ -271,6 +370,20 @@ export interface TransitConfig {
 	retentionRequireArchive: boolean
 	/** Seconds after local midnight, or null when the schedule is off. */
 	syncAt: number | null
+}
+
+/** Parses KENTKART_AUTH_PATHS; null when it is not a JSON object of strings. */
+function parsePaths(value: string | undefined): Record<string, string> | null {
+	if (value === undefined) return {}
+	try {
+		const parsed: unknown = JSON.parse(value)
+		if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null
+		const entries = Object.entries(parsed as Record<string, unknown>)
+		if (!entries.every(([, v]) => typeof v === "string" && v.startsWith("/"))) return null
+		return Object.fromEntries(entries) as Record<string, string>
+	} catch {
+		return null
+	}
 }
 
 function clockSeconds(value: string): number {
@@ -345,6 +458,14 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 				clientSecret: env.KENTKART_CLIENT_SECRET,
 				refreshToken: env.KENTKART_REFRESH_TOKEN,
 			},
+			kentkartAutoAuth: {
+				enabled: env.KENTKART_AUTO_AUTH,
+				emailDomain: env.KENTKART_ACCOUNT_EMAIL_DOMAIN,
+				emailPrefix: env.KENTKART_ACCOUNT_EMAIL_PREFIX,
+				maxRegistrationsPerDay: env.KENTKART_MAX_REGISTRATIONS_PER_DAY,
+				otpTimeoutS: env.KENTKART_OTP_TIMEOUT_S,
+				paths: parsePaths(env.KENTKART_AUTH_PATHS) ?? {},
+			},
 			providerEnabled: {
 				kentkart: env.PROVIDER_KENTKART_ENABLED,
 				fake: env.PROVIDER_FAKE_ENABLED,
@@ -362,6 +483,19 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 			hotDays: env.VTS_HOT_DAYS,
 			retentionRequireArchive: env.VTS_RETENTION_REQUIRE_ARCHIVE,
 			syncAt: env.TRANSIT_SYNC_AT === "off" ? null : clockSeconds(env.TRANSIT_SYNC_AT),
+		},
+		mailbox: {
+			reader: env.MAILBOX_READER ?? (env.NODE_ENV === "test" ? "memory" : "none"),
+			imap: {
+				host: env.IMAP_HOST,
+				port: env.IMAP_PORT,
+				tls: env.IMAP_TLS,
+				user: env.IMAP_USER,
+				password: env.IMAP_PASSWORD,
+				mailbox: env.IMAP_MAILBOX,
+			},
+			inboundSecret: env.INBOUND_EMAIL_SECRET,
+			smtp: { host: env.SMTP_INBOUND_HOST, port: env.SMTP_INBOUND_PORT },
 		},
 		analytics: {
 			archiveDir: path.join(path.resolve(env.DATA_DIR), "archive"),
