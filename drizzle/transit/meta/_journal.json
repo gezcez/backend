@@ -15,6 +15,13 @@
       "when": 1792681662387,
       "tag": "0001_search_index",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792706069474,
+      "tag": "0002_service_calendar_dates",
+      "breakpoints": true
     }
   ]
 }

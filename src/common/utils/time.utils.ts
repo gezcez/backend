@@ -50,6 +50,27 @@ export function weekdayBit(weekday: number): number {
 	return 1 << weekday
 }
 
+/** The calendar fields of a service row (transit.db `services`). */
+export interface ServiceCalendar {
+	days_mask: number
+	start_date: string | null
+	end_date: string | null
+	added_dates?: string[] | null
+	removed_dates?: string[] | null
+}
+
+/**
+ * Whether a service runs on local date `date` (YYYY-MM-DD): removed dates win, then added dates,
+ * then the weekday mask inside the start/end bounds (GTFS calendar plus calendar_dates).
+ */
+export function serviceRunsOn(service: ServiceCalendar, date: string): boolean {
+	if (service.removed_dates?.includes(date)) return false
+	if (service.added_dates?.includes(date)) return true
+	if (service.start_date && service.start_date > date) return false
+	if (service.end_date && service.end_date < date) return false
+	return (service.days_mask & weekdayBit(weekdayOfDate(date))) !== 0
+}
+
 /** Unix seconds of local midnight of the service day containing `unixSeconds`. */
 export function serviceDayStart(unixSeconds: number, timeZone: string): number {
 	return unixSeconds - localTime(unixSeconds, timeZone).secondsOfDay

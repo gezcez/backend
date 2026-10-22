@@ -4,7 +4,7 @@
 // worker) and caches per active version.
 
 import { Injectable } from "@nestjs/common"
-import { localTime, serviceDayStart, weekdayBit } from "@common/utils"
+import { localTime, serviceDayStart, serviceRunsOn, type ServiceCalendar } from "@common/utils"
 import { TransitRepository } from "@services/transit/transit.repository"
 import type { OpenRun } from "./trip-detector"
 
@@ -17,12 +17,7 @@ interface VersionCache {
 	checkedAt: number
 	patternLength: Map<string, number | null>
 	patternId: Map<string, number | null>
-	services: {
-		id: number
-		days_mask: number
-		start_date: string | null
-		end_date: string | null
-	}[]
+	services: (ServiceCalendar & { id: number })[]
 }
 
 @Injectable()
@@ -110,16 +105,8 @@ export class TrackerTimetable {
 		}
 		const pattern = this.pattern(cache, run.routeExt, run.direction)
 		if (pattern.id === null) return null
-		const { date, weekday } = localTime(vehicleTs, timeZone)
-		const bit = weekdayBit(weekday)
-		const serviceIds = cache.services
-			.filter(
-				(s) =>
-					(s.days_mask & bit) !== 0 &&
-					(!s.start_date || s.start_date <= date) &&
-					(!s.end_date || s.end_date >= date),
-			)
-			.map((s) => s.id)
+		const { date } = localTime(vehicleTs, timeZone)
+		const serviceIds = cache.services.filter((s) => serviceRunsOn(s, date)).map((s) => s.id)
 		const trips = this.transit.tripsForPatterns([pattern.id], serviceIds, {
 			from: local - MATCH_WINDOW_S,
 			to: local + MATCH_WINDOW_S + 1,

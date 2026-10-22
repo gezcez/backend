@@ -1,5 +1,5 @@
 // transit-provider.interface.ts
-// The provider seam (plan section 6.6). Every upstream (Kentkart, plain GTFS later, the fake
+// The provider seam (plan section 6.6). Every upstream (Kentkart, plain GTFS feeds, the fake
 // provider) implements TransitProvider; nothing outside services/providers knows upstream shapes.
 
 import type { PulledDataItem } from "@schemas/core"
@@ -126,6 +126,13 @@ export interface StaticService {
 	/** Mon=1, Tue=2, ... Sun=64. */
 	daysMask: number
 	label?: string | null
+	/** YYYY-MM-DD bounds of the weekday pattern (inclusive); unbounded when absent. */
+	startDate?: string | null
+	endDate?: string | null
+	/** YYYY-MM-DD dates the service runs regardless of the weekday pattern (GTFS calendar_dates 1). */
+	addedDates?: string[]
+	/** YYYY-MM-DD dates the service does not run (GTFS calendar_dates 2). */
+	removedDates?: string[]
 }
 
 export interface StaticTrip {
@@ -211,6 +218,43 @@ export interface ServiceAlert {
 	url: string | null
 }
 
+/** One GTFS-RT TripUpdate, normalised (capability `trip_updates`). */
+export interface TripUpdate {
+	tripExt: string
+	routeExt?: string
+	direction?: number
+	/** YYYY-MM-DD service date when the feed gives one. */
+	startDate?: string
+	/** Seconds after local midnight when the feed gives a start time (frequency trips). */
+	startTimeS?: number
+	relationship: "scheduled" | "added" | "unscheduled" | "canceled" | "duplicated" | "deleted"
+	vehicleExt?: string
+	/** Trip-level delay in seconds when the feed gives one. */
+	delayS?: number
+	/** Unix seconds of the measurement. */
+	timestamp?: number
+	stops: TripUpdateStop[]
+}
+
+export interface TripUpdateStop {
+	stopSeq?: number
+	stopExt?: string
+	arrivalDelayS?: number
+	/** Unix seconds. */
+	arrivalAt?: number
+	departureDelayS?: number
+	/** Unix seconds. */
+	departureAt?: number
+	skipped: boolean
+}
+
+export interface TripUpdateFeed {
+	/** Unix seconds from the feed header. */
+	feedTs: number
+	updates: TripUpdate[]
+	bytes: number
+}
+
 export type DropReason = "staff" | "test"
 
 export type ProviderErrorKind =
@@ -261,6 +305,13 @@ export interface TransitProvider {
 	): Promise<{ currency: string; items: CardTransaction[] } | null>
 	/** Service alerts, only for providers declaring the `alerts` capability. */
 	fetchAlerts?(binding: BindingContext, signal: AbortSignal): Promise<ServiceAlert[]>
+	/** Realtime trip updates, only for providers declaring the `trip_updates` capability. */
+	fetchTripUpdates?(binding: BindingContext, signal: AbortSignal): Promise<TripUpdateFeed>
+	/**
+	 * Capabilities that depend on a binding's own config (a GTFS binding without a realtime URL
+	 * has no live vehicles). Applied over describe() and under the binding's manual overrides.
+	 */
+	bindingCapabilities?(config: Record<string, unknown>): Partial<Capabilities>
 	/** Upstream rules that drop a vehicle entirely (staff duty routes, test devices). */
 	classify?(vehicle: RawVehicle, binding: BindingContext): DropReason | null
 	/** Clears a sticky fallback URL (dashboard "clear fallback"). */

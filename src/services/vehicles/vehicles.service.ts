@@ -22,8 +22,8 @@ import {
 	parsePublicRef,
 	publicRef,
 	serviceDayStart,
+	serviceRunsOn,
 	snapBBoxToTiles,
-	weekdayBit,
 	weekdayOfDate,
 	zonedInstant,
 } from "@common/utils"
@@ -362,15 +362,7 @@ export class VehiclesService {
 			if (!pattern || !route || !route.is_public) continue
 			const offset = visit.offset_s ?? 0
 			for (const date of [addDays(today, -1), today]) {
-				const bit = weekdayBit(weekdayOfDate(date))
-				const serviceIds = services
-					.filter(
-						(s) =>
-							(s.days_mask & bit) !== 0 &&
-							(!s.start_date || s.start_date <= date) &&
-							(!s.end_date || s.end_date >= date),
-					)
-					.map((s) => s.id)
+				const serviceIds = services.filter((s) => serviceRunsOn(s, date)).map((s) => s.id)
 				const dayStart = zonedInstant(date, 0, timezone)
 				const from = nowS - DEPARTURE_PAST_S - dayStart - offset
 				const trips = this.transitRepo.tripsForPatterns([pattern.id], serviceIds, {

@@ -19,6 +19,7 @@ import {
 	pageFrom,
 	parsePublicRef,
 	publicRef,
+	serviceRunsOn,
 	weekdayBit,
 	weekdayOfDate,
 	type BBox,
@@ -242,8 +243,12 @@ export class TransitService {
 		}
 	}
 
-	/** Services active on a local date (weekday mask; manual exceptions come later). */
-	private servicesOn(services: ServiceRow[], weekday: number): ServiceRow[] {
+	/**
+	 * Services active on a local date (weekday mask, date bounds and feed calendar dates), or on
+	 * a weekday when no date is given. Manual exceptions come later.
+	 */
+	private servicesOn(services: ServiceRow[], weekday: number, date: string | null): ServiceRow[] {
+		if (date) return services.filter((s) => serviceRunsOn(s, date))
 		const bit = weekdayBit(weekday)
 		return services.filter((s) => (s.days_mask & bit) !== 0)
 	}
@@ -259,7 +264,7 @@ export class TransitService {
 			(query.day_type ? null : localTime(Math.floor(Date.now() / 1000), timezone).date)
 		const weekday = date ? weekdayOfDate(date) : DAY_TYPE_WEEKDAY[query.day_type ?? "weekday"]
 		const dayType: DayType = weekday === 6 ? "sunday" : weekday === 5 ? "saturday" : "weekday"
-		const services = this.servicesOn(this.repository.services(version.version_id), weekday)
+		const services = this.servicesOn(this.repository.services(version.version_id), weekday, date)
 		const patterns = this.repository.patternsForRoute(route.id, query.direction)
 		const stopsOf = this.patternStopsOf(patterns, 0)
 		const trips = this.repository.tripsForPatterns(

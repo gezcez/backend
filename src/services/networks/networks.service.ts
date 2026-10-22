@@ -171,6 +171,7 @@ export class NetworksService {
 		const declared = adapter?.describe().capabilities ?? NO_CAPABILITIES
 		const capabilities: Capabilities = {
 			...declared,
+			...adapter?.bindingCapabilities?.(binding.config),
 			...(binding.capabilities as Partial<Capabilities>),
 		}
 		const runtime = this.health.get(binding.id)

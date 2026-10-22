@@ -249,6 +249,10 @@ export class TransitRepository {
 						external_id: s.externalId,
 						days_mask: s.daysMask,
 						label: s.label ?? null,
+						start_date: s.startDate ?? null,
+						end_date: s.endDate ?? null,
+						added_dates: s.addedDates?.length ? s.addedDates : null,
+						removed_dates: s.removedDates?.length ? s.removedDates : null,
 					})
 					.returning({ id: servicesTable.id })
 					.get().id

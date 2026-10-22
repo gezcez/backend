@@ -112,8 +112,12 @@ export const servicesTable = sqliteTable(
 		/** Mon=1, Tue=2 ... Sun=64. */
 		days_mask: int().notNull(),
 		label: text(),
+		/** YYYY-MM-DD bounds of the weekday pattern, inclusive. */
 		start_date: text(),
 		end_date: text(),
+		/** YYYY-MM-DD dates added or removed on top of the weekday pattern (GTFS calendar_dates). */
+		added_dates: text({ mode: "json" }).$type<string[]>(),
+		removed_dates: text({ mode: "json" }).$type<string[]>(),
 	},
 	(t) => [
 		uniqueIndex("services_version_ext_unique").on(t.version_id, t.binding_id, t.external_id),
