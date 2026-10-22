@@ -2,8 +2,9 @@
 // Public live endpoints (plan 7.4): network vehicle snapshot (REST fallback of the WS channel),
 // vehicle detail, stop departures and observed departures last week.
 
-import { Controller, Get, Header, Param, Query } from "@nestjs/common"
-import { ApiTags } from "@nestjs/swagger"
+import { Controller, Get, Header, Headers, Param, Query, Res } from "@nestjs/common"
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
+import type { Response } from "express"
 import { ApiEnvelope, Public } from "@common/middlewares"
 import {
 	DeparturesDto,
@@ -23,18 +24,32 @@ export class VehiclesController {
 	constructor(private readonly vehicles: VehiclesService) {}
 
 	@Get("networks/:networkId/vehicles")
-	@Header("Cache-Control", "public, max-age=5")
+	@ApiBearerAuth("bearer")
 	@ApiEnvelope(VehicleSnapshotDto, {
 		description:
-			"Live vehicles as compact arrays in the order of `fields` (same as the WS snapshot)",
+			"Live vehicles as arrays in the order of `fields` (same as the WS snapshot). Public for compact rows; detail=full needs a dash token with vehicles.live.read",
 	})
-	snapshot(@Param("networkId") networkId: string, @Query() query: VehiclesQueryDto) {
-		return this.vehicles.snapshot({
-			network: networkId,
-			routes: query.routes,
-			direction: query.direction as 0 | 1 | undefined,
-			bbox: query.bbox,
-		})
+	async snapshot(
+		@Param("networkId") networkId: string,
+		@Query() query: VehiclesQueryDto,
+		@Headers("authorization") authorization: string | undefined,
+		@Res({ passthrough: true }) res: Response,
+	) {
+		const snapshot = await this.vehicles.snapshot(
+			{
+				network: networkId,
+				routes: query.routes,
+				direction: query.direction as 0 | 1 | undefined,
+				bbox: query.bbox,
+			},
+			query.detail,
+			authorization,
+		)
+		res.setHeader(
+			"Cache-Control",
+			query.detail === "full" ? "private, no-store" : "public, max-age=5",
+		)
+		return snapshot
 	}
 
 	@Get("vehicles/:vehicleId")

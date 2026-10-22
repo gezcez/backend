@@ -32,6 +32,12 @@ export class VehiclesQueryDto extends createZodDto(
 			.refine((d) => d === 0 || d === 1, "direction is 0 or 1")
 			.optional(),
 		bbox: BBoxParam.optional().describe("w,s,e,n; max 0.5 degree span, snapped to z12 tiles"),
+		detail: z
+			.enum(["compact", "full"])
+			.default("compact")
+			.describe(
+				"full adds plate, stop and headsign; needs a bearer token with the dash scope and vehicles.live.read",
+			),
 	}),
 ) {}
 

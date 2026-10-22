@@ -15319,6 +15319,28 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"description": "full adds plate, stop and headsign; needs a bearer token with the dash scope and vehicles.live.read",
+						"in": "query",
+						"name": "detail",
+						"required": false,
+						"schema": {
+							"default": "compact",
+							"enum": [
+								"compact",
+								"full"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "header",
+						"name": "authorization",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -15345,7 +15367,7 @@
 								}
 							}
 						},
-						"description": "Live vehicles as compact arrays in the order of `fields` (same as the WS snapshot)"
+						"description": "Live vehicles as arrays in the order of `fields` (same as the WS snapshot). Public for compact rows; detail=full needs a dash token with vehicles.live.read"
 					},
 					"default": {
 						"content": {
@@ -15358,6 +15380,11 @@
 						"description": "Error envelope"
 					}
 				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
 				"tags": [
 					"transit: live"
 				]

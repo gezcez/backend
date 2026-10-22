@@ -5,6 +5,8 @@ import type { RawVehicle } from "@services/providers/transit-provider.interface"
 import { TrackerHostService } from "@services/tracker/tracker-host.service"
 import { TransitSyncService } from "@services/transit/transit-sync.service"
 import { createTestApp, type TestApp } from "../helpers/app"
+import { FIXTURE } from "../helpers/dash"
+import { accessTokenFor } from "../helpers/oauth-client"
 
 let t: TestApp
 let bindingId: number
@@ -118,6 +120,37 @@ describe("live vehicles REST", () => {
 			"/v1/networks/kocaeli-ulasimpark/vehicles?routes=999.1",
 		)
 		expect(foreign.body.error.code).toBe("VALIDATION_FAILED")
+	})
+
+	test("detail=full needs a dash token with vehicles.live.read and is never cached", async () => {
+		const path = "/v1/networks/kocaeli-ulasimpark/vehicles?detail=full"
+		const anonymous = await t.json<Body<unknown>>(path)
+		expect(anonymous.status).toBe(401)
+		expect(anonymous.body.error.code).toBe("AUTH_REQUIRED")
+
+		const rider = (await accessTokenFor(t, FIXTURE.rider)).accessToken
+		const denied = await t.json<Body<unknown>>(path, {
+			headers: { authorization: `Bearer ${rider}` },
+		})
+		expect(denied.status).toBe(403)
+		expect(denied.body.error.code).toBe("PERMISSION_MISSING")
+
+		const root = (await accessTokenFor(t, FIXTURE.root)).accessToken
+		const res = await t.json<Body<{ fields: string[]; vehicles: unknown[][] }>>(path, {
+			headers: { authorization: `Bearer ${root}` },
+		})
+		expect(res.status).toBe(200)
+		expect(res.headers.get("cache-control")).toBe("private, no-store")
+		const { fields, vehicles } = res.body.data
+		expect(fields).toContain("plate")
+		const v1 = vehicles.find((v) => v[0] === `${bindingId}.V1`)!
+		expect(v1[fields.indexOf("plate")]).toBe("41 V V1")
+
+		const compact = await t.json<Body<{ fields: string[] }>>(
+			"/v1/networks/kocaeli-ulasimpark/vehicles",
+		)
+		expect(compact.headers.get("cache-control")).toBe("public, max-age=5")
+		expect(compact.body.data.fields).not.toContain("plate")
 	})
 
 	test("vehicle detail has the live state and the open run", async () => {
