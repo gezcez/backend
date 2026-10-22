@@ -49,10 +49,14 @@
 						"type": "string"
 					},
 					"active_to": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"body": {
 						"type": "string"
@@ -83,10 +87,14 @@
 						"type": "string"
 					},
 					"url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -227,11 +235,15 @@
 						"type": "string"
 					},
 					"soft_update_version": {
-						"description": "Older apps are nudged to update",
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "Older apps are nudged to update"
 					},
 					"tiles_style_url": {
 						"properties": {
@@ -869,10 +881,14 @@
 						"type": "integer"
 					},
 					"success_rate": {
-						"items": {
-							"type": "number"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"window_hours": {
 						"maximum": 9007199254740991,
@@ -1560,10 +1576,14 @@
 			"ControlResultDto": {
 				"properties": {
 					"error": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"ok": {
 						"type": "boolean"
@@ -1900,10 +1920,14 @@
 						"type": "string"
 					},
 					"disabled_reason": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"external_ref": {
 						"type": "string"
@@ -1919,10 +1943,14 @@
 						"type": "integer"
 					},
 					"last_feed_at": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"network_id": {
 						"maximum": 9007199254740991,
@@ -1953,10 +1981,14 @@
 						"type": "string"
 					},
 					"state_message": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"status": {
 						"enum": [
@@ -1967,10 +1999,14 @@
 						"type": "string"
 					},
 					"updated_at": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -2024,16 +2060,24 @@
 						]
 					},
 					"center_lat": {
-						"items": {
-							"type": "number"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"center_lon": {
-						"items": {
-							"type": "number"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"country_code": {
 						"type": "string"
@@ -2313,10 +2357,14 @@
 						"type": "integer"
 					},
 					"colour": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"created_at": {
 						"type": "string"
@@ -2338,16 +2386,24 @@
 						"type": "string"
 					},
 					"network_status_message": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"operator_name": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"slug": {
 						"type": "string"
@@ -2361,10 +2417,14 @@
 						"type": "string"
 					},
 					"updated_at": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -2575,10 +2635,14 @@
 						"type": "array"
 					},
 					"disabled_reason": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"enabled": {
 						"description": "Dashboard kill switch (providers.enabled)",
@@ -2589,19 +2653,27 @@
 						"type": "boolean"
 					},
 					"image_url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"key": {
 						"type": "string"
 					},
 					"legal_note": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"name": {
 						"type": "string"
@@ -2658,10 +2730,14 @@
 						"type": "boolean"
 					},
 					"url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -2807,10 +2883,14 @@
 						]
 					},
 					"disabled_reason": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"enabled": {
 						"description": "Dashboard kill switch (providers.enabled)",
@@ -2821,19 +2901,27 @@
 						"type": "boolean"
 					},
 					"image_url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"key": {
 						"type": "string"
 					},
 					"legal_note": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"name": {
 						"type": "string"
@@ -2868,10 +2956,14 @@
 						"type": "boolean"
 					},
 					"url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -4704,10 +4796,14 @@
 						"type": "integer"
 					},
 					"colour": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"freshness": {
 						"properties": {
@@ -4761,17 +4857,25 @@
 						"type": "string"
 					},
 					"operator_name": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"pack_version": {
-						"description": "Changes whenever the static data changes",
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "Changes whenever the static data changes"
 					},
 					"privacy": {
 						"items": {
@@ -4826,10 +4930,14 @@
 						"type": "string"
 					},
 					"status_message": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -5664,16 +5772,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -5831,19 +5947,27 @@
 						"type": "boolean"
 					},
 					"image_url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"key": {
 						"type": "string"
 					},
 					"legal_note": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"name": {
 						"type": "string"
@@ -5875,10 +5999,14 @@
 						"type": "array"
 					},
 					"url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -6470,16 +6598,24 @@
 			"RouteDetailDto": {
 				"properties": {
 					"agency": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"colour": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"directions": {
 						"items": {
@@ -6618,10 +6754,14 @@
 						"type": "string"
 					},
 					"text_colour": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -6713,16 +6853,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -7299,10 +7447,14 @@
 			"StopDetailDto": {
 				"properties": {
 					"code": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"id": {
 						"description": "Stable public id, e.g. 1.41003",
@@ -7449,16 +7601,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -7511,10 +7671,14 @@
 						"type": "object"
 					},
 					"error": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"run_id": {
 						"maximum": 9007199254740991,
@@ -7660,16 +7824,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -7762,10 +7934,14 @@
 			"TimetableDto": {
 				"properties": {
 					"date": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"day_type": {
 						"enum": [
@@ -8315,10 +8491,14 @@
 			"VehicleDetailDto": {
 				"properties": {
 					"accessible": {
-						"items": {
-							"type": "boolean"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "boolean"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"current_run": {
 						"anyOf": [
@@ -8441,10 +8621,14 @@
 						"type": "string"
 					},
 					"label": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"last_seen_at": {
 						"type": "string"
@@ -8458,10 +8642,14 @@
 						"type": "integer"
 					},
 					"plate": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"position": {
 						"anyOf": [
@@ -8693,10 +8881,14 @@
 						"type": "array"
 					},
 					"stop_id": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"stop_seq": {
 						"anyOf": [
@@ -8711,10 +8903,14 @@
 						]
 					},
 					"trip_id": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -8758,10 +8954,14 @@
 						"type": "array"
 					},
 					"message": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"network_id": {
 						"maximum": 9007199254740991,

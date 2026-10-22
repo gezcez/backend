@@ -50,16 +50,27 @@ export function nullableProperty(meta: Record<string, unknown>): Record<string, 
 	return outer
 }
 
+/**
+ * Swagger reads the factory of every class in the prototype chain (the DTO and the base class
+ * createZodDto made), so each one that defines its own factory is wrapped.
+ */
 function patchDto(dto: unknown): void {
-	if (typeof dto !== "function") return
-	const cls = dto as DtoClass
-	const factory = cls._OPENAPI_METADATA_FACTORY
-	if (!factory || cls[PATCHED]) return
-	cls[PATCHED] = true
-	cls._OPENAPI_METADATA_FACTORY = () =>
-		Object.fromEntries(
-			Object.entries(factory.call(cls)).map(([key, meta]) => [key, nullableProperty(meta)]),
-		)
+	for (let cls = dto; typeof cls === "function" && cls !== Function.prototype;) {
+		const target = cls as DtoClass
+		const factory = Object.getOwnPropertyDescriptor(target, "_OPENAPI_METADATA_FACTORY")
+			?.value as MetadataFactory | undefined
+		if (factory && !Object.prototype.hasOwnProperty.call(target, PATCHED)) {
+			target[PATCHED] = true
+			target._OPENAPI_METADATA_FACTORY = () =>
+				Object.fromEntries(
+					Object.entries(factory.call(target)).map(([key, meta]) => [
+						key,
+						nullableProperty(meta),
+					]),
+				)
+		}
+		cls = Object.getPrototypeOf(cls) as unknown
+	}
 }
 
 /** Every DTO class a controller method names (responses, extra models, parameters). */
@@ -75,8 +86,10 @@ function patchControllerDtos(app: INestApplication): void {
 				if (name === "constructor") continue
 				const handler = (proto as Record<string, unknown>)[name]
 				const models = [
-					...((Reflect.getMetadata("swagger/apiExtraModels", handler as object) as unknown[]) ??
-						[]),
+					...((Reflect.getMetadata(
+						"swagger/apiExtraModels",
+						handler as object,
+					) as unknown[]) ?? []),
 					...((Reflect.getMetadata("design:paramtypes", proto, name) as unknown[]) ?? []),
 				]
 				for (const model of models) patchDto(model)
