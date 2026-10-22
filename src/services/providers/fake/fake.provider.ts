@@ -12,6 +12,7 @@ import {
 	type DropReason,
 	type ProviderDescription,
 	type RawVehicle,
+	type ServiceAlert,
 	type StaticChunk,
 	type StaticPattern,
 	type StaticRoute,
@@ -82,6 +83,7 @@ export class FakeProvider implements TransitProvider {
 	readonly key = "fake"
 	private readonly scripts = new Map<number, ScriptStep[]>()
 	private readonly calls = new Map<number, number>()
+	private readonly alerts = new Map<number, ServiceAlert[] | ProviderError>()
 
 	constructor(private readonly now: () => number = Date.now) {}
 
@@ -97,6 +99,7 @@ export class FakeProvider implements TransitProvider {
 				shapes: true,
 				realtime_vehicles: true,
 				realtime_departures: "estimated",
+				alerts: true,
 			},
 			pulledData: [
 				{
@@ -113,6 +116,18 @@ export class FakeProvider implements TransitProvider {
 	/** Queues exact feeds (or errors) for a binding; consumed one per poll. */
 	script(bindingId: number, steps: ScriptStep[]): void {
 		this.scripts.set(bindingId, [...steps])
+	}
+
+	/** Alerts (or an error) the binding reports from now on; none by default. */
+	setAlerts(bindingId: number, alerts: ServiceAlert[] | ProviderError): void {
+		this.alerts.set(bindingId, alerts)
+	}
+
+	fetchAlerts(binding: BindingContext, signal: AbortSignal): Promise<ServiceAlert[]> {
+		signal.throwIfAborted()
+		const alerts = this.alerts.get(binding.id) ?? []
+		if (alerts instanceof ProviderError) return Promise.reject(alerts)
+		return Promise.resolve(alerts)
 	}
 
 	clearScript(bindingId: number): void {

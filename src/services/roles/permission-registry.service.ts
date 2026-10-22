@@ -20,7 +20,8 @@ function joinPath(...parts: (string | string[] | undefined)[]): string {
 		.map((part) => (Array.isArray(part) ? part[0] : part) ?? "")
 		.flatMap((part) => part.split("/"))
 		.filter(Boolean)
-	return `/${segments.join("/")}`
+	// "permissions\\:batch" escapes the colon for the router; the registry stores the real path.
+	return `/${segments.join("/")}`.replace(/\\:/g, ":")
 }
 
 @Injectable()

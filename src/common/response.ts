@@ -64,12 +64,89 @@ export function pageSchema<T extends z.ZodType>(item: T) {
 	})
 }
 
+const MOVED_TO_MEMBER = [
+	"format",
+	"pattern",
+	"minLength",
+	"maxLength",
+	"minimum",
+	"maximum",
+	"enum",
+	"items",
+	"minItems",
+	"maxItems",
+] as const
+
+function nullableToAnyOf(node: Record<string, unknown>): Record<string, unknown> {
+	const types = node.type as string[]
+	const member: Record<string, unknown> = {}
+	const nonNull = types.filter((type) => type !== "null")
+	member.type = nonNull.length === 1 ? nonNull[0] : nonNull
+	const rest: Record<string, unknown> = { ...node }
+	delete rest.type
+	for (const name of MOVED_TO_MEMBER) {
+		if (name in rest) {
+			member[name] = rest[name]
+			delete rest[name]
+		}
+	}
+	return { ...rest, anyOf: types.includes("null") ? [member, { type: "null" }] : [member] }
+}
+
+/** Rewrites every `type: [T, "null"]` below `value` (including $defs) as `anyOf`. */
+function normaliseTypeArrays(value: unknown): unknown {
+	if (Array.isArray(value)) return value.map(normaliseTypeArrays)
+	if (!value || typeof value !== "object") return value
+	const node = Object.fromEntries(
+		Object.entries(value as Record<string, unknown>).map(([key, inner]) => [
+			key,
+			normaliseTypeArrays(inner),
+		]),
+	)
+	return Array.isArray(node.type) && node.type.every((type) => typeof type === "string")
+		? nullableToAnyOf(node)
+		: node
+}
+
 /**
- * createZodDto for schemas TypeScript cannot extend as a class (unions). The class is named so
+ * Root-level properties of a DTO reach @nestjs/swagger one by one, and swagger reads zod's
+ * `type: ["string", "null"]` (a nullable plain primitive) as an array of strings. Every schema the
+ * DTO carries is rewritten to the `anyOf` form zod already uses for nullable formatted strings;
+ * root properties keep an empty `type`, which cleanupOpenApiDoc removes.
+ */
+export function fixNullablePropertyTypes(
+	properties: Record<string, Record<string, unknown>>,
+): Record<string, Record<string, unknown>> {
+	const fixed: Record<string, Record<string, unknown>> = {}
+	for (const [key, property] of Object.entries(properties)) {
+		const wasArray = Array.isArray(property.type)
+		const normalised = normaliseTypeArrays(property) as Record<string, unknown>
+		fixed[key] = wasArray ? { ...normalised, type: "" } : normalised
+	}
+	return fixed
+}
+
+/** createZodDto with fixNullablePropertyTypes applied; use it for every DTO. */
+export function zodDto<T extends z.ZodType>(schema: T) {
+	const dto = createZodDto(schema)
+	const factory = (dto as unknown as { _OPENAPI_METADATA_FACTORY: () => unknown })
+		._OPENAPI_METADATA_FACTORY
+	Object.defineProperty(dto, "_OPENAPI_METADATA_FACTORY", {
+		value: function (this: unknown) {
+			return fixNullablePropertyTypes(
+				factory.call(this) as Record<string, Record<string, unknown>>,
+			)
+		},
+	})
+	return dto
+}
+
+/**
+ * zodDto for schemas TypeScript cannot extend as a class (unions). The class is named so
  * the OpenAPI component gets a stable name.
  */
 export function namedZodDto<T extends z.ZodType>(name: string, schema: T) {
-	const dto = createZodDto(schema)
+	const dto = zodDto(schema)
 	Object.defineProperty(dto, "name", { value: name })
 	return dto
 }

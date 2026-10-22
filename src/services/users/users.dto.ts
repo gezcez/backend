@@ -1,7 +1,7 @@
 // users.dto.ts
 // GET /v1/me (the dashboard plan's section 4.2 contract) and PATCH /v1/me.
 
-import { createZodDto } from "nestjs-zod"
+import { zodDto } from "@common/response"
 import { z } from "zod"
 import { PermissionKeySchema, RoleRefSchema } from "@services/roles/roles.dto"
 
@@ -35,7 +35,7 @@ export const MeSchema = z.object({
 		}),
 	),
 })
-export class MeDto extends createZodDto(MeSchema) {}
+export class MeDto extends zodDto(MeSchema) {}
 
 export const PatchMeBody = z
 	.object({
@@ -45,4 +45,4 @@ export const PatchMeBody = z
 	.refine((body) => body.display_name !== undefined || body.locale !== undefined, {
 		message: "Nothing to update",
 	})
-export class PatchMeDto extends createZodDto(PatchMeBody) {}
+export class PatchMeDto extends zodDto(PatchMeBody) {}

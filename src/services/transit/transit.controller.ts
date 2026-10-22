@@ -5,6 +5,7 @@ import { Controller, Get, Header, Param, Query } from "@nestjs/common"
 import { ApiTags } from "@nestjs/swagger"
 import { ApiEnvelope, Public } from "@common/middlewares"
 import {
+	AlertDto,
 	DirectionQueryDto,
 	NearbyDto,
 	NearbyQueryDto,
@@ -20,13 +21,27 @@ import {
 	TimetableDto,
 	TimetableQueryDto,
 } from "./transit.dto"
+import { AlertsService } from "./alerts.service"
 import { TransitService } from "./transit.service"
 
 @ApiTags("transit")
 @Public()
 @Controller()
 export class TransitController {
-	constructor(private readonly transit: TransitService) {}
+	constructor(
+		private readonly transit: TransitService,
+		private readonly alerts: AlertsService,
+	) {}
+
+	@Get("networks/:networkId/alerts")
+	@Header("Cache-Control", "public, max-age=300")
+	@ApiEnvelope([AlertDto], {
+		description:
+			"Active service alerts; an empty list unless the network has the alerts capability",
+	})
+	networkAlerts(@Param("networkId") networkId: string) {
+		return this.alerts.list(networkId)
+	}
 
 	@Get("networks/:networkId/routes")
 	@Header("Cache-Control", "public, max-age=600")

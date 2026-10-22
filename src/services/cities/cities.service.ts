@@ -7,6 +7,7 @@ import { MODE_LABELS, type Mode } from "@common/models/transit.models"
 import { fromE6, sha256Base64Url } from "@common/utils"
 import type { CityRow, NetworkRow } from "@schemas/core"
 import { NetworksService, mergeCapabilities } from "@services/networks/networks.service"
+import { packVersionOf } from "@services/transit/pack.service"
 import { TransitService } from "@services/transit/transit.service"
 
 /** Static data older than this is flagged in the manifest. */
@@ -65,12 +66,7 @@ export class CitiesService {
 			modes: this.transit.modes(versionIds),
 			city_id: network.city_id,
 			capabilities,
-			pack_version: versions.length
-				? versions
-						.map((v) => `${v.binding_id}-${v.version_id}`)
-						.sort()
-						.join(".")
-				: null,
+			pack_version: packVersionOf(versions),
 			attribution: providers.map((p) => ({ provider: p.key, name: p.name, url: p.url })),
 			privacy: providers.map((p) => ({ provider: p.key, pulled_data: p.pulled_data })),
 			freshness: {

@@ -478,6 +478,32 @@ export class TransitRepository {
 			.all()
 	}
 
+	/** Patterns of many routes, largest first per route and direction (offline pack). */
+	patternsOfRoutes(routeIds: number[]): PatternRow[] {
+		if (!routeIds.length) return []
+		return this.db
+			.select()
+			.from(patternsTable)
+			.where(inArray(patternsTable.route_id, routeIds))
+			.orderBy(
+				asc(patternsTable.route_id),
+				asc(patternsTable.direction),
+				sql`${patternsTable.stop_count} DESC`,
+			)
+			.all()
+	}
+
+	/** Every stop of the given versions (offline pack). */
+	allStops(versionIds: number[]): StopRow[] {
+		if (!versionIds.length) return []
+		return this.db
+			.select()
+			.from(stopsTable)
+			.where(inArray(stopsTable.version_id, versionIds))
+			.orderBy(asc(stopsTable.binding_id), asc(stopsTable.id))
+			.all()
+	}
+
 	patternsByIds(ids: number[]): PatternRow[] {
 		if (!ids.length) return []
 		return this.db.select().from(patternsTable).where(inArray(patternsTable.id, ids)).all()

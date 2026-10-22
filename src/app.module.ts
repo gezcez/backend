@@ -25,14 +25,18 @@ import { ArchiveModule } from "@services/archive/archive.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
+import { FavouritesModule } from "@services/favourites/favourites.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
+import { ModerationModule } from "@services/moderation/moderation.module"
 import { NetworksCoreModule } from "@services/networks/networks-core.module"
 import { NetworksModule } from "@services/networks/networks.module"
 import { KeysModule } from "@services/oauth/keys.module"
 import { OAuthModule } from "@services/oauth/oauth.module"
 import { ProvidersModule } from "@services/providers/providers.module"
+import { RefsModule } from "@services/refs/refs.module"
 import { RolesModule } from "@services/roles/roles.module"
 import { SystemModule } from "@services/system/system.module"
+import { TelemetryModule } from "@services/telemetry/telemetry.module"
 import { trackerRunner } from "@services/tracker/tracker-host.service"
 import { TrackerModule } from "@services/tracker/tracker.module"
 import { TransitModule } from "@services/transit/transit.module"
@@ -67,11 +71,13 @@ export class AppModule {
 				SystemModule,
 				KeysModule,
 				EmailModule,
+				RefsModule,
 				AuditModule,
 				AccountModule,
 				OAuthModule,
 				RolesModule,
 				UsersModule,
+				ModerationModule,
 				// Transit catalog, providers and static data (P3).
 				// This process writes vts.db (and so persists upstream tokens) only with an
 				// in-process tracker; with the worker, the worker owns them.
@@ -89,6 +95,9 @@ export class AppModule {
 				ArchiveModule.forRoot(),
 				AnalyticsModule,
 				WsModule,
+				// Mobile MVP support (P4).
+				FavouritesModule,
+				TelemetryModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],

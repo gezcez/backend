@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import { GezcezError } from "./errors"
-import { cappedTotal, PAGE_TOTAL_CAP, parseSort } from "./response"
+import { cappedTotal, fixNullablePropertyTypes, PAGE_TOTAL_CAP, parseSort } from "./response"
 import { decodeCursor, encodeCursor, pageFrom } from "./utils/pagination.utils"
 
 describe("parseSort", () => {
@@ -42,5 +42,25 @@ describe("cursors", () => {
 	test("total is null above the cap", () => {
 		expect(cappedTotal(PAGE_TOTAL_CAP)).toBe(PAGE_TOTAL_CAP)
 		expect(cappedTotal(PAGE_TOTAL_CAP + 1)).toBeNull()
+	})
+})
+
+describe("fixNullablePropertyTypes", () => {
+	test("rewrites nullable primitives as anyOf at the root and inside defs", () => {
+		const fixed = fixNullablePropertyTypes({
+			username: { type: ["string", "null"], maxLength: 5, required: true },
+			count: { type: "integer" },
+			tags: { type: "array", items: { type: ["string", "null"] } },
+		})
+		expect(fixed.username).toEqual({
+			type: "",
+			required: true,
+			anyOf: [{ type: "string", maxLength: 5 }, { type: "null" }],
+		})
+		expect(fixed.count).toEqual({ type: "integer" })
+		expect(fixed.tags).toEqual({
+			type: "array",
+			items: { anyOf: [{ type: "string" }, { type: "null" }] },
+		})
 	})
 })
