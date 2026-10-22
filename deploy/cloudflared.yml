@@ -1,0 +1,9 @@
+# Tunnel ingress for the API (production). For staging copy this file to
+# cloudflared.staging.yml with hostname api-staging.gezcez.com and set
+# CLOUDFLARED_CONFIG=cloudflared.staging.yml in deploy/.env.
+tunnel: gezcez-api
+credentials-file: /etc/cloudflared/credentials.json
+ingress:
+    - hostname: api.gezcez.com
+      service: http://backend:8080
+    - service: http_status:404

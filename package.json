@@ -6,8 +6,7 @@
 	"description": "gezcez API: OAuth authorization server, dashboard, mobile and public transit API",
 	"scripts": {
 		"dev": "bun --watch src/main.ts",
-		"start": "bun dist/main.js",
-		"build": "bun build src/main.ts src/tracker.worker.ts --target=bun --outdir=dist --packages=external --sourcemap=linked",
+		"start": "bun src/main.ts",
 		"typecheck": "tsc --noEmit -p tsconfig.json",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
@@ -16,6 +15,7 @@
 		"test": "bun run test:unit && bun run test:e2e",
 		"test:unit": "bun test src eslint-rules",
 		"test:e2e": "bun test ./test/e2e/*.e2e.ts",
+		"test:smoke": "bun test ./test/smoke/*.smoke.ts",
 		"db:generate": "drizzle-kit generate --config drizzle.core.config.ts && drizzle-kit generate --config drizzle.transit.config.ts && drizzle-kit generate --config drizzle.vts.config.ts",
 		"db:check": "drizzle-kit check --config drizzle.core.config.ts && drizzle-kit check --config drizzle.transit.config.ts && drizzle-kit check --config drizzle.vts.config.ts",
 		"db:migrate": "bun scripts/migrate.ts",

@@ -62,6 +62,11 @@ describe("loadConfig", () => {
 		)
 	})
 
+	test("the email transport defaults to memory in tests and console elsewhere", () => {
+		expect(loadConfig({ NODE_ENV: "test" }).email.transport).toBe("memory")
+		expect(loadConfig({}).email.transport).toBe("console")
+	})
+
 	test("short secrets are rejected", () => {
 		expect(() => loadConfig({ SEAL_SECRET: "short" })).toThrow(ConfigError)
 	})

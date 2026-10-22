@@ -41,15 +41,72 @@ jobs:
                   fi
             - name: openapi.json is current
               run: bun run openapi:check
-            - name: Build
-              run: bun run build
             - uses: actions/upload-artifact@v4
               with:
                   name: openapi
                   path: openapi.json
 
-    image:
+    # The published image in test mode, as client repos use it for their e2e suites: seeded
+    # e2e clients and fixture users, memory mail and the test mailbox.
+    smoke:
         needs: check
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version-file: .bun-version
+            - run: bun install --frozen-lockfile
+            - uses: docker/setup-buildx-action@v3
+            - name: Build image
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  load: true
+                  tags: gezcez-backend:smoke
+                  build-args: |
+                      GIT_SHA=${{ github.sha }}
+                  cache-from: type=gha
+            - name: Start the image in test mode
+              run: |
+                  docker run -d --name backend -p 8080:8080 \
+                    -e NODE_ENV=test -e PUBLIC_API_URL=http://localhost:8080 \
+                    gezcez-backend:smoke
+                  for i in $(seq 1 60); do
+                    if curl -sf http://localhost:8080/ready; then exit 0; fi
+                    sleep 1
+                  done
+                  docker logs backend
+                  exit 1
+            - name: Smoke test (e2e_client code flow, /v1/me, refresh)
+              run: bun run test:smoke
+              env:
+                  SMOKE_BASE_URL: http://localhost:8080
+            - name: Container logs
+              if: failure()
+              run: docker logs backend
+
+    # Breaking changes to the published contract need the api-breaking label on the PR.
+    contract:
+        if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'api-breaking')
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - name: oasdiff breaking against the base branch
+              run: |
+                  if ! git show "origin/${{ github.base_ref }}:openapi.json" > "$RUNNER_TEMP/base.json" 2>/dev/null; then
+                    echo "No openapi.json on the base branch yet"
+                    exit 0
+                  fi
+                  docker run --rm \
+                    -v "$RUNNER_TEMP/base.json:/base.json:ro" \
+                    -v "$PWD/openapi.json:/head.json:ro" \
+                    tufin/oasdiff:v1.33.0 breaking /base.json /head.json --fail-on ERR
+
+    image:
+        needs: [check, smoke]
         runs-on: ubuntu-latest
         permissions:
             contents: read

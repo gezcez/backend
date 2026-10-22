@@ -27,10 +27,11 @@ Migrations run at boot. `bun run db:seed` loads the idempotent seed for the curr
 | Script                             | What it does                                                     |
 | ---------------------------------- | ---------------------------------------------------------------- |
 | `dev`                              | Run `src/main.ts` with watch                                     |
-| `build` / `start`                  | Bundle to `dist/main.js` (packages stay external) and run it     |
+| `start`                            | Run `src/main.ts` (Bun runs TypeScript directly; no bundle)      |
 | `typecheck`                        | `tsc --noEmit`                                                   |
 | `lint` / `format`                  | ESLint (with the rules in `eslint-rules/`) and Prettier          |
 | `test`                             | Unit specs (`src/**/*.spec.ts`) then e2e (`test/e2e/*.e2e.ts`)   |
+| `test:smoke`                       | Code flow against `SMOKE_BASE_URL` (or an in-process app)        |
 | `db:generate`                      | Generate a migration from `src/schemas/core` into `drizzle/core` |
 | `db:migrate` / `db:seed`           | Apply migrations / seed without starting the server              |
 | `openapi:export` / `openapi:check` | Write `openapi.json` / fail if the committed copy is stale       |
@@ -91,9 +92,36 @@ docker run --rm -p 8080:8080 -v gezcez-data:/app/data \
 The image runs as a non-root user, keeps all state in `/app/data` and has a health check on
 `/health`. `compose.yml` runs the same image locally (`docker compose up --build`).
 
+## Deploy
+
+`deploy/compose.yml` runs the published image behind a Cloudflare tunnel (no open ports) with
+Litestream replicating `core.db` to R2 (`litestream.yml`); a one-shot `restore` service
+restores from R2 when the volume is empty. Copy `deploy/.env.example` to `deploy/.env`, add
+`deploy/cloudflared-credentials.json`, then `docker compose up -d` in `deploy/`.
+`deploy/restore.md` is the restore runbook.
+
+## Test mode for client e2e suites
+
+Client repos (oauth, dashboard, mobile) run their e2e suites against the published image:
+
+```sh
+docker run --rm -p 8080:8080 -e NODE_ENV=test -e PUBLIC_API_URL=http://localhost:8080 \
+  ghcr.io/gezcez/backend:v<x.y.z>
+```
+
+With `NODE_ENV=test` the boot seeds the `e2e_client` (first-party) and `e2e_third_party`
+clients (redirect `http://localhost:4710/callback`, post-logout `http://localhost:4710/`),
+fixture users (`root@`, `admin@`, `moderator@`, `netadmin@`, `analyst@` and `rider@`
+`test.gezcez.com`), the Kocaeli city and two networks. Mail goes to memory, and
+`GET /v1/__test/mailbox?to=<address>` returns the codes. The identity UI origin defaults to
+`http://localhost:5174` (`OAUTH_UI_URL`). CI runs `test/smoke/code-flow.smoke.ts` against the
+image (`SMOKE_BASE_URL=http://localhost:8080 bun run test:smoke`) before publishing it.
+
 ## Contract publishing
 
 - `openapi.json` is committed at the root; CI fails when it is stale (`bun run openapi:export`).
-- CI on `main` pushes `ghcr.io/gezcez/backend:main` and `:sha-<sha>`.
+- CI on `main` pushes `ghcr.io/gezcez/backend:main` and `:sha-<sha>` after the smoke test.
+- Pull requests run `oasdiff breaking` against the base branch's `openapi.json`; a PR that
+  breaks the contract on purpose carries the `api-breaking` label.
 - A `v*` tag attaches `openapi.json` to the GitHub release and pushes `:v<x.y.z>` and `:latest`,
   so client repos can pin an exact contract version for `api:gen` and their e2e suites.
