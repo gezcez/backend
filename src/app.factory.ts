@@ -12,7 +12,7 @@ import type { Request, Response } from "express"
 import { Logger as PinoLogger } from "nestjs-pino"
 import type { AppConfig } from "@common/config"
 import { API_PREFIX } from "@common/constants"
-import { requestIdMiddleware } from "@common/middlewares"
+import { corsMiddleware, requestIdMiddleware } from "@common/middlewares"
 import { buildOpenApiDocument } from "@common/openapi"
 import { AppModule } from "./app.module"
 
@@ -67,19 +67,8 @@ export async function createApp(
 	app.useBodyParser("json", { limit: "100kb" })
 	app.useBodyParser("urlencoded", { limit: "20kb", extended: false })
 	app.use(cookieParser())
-	app.enableCors({
-		origin: config.corsOrigins.length ? config.corsOrigins : false,
-		credentials: true,
-		allowedHeaders: [
-			"Authorization",
-			"Content-Type",
-			"X-CSRF-Token",
-			"If-Match",
-			"Idempotency-Key",
-		],
-		exposedHeaders: ["x-request-id", "ETag", "Retry-After"],
-		maxAge: 600,
-	})
+	// Per route group, credentials only where a cookie is meant to travel (middlewares/cors.ts).
+	app.use(corsMiddleware(config))
 	app.setGlobalPrefix(API_PREFIX, {
 		exclude: [
 			{ path: "health", method: RequestMethod.GET },

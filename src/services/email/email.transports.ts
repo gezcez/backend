@@ -24,9 +24,16 @@ export class ConsoleTransport implements EmailTransport {
 	readonly name = "console"
 	private readonly logger = new Logger("Email")
 
+	constructor(
+		private readonly sink: (text: string) => void = (text) => process.stderr.write(text),
+	) {}
+
 	async send(email: OutgoingEmail) {
-		// Development only: the whole text body, so a developer can read the code.
-		this.logger.log(`To ${email.to}: ${email.subject}\n${email.text}`)
+		// Development only (config refuses it in staging and production). The body carries codes,
+		// so it goes straight to stderr and never through the shared logger, its ring buffer
+		// (ops.logs) or log shipping. The logger only records that a mail was printed.
+		this.sink(`\n--- email ${email.id} to ${email.to}: ${email.subject}\n${email.text}\n---\n`)
+		this.logger.log(`Printed email ${email.id} (${email.template}) to stderr`)
 		return {}
 	}
 }
