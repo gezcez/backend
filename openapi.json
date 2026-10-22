@@ -101,6 +101,166 @@
 				],
 				"type": "object"
 			},
+			"JwksDto": {
+				"properties": {
+					"keys": {
+						"items": {
+							"properties": {
+								"alg": {
+									"const": "ES256",
+									"type": "string"
+								},
+								"crv": {
+									"type": "string"
+								},
+								"kid": {
+									"type": "string"
+								},
+								"kty": {
+									"type": "string"
+								},
+								"use": {
+									"const": "sig",
+									"type": "string"
+								},
+								"x": {
+									"type": "string"
+								},
+								"y": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"kty",
+								"crv",
+								"x",
+								"y",
+								"kid",
+								"alg",
+								"use"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"keys"
+				],
+				"type": "object"
+			},
+			"OpenIdConfigurationDto": {
+				"properties": {
+					"authorization_endpoint": {
+						"type": "string"
+					},
+					"claims_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"code_challenge_methods_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"end_session_endpoint": {
+						"type": "string"
+					},
+					"grant_types_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"id_token_signing_alg_values_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"issuer": {
+						"type": "string"
+					},
+					"jwks_uri": {
+						"type": "string"
+					},
+					"prompt_values_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"response_modes_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"response_types_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"revocation_endpoint": {
+						"type": "string"
+					},
+					"scopes_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"subject_types_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"token_endpoint": {
+						"type": "string"
+					},
+					"token_endpoint_auth_methods_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"ui_locales_supported": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"userinfo_endpoint": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"issuer",
+					"authorization_endpoint",
+					"token_endpoint",
+					"revocation_endpoint",
+					"end_session_endpoint",
+					"jwks_uri",
+					"userinfo_endpoint",
+					"scopes_supported",
+					"response_types_supported",
+					"response_modes_supported",
+					"grant_types_supported",
+					"code_challenge_methods_supported",
+					"token_endpoint_auth_methods_supported",
+					"subject_types_supported",
+					"id_token_signing_alg_values_supported",
+					"claims_supported",
+					"prompt_values_supported",
+					"ui_locales_supported"
+				],
+				"type": "object"
+			},
 			"ReadyDto": {
 				"properties": {
 					"checks": {
@@ -194,6 +354,68 @@
 	},
 	"openapi": "3.1.0",
 	"paths": {
+		"/.well-known/jwks.json": {
+			"get": {
+				"operationId": "WellKnown_jwks",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/JwksDto"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/.well-known/openid-configuration": {
+			"get": {
+				"operationId": "WellKnown_openidConfiguration",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenIdConfigurationDto"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"oauth"
+				]
+			}
+		},
 		"/health": {
 			"get": {
 				"operationId": "System_health",

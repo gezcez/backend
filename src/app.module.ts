@@ -9,6 +9,7 @@ import { ConfigModule, type AppConfig } from "@common/config"
 import { pinoHttpParams } from "@common/logger"
 import { GezcezExceptionFilter, ResponseInterceptor } from "@common/middlewares"
 import { DatabaseModule } from "@db"
+import { KeysModule } from "@services/oauth/keys.module"
 import { SystemModule } from "@services/system/system.module"
 
 @Module({})
@@ -21,6 +22,7 @@ export class AppModule {
 				LoggerModule.forRoot(pinoHttpParams(config)),
 				DatabaseModule,
 				SystemModule,
+				KeysModule,
 			],
 			providers: [
 				{ provide: APP_FILTER, useClass: GezcezExceptionFilter },
