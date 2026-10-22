@@ -267,6 +267,58 @@ describe("admin session management", () => {
 		const after = await dash.get<unknown[]>(FIXTURE.admin, `/v1/dash/users/${rider}/sessions`)
 		expect(after.body.data).toEqual([])
 	})
+
+	test("revoking an SSO session also ends the refresh families issued under it", async () => {
+		const rider = dash.publicId(FIXTURE.rider)
+		const signedIn = await accessTokenFor(t, FIXTURE.rider, {
+			clientId: "e2e_client",
+			scope: "openid offline_access",
+		})
+		const list = await dash.get<{ id: string; kind: string }[]>(
+			FIXTURE.admin,
+			`/v1/dash/users/${rider}/sessions`,
+		)
+		const sso = list.body.data.filter((s) => s.kind === "sso")
+		expect(sso).toHaveLength(1)
+		expect(list.body.data.filter((s) => s.kind === "refresh")).toHaveLength(1)
+
+		const revoked = await dash.call<{ revoked: number }>(
+			FIXTURE.admin,
+			"DELETE",
+			`/v1/dash/users/${rider}/sessions/${sso[0]!.id}`,
+			{ reason: "shared computer" },
+		)
+		expect(revoked.status).toBe(200)
+		expect(revoked.body.data.revoked).toBe(2)
+		const me = await t.json<{ error: { code: string } }>("/v1/me", {
+			headers: { authorization: `Bearer ${signedIn.accessToken}` },
+		})
+		expect(me.body.error.code).toBe("AUTH_SESSION_REVOKED")
+		const after = await dash.get<unknown[]>(FIXTURE.admin, `/v1/dash/users/${rider}/sessions`)
+		expect(after.body.data).toEqual([])
+
+		const audit = dash.db
+			.select()
+			.from(auditLogTable)
+			.where(eq(auditLogTable.action, "users.session_revoked"))
+			.all()
+			.find((row) => (row.data as { session?: string }).session === sso[0]!.id)
+		expect(audit?.data).toMatchObject({ reason: "shared computer" })
+	})
+
+	test("unknown or already revoked session ids are 404", async () => {
+		const rider = dash.publicId(FIXTURE.rider)
+		for (const id of ["sso_does-not-exist", "xyz_123", "rf_does-not-exist"]) {
+			const res = await dash.call<unknown>(
+				FIXTURE.admin,
+				"DELETE",
+				`/v1/dash/users/${rider}/sessions/${id}`,
+				{ reason: "cleanup" },
+			)
+			expect(res.status).toBe(404)
+			expect(res.body.error.code).toBe("NOT_FOUND")
+		}
+	})
 })
 
 describe("POST /v1/dash/users/:userId/roles", () => {
