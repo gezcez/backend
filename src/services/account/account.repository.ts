@@ -2,7 +2,7 @@
 // Users and email-code flows.
 
 import { Injectable } from "@nestjs/common"
-import { and, desc, eq, isNull, lt, lte, sql } from "drizzle-orm"
+import { and, desc, eq, gte, isNull, lt, lte, sql } from "drizzle-orm"
 import { InjectCoreDb, type CoreDatabase } from "@db"
 import {
 	emailCodesTable,
@@ -134,6 +134,19 @@ export class AccountRepository {
 	}
 
 	/** Atomically counts a failed attempt; returns the new count, or undefined when exhausted. */
+	/** Wrong codes entered for an address in flows created since `since`. */
+	failedAttemptsSince(email: string, since: Date): number {
+		return (
+			this.db
+				.select({ total: sql<number>`coalesce(sum(${emailCodesTable.attempts}), 0)` })
+				.from(emailCodesTable)
+				.where(
+					and(eq(emailCodesTable.email, email), gte(emailCodesTable.created_at, since)),
+				)
+				.get()?.total ?? 0
+		)
+	}
+
 	incrementAttempts(flowId: string): number | undefined {
 		return this.db
 			.update(emailCodesTable)

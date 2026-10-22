@@ -74,7 +74,10 @@ export class SelfServiceController {
 	@UseSession({ stepUp: true })
 	@ApiOperation({ summary: "Confirm the new address; the old one gets a notice (step-up)" })
 	@ApiEnvelope(EmailChangeResultDto)
-	verifyEmailChange(@Req() req: Request, @Body() body: EmailVerifyDto): EmailChangeResultDto {
+	verifyEmailChange(
+		@Req() req: Request,
+		@Body() body: EmailVerifyDto,
+	): Promise<EmailChangeResultDto> {
 		return this.account.verifyEmailChange(req, body.flow_id, body.code)
 	}
 

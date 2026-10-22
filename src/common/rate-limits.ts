@@ -25,6 +25,8 @@ export const RATE_LIMIT_PRESETS = {
 		{ by: "ip", limit: 20, windowMs: HOUR },
 	],
 	"email-code-verify": [{ by: "ip", limit: 30, windowMs: 10 * MINUTE }],
+	/** Every code check from one network (/24 or /48), across all addresses. */
+	"email-code-verify-range": [{ by: "ip", limit: 120, windowMs: HOUR }],
 	/** Per signed-in user, on top of email-code-send for the new address. */
 	"email-change": [{ by: "user", limit: 5, windowMs: HOUR }],
 	"password-login": [

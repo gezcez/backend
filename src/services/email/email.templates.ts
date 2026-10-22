@@ -23,6 +23,8 @@ export interface TemplateVars {
 	change_email_code: CodeVars
 	reset_unavailable: Record<string, never>
 	password_changed: Record<string, never>
+	/** Too many wrong codes for this address today; codes stop working until tomorrow. */
+	codes_locked: Record<string, never>
 	/** Sent to the old address; `email` is the new one, masked. */
 	email_changed: { email: string; security_url: string }
 }
@@ -36,6 +38,7 @@ export const TEMPLATE_KEYS = [
 	"change_email_code",
 	"reset_unavailable",
 	"password_changed",
+	"codes_locked",
 	"email_changed",
 ] as const satisfies TemplateKey[]
 
@@ -84,7 +87,7 @@ function codeEmail(
 
 function noticeEmail(
 	locale: Locale,
-	prefix: "reset_unavailable" | "password_changed" | "email_changed",
+	prefix: "reset_unavailable" | "password_changed" | "codes_locked" | "email_changed",
 	vars: Record<string, string> = {},
 ): RenderedEmail {
 	const title = t(locale, `email.${prefix}.title` as LangKey)
@@ -110,6 +113,7 @@ export function renderTemplate<K extends TemplateKey>(
 			return codeEmail(locale, key, vars as CodeVars)
 		case "reset_unavailable":
 		case "password_changed":
+		case "codes_locked":
 			return noticeEmail(locale, key)
 		case "email_changed":
 			return noticeEmail(locale, key, vars as TemplateVars["email_changed"])

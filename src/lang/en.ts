@@ -26,6 +26,10 @@ export const en = {
 	"email.password_changed.title": "Password changed",
 	"email.password_changed.intro":
 		"The password of your gezcez account was just changed and every other session was signed out. If this wasn't you, reset your password right away and contact info@gezcez.com.",
+	"email.codes_locked.subject": "Sign-in codes paused for your gezcez account",
+	"email.codes_locked.title": "Too many wrong codes",
+	"email.codes_locked.intro":
+		"Someone entered many wrong sign-in codes for this address today, so codes stop working for 24 hours. If this wasn't you, nobody got in, but consider setting a password and contact info@gezcez.com if it keeps happening.",
 	"email.change_email_code.subject": "Confirm your new gezcez email: {code}",
 	"email.change_email_code.title": "Confirm your new email address",
 	"email.change_email_code.intro":

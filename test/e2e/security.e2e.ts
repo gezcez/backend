@@ -510,6 +510,42 @@ describe("F10 class-level @UseAuthorization is silently ignored", () => {
 	})
 })
 
+describe("F11 distributed code guessing is capped per address and per network", () => {
+	test("20 wrong codes a day stop every code for the address and mail its owner", async () => {
+		const email = "capped@example.com"
+		await signedIn(email)
+		const browser = new TestBrowser(t)
+		await browser.csrf()
+		const start = () =>
+			browser.post<{ flow_id: string }>("/v1/account/email/start", {
+				email,
+				intent: "signin",
+				locale: "en",
+			})
+		for (let flow = 0; flow < 4; flow++) {
+			const { data } = await start()
+			const real = await browser.lastCode(email)
+			const wrong = String((Number(real) + 1) % 1_000_000).padStart(6, "0")
+			for (let i = 0; i < 5; i++)
+				await browser.post("/v1/account/email/verify", {
+					flow_id: data.flow_id,
+					code: wrong,
+				})
+		}
+		const fresh = await start()
+		const code = await browser.lastCode(email)
+		const last = await browser.post("/v1/account/email/verify", {
+			flow_id: fresh.data.flow_id,
+			code,
+		})
+		expect(last.body.error.code).toBe("AUTH_CODE_ATTEMPTS")
+		const mailbox = await t.json<{ data: { messages: { template: string }[] } }>(
+			`/v1/__test/mailbox?to=${encodeURIComponent(email)}`,
+		)
+		expect(mailbox.body.data.messages.map((m) => m.template)).toContain("codes_locked")
+	})
+})
+
 describe("probes that held (kept as regression checks)", () => {
 	test("20 concurrent refreshes with one token all get the same successor, family survives", async () => {
 		const browser = await signedIn()

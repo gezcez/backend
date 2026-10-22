@@ -10,6 +10,7 @@ import { AuditRepository } from "./audit.repository"
 export type AuditAction =
 	| "auth.code_sent"
 	| "auth.code_failed"
+	| "auth.codes_locked"
 	| "auth.login"
 	| "auth.login_failed"
 	| "auth.signup"

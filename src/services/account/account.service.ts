@@ -13,6 +13,7 @@ import {
 	hashIp,
 	hmacHex,
 	initials,
+	ipPrefix,
 	maskEmail,
 	newId,
 	normaliseEmail,
@@ -46,6 +47,9 @@ export const CODE_TTL_MS = 10 * 60_000
 export const RESEND_AFTER_MS = 30_000
 export const PROFILE_TOKEN_TTL_MS = 30 * 60_000
 export const RESET_TOKEN_TTL_MS = 10 * 60_000
+/** Wrong codes per address per day across all flows; then codes stop working for the day. */
+export const DAILY_FAILED_CODE_CAP = 20
+const DAY_MS = 86_400_000
 const STAGING_TEST_DOMAIN = "@test.gezcez.com"
 const MAX_DEVICE_ACCOUNTS = 5
 
@@ -363,7 +367,12 @@ export class AccountService {
 		code: string,
 	): Promise<EmailVerifyResultDto> {
 		// Email change flows are confirmed only through /email/change/verify.
-		const flow = this.consumeCode(req, flowId, code, (row) => row.intent !== "change_email")
+		const flow = await this.consumeCode(
+			req,
+			flowId,
+			code,
+			(row) => row.intent !== "change_email",
+		)
 
 		switch (flow.intent) {
 			case "reauth": {
@@ -454,17 +463,25 @@ export class AccountService {
 	 * Checks a code against a live flow (attempt counting, single use) and consumes it.
 	 * `accept` rejects flows of the wrong kind as if they did not exist.
 	 */
-	private consumeCode(
+	private async consumeCode(
 		req: Request,
 		flowId: string,
 		code: string,
 		accept: (flow: EmailCodeRow) => boolean,
-	): EmailCodeRow {
+	): Promise<EmailCodeRow> {
+		// A brute force spread over many IPs still shares a network range now and then; this
+		// caps every code check from one /24 or /48, whatever address it targets.
+		const ip = clientIp(req, this.config.trustCfHeaders)
+		await this.limits.consume("email-code-verify-range", { ip: ipPrefix(ip) })
 		const flow = this.repository.findFlow(flowId)
 		const now = new Date()
 		if (!flow || !accept(flow) || flow.consumed_at || flow.expires_at <= now)
 			throw new GezcezError("AUTH_CODE_EXPIRED")
 		if (flow.attempts >= flow.max_attempts) throw new GezcezError("AUTH_CODE_ATTEMPTS")
+		// Per address, across resends and new flows: resending resets a flow's attempts.
+		const since = new Date(now.getTime() - DAY_MS)
+		if (this.repository.failedAttemptsSince(flow.email, since) >= DAILY_FAILED_CODE_CAP)
+			throw new GezcezError("AUTH_CODE_ATTEMPTS")
 
 		if (!safeEqual(this.codeHash(flow.flow_id, flow.email, code), flow.code_hash)) {
 			const attempts = this.repository.incrementAttempts(flowId) ?? flow.max_attempts
@@ -473,6 +490,8 @@ export class AccountService {
 				actorUserId: flow.user_id,
 				data: { intent: flow.intent },
 			})
+			if (this.repository.failedAttemptsSince(flow.email, since) === DAILY_FAILED_CODE_CAP)
+				this.codesLocked(req, flow)
 			if (attempts >= flow.max_attempts) throw new GezcezError("AUTH_CODE_ATTEMPTS")
 			throw new GezcezError("AUTH_CODE_INVALID", undefined, {
 				attempts_left: flow.max_attempts - attempts,
@@ -480,6 +499,19 @@ export class AccountService {
 		}
 		if (!this.repository.consumeFlow(flowId, now)) throw new GezcezError("AUTH_CODE_EXPIRED")
 		return flow
+	}
+
+	/** The daily cap just tripped: tell the account owner (if any) and leave a trail. */
+	private codesLocked(req: Request, flow: EmailCodeRow): void {
+		this.audit.record("auth.codes_locked", {
+			req,
+			actorUserId: flow.user_id,
+			target: flow.user_id ? { type: "user", id: flow.user_id } : undefined,
+			data: { failed: DAILY_FAILED_CODE_CAP },
+		})
+		if (!flow.user_id) return
+		const user = this.repository.findUserById(flow.user_id)
+		if (user) this.email.send("codes_locked", user.email, user.locale, {}, { userId: user.id })
 	}
 
 	// ---------------------------------------------------------------- email change
@@ -542,9 +574,13 @@ export class AccountService {
 	}
 
 	/** POST /v1/account/email/change/verify (step-up): switches the address, notifies the old one. */
-	verifyEmailChange(req: Request, flowId: string, code: string): EmailChangeResultDto {
+	async verifyEmailChange(
+		req: Request,
+		flowId: string,
+		code: string,
+	): Promise<EmailChangeResultDto> {
 		const userId = req.session!.userId
-		const flow = this.consumeCode(
+		const flow = await this.consumeCode(
 			req,
 			flowId,
 			code,
