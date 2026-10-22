@@ -19,6 +19,9 @@ import { RATE_LIMIT_PRESETS, RateLimitModule } from "@common/rate-limits"
 import { clientIp } from "@common/utils"
 import { DatabaseModule } from "@db"
 import { AccountModule } from "@services/account/account.module"
+import { AnalyticsModule } from "@services/analytics/analytics.module"
+import { DuckDbModule } from "@services/analytics/duckdb.module"
+import { ArchiveModule } from "@services/archive/archive.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
@@ -87,6 +90,10 @@ export class AppModule {
 				CitiesModule,
 				TrackerModule.forRoot(config),
 				VehiclesModule,
+				// Parquet archive and DuckDB analytics (P3).
+				DuckDbModule,
+				ArchiveModule.forRoot(),
+				AnalyticsModule,
 				WsModule,
 				// Mobile MVP support (P4).
 				FavouritesModule,
@@ -122,6 +129,9 @@ export class AppModule {
 				ProvidersModule.forRoot({ persistTokens: true }),
 				NetworksCoreModule,
 				TrackerModule.forRoot(config, { http: false }),
+				// The process that writes vts.db runs the nightly export (plan 3.1).
+				DuckDbModule,
+				ArchiveModule.forRoot({ http: false }),
 			],
 		}
 	}
