@@ -70,6 +70,147 @@
 				],
 				"type": "object"
 			},
+			"AppDetail": {
+				"properties": {
+					"access_ttl_s": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"active_families": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"client_id": {
+						"type": "string"
+					},
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"first_party": {
+						"type": "boolean"
+					},
+					"homepage_url": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"logo_url": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"name": {
+						"type": "string"
+					},
+					"platform": {
+						"$ref": "#/components/schemas/AppPlatform"
+					},
+					"redirect_uris": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"refresh_max_s": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"refresh_ttl_s": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"scopes": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"secrets": {
+						"items": {
+							"$ref": "#/components/schemas/AppSecret"
+						},
+						"type": "array"
+					},
+					"system": {
+						"type": "boolean"
+					},
+					"tokens_24h": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"type": {
+						"$ref": "#/components/schemas/AppType"
+					},
+					"updated_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"usage": {
+						"items": {
+							"properties": {
+								"date": {
+									"type": "string"
+								},
+								"tokens": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								}
+							},
+							"required": [
+								"date",
+								"tokens"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"client_id",
+					"name",
+					"description",
+					"logo_url",
+					"homepage_url",
+					"type",
+					"platform",
+					"first_party",
+					"system",
+					"redirect_uris",
+					"scopes",
+					"access_ttl_s",
+					"refresh_ttl_s",
+					"refresh_max_s",
+					"secrets",
+					"active_families",
+					"tokens_24h",
+					"usage",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object"
+			},
 			"AppInfoDto": {
 				"properties": {
 					"client_id": {
@@ -121,6 +262,193 @@
 					"scopes"
 				],
 				"type": "object"
+			},
+			"AppListItem": {
+				"properties": {
+					"active_families": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"client_id": {
+						"type": "string"
+					},
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"first_party": {
+						"type": "boolean"
+					},
+					"name": {
+						"type": "string"
+					},
+					"platform": {
+						"$ref": "#/components/schemas/AppPlatform"
+					},
+					"redirect_uri_count": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"system": {
+						"type": "boolean"
+					},
+					"tokens_24h": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"type": {
+						"$ref": "#/components/schemas/AppType"
+					}
+				},
+				"required": [
+					"client_id",
+					"name",
+					"type",
+					"platform",
+					"first_party",
+					"system",
+					"redirect_uri_count",
+					"active_families",
+					"tokens_24h",
+					"created_at"
+				],
+				"type": "object"
+			},
+			"AppPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/AppListItem"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prev_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
+			"AppPlatform": {
+				"enum": [
+					"web",
+					"native",
+					"dev"
+				],
+				"type": "string"
+			},
+			"AppReasonDto": {
+				"properties": {
+					"reason": {
+						"maxLength": 500,
+						"minLength": 3,
+						"type": "string"
+					}
+				},
+				"required": [
+					"reason"
+				],
+				"type": "object"
+			},
+			"AppSecret": {
+				"properties": {
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"expires_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"id": {
+						"type": "string"
+					},
+					"last_used_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prefix": {
+						"type": "string"
+					},
+					"state": {
+						"enum": [
+							"current",
+							"previous"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"prefix",
+					"state",
+					"created_at",
+					"last_used_at",
+					"expires_at"
+				],
+				"type": "object"
+			},
+			"AppType": {
+				"enum": [
+					"public",
+					"confidential"
+				],
+				"type": "string"
 			},
 			"AuditEntry": {
 				"properties": {
@@ -1535,6 +1863,78 @@
 					"ok",
 					"error",
 					"status"
+				],
+				"type": "object"
+			},
+			"CreateAppDto": {
+				"properties": {
+					"description": {
+						"default": "",
+						"maxLength": 280,
+						"type": "string"
+					},
+					"homepage_url": {
+						"anyOf": [
+							{
+								"format": "uri",
+								"maxLength": 500,
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"default": null
+					},
+					"name": {
+						"maxLength": 64,
+						"minLength": 2,
+						"type": "string"
+					},
+					"platform": {
+						"$ref": "#/components/schemas/AppPlatform"
+					},
+					"redirect_uris": {
+						"items": {
+							"maxLength": 500,
+							"minLength": 1,
+							"type": "string"
+						},
+						"maxItems": 20,
+						"minItems": 1,
+						"type": "array"
+					},
+					"type": {
+						"$ref": "#/components/schemas/AppType"
+					}
+				},
+				"required": [
+					"name",
+					"type",
+					"platform",
+					"redirect_uris"
+				],
+				"type": "object"
+			},
+			"CreatedAppDto": {
+				"properties": {
+					"app": {
+						"$ref": "#/components/schemas/AppDetail"
+					},
+					"secret": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"app",
+					"secret"
 				],
 				"type": "object"
 			},
@@ -5738,6 +6138,37 @@
 				],
 				"type": "object"
 			},
+			"RotatedSecretDto": {
+				"properties": {
+					"meta": {
+						"$ref": "#/components/schemas/AppSecret"
+					},
+					"secret": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"secret",
+					"meta"
+				],
+				"type": "object"
+			},
+			"RotateSecretDto": {
+				"properties": {
+					"grace": {
+						"enum": [
+							"none",
+							"24h",
+							"7d"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"grace"
+				],
+				"type": "object"
+			},
 			"RouteDetailDto": {
 				"properties": {
 					"agency": {
@@ -6201,6 +6632,17 @@
 				"required": [
 					"routes",
 					"stops"
+				],
+				"type": "object"
+			},
+			"SecretRevokedDto": {
+				"properties": {
+					"revoked": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"revoked"
 				],
 				"type": "object"
 			},
@@ -7378,6 +7820,80 @@
 				"required": [
 					"unbanned"
 				],
+				"type": "object"
+			},
+			"UpdateAppDto": {
+				"properties": {
+					"access_ttl_s": {
+						"maximum": 3600,
+						"minimum": 300,
+						"type": "integer"
+					},
+					"description": {
+						"maxLength": 280,
+						"type": "string"
+					},
+					"first_party": {
+						"type": "boolean"
+					},
+					"homepage_url": {
+						"anyOf": [
+							{
+								"format": "uri",
+								"maxLength": 500,
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"logo_url": {
+						"anyOf": [
+							{
+								"format": "uri",
+								"maxLength": 500,
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"name": {
+						"maxLength": 64,
+						"minLength": 2,
+						"type": "string"
+					},
+					"redirect_uris": {
+						"items": {
+							"maxLength": 500,
+							"minLength": 1,
+							"type": "string"
+						},
+						"maxItems": 20,
+						"minItems": 1,
+						"type": "array"
+					},
+					"refresh_max_s": {
+						"maximum": 31536000,
+						"minimum": 3600,
+						"type": "integer"
+					},
+					"refresh_ttl_s": {
+						"maximum": 7776000,
+						"minimum": 3600,
+						"type": "integer"
+					},
+					"scopes": {
+						"items": {
+							"type": "string"
+						},
+						"maxItems": 20,
+						"minItems": 1,
+						"type": "array"
+					}
+				},
 				"type": "object"
 			},
 			"UpdateRoleDto": {
@@ -10624,6 +11140,587 @@
 				"tags": [
 					"transit"
 				]
+			}
+		},
+		"/v1/dash/apps": {
+			"get": {
+				"operationId": "Apps_list",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AppPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "OAuth clients with usage counts; sort name, created_at, tokens_24h",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "apps.read",
+					"scope": "global"
+				}
+			},
+			"post": {
+				"operationId": "Apps_create",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateAppDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/CreatedAppDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Create a client; a confidential client's secret is shown once",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "apps.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/apps/{appId}": {
+			"delete": {
+				"operationId": "Apps_delete",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DeletedDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Delete a client with its grants and tokens (not system apps)",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "apps.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			},
+			"get": {
+				"operationId": "Apps_detail",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AppDetail"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Client detail, secret metadata and tokens issued per day",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "apps.read",
+					"scope": "global"
+				}
+			},
+			"patch": {
+				"description": "redirect_uris and first_party changes additionally need a fresh sign-in (403 AUTH_STEP_UP_REQUIRED).",
+				"operationId": "Apps_update",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateAppDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AppDetail"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Edit a client",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "apps.write",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/apps/{appId}/revoke-all": {
+			"post": {
+				"operationId": "Apps_revokeAll",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AppReasonDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RevokedCountDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Revoke every refresh family of the client",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "apps.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/apps/{appId}/secret": {
+			"post": {
+				"operationId": "Apps_rotate",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RotateSecretDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RotatedSecretDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Rotate the secret (shown once); the previous one works for the grace",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "apps.secrets.rotate",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/apps/{appId}/secret/previous": {
+			"delete": {
+				"operationId": "Apps_revokePrevious",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SecretRevokedDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "End the previous secret's grace now",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "apps.secrets.rotate",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
 			}
 		},
 		"/v1/dash/audit": {

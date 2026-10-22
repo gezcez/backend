@@ -74,14 +74,19 @@ export class ClientsService {
 		return app
 	}
 
+	/** Checks the current secret, then the previous one inside its grace; records the use. */
 	private secretMatches(app: AppRow, secret: string): boolean {
 		const hash = sha256Hex(secret)
-		if (app.client_secret_hash && safeEqual(app.client_secret_hash, hash)) return true
-		return (
+		if (app.client_secret_hash && safeEqual(app.client_secret_hash, hash)) {
+			this.repository.markSecretUsed(app.client_id, "current", new Date())
+			return true
+		}
+		const previous =
 			app.previous_secret_hash !== null &&
 			app.previous_secret_expires_at !== null &&
 			app.previous_secret_expires_at > new Date() &&
 			safeEqual(app.previous_secret_hash, hash)
-		)
+		if (previous) this.repository.markSecretUsed(app.client_id, "previous", new Date())
+		return previous
 	}
 }

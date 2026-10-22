@@ -19,6 +19,7 @@ import { RATE_LIMIT_PRESETS, RateLimitModule } from "@common/rate-limits"
 import { clientIp } from "@common/utils"
 import { DatabaseModule } from "@db"
 import { AccountModule } from "@services/account/account.module"
+import { AppsModule } from "@services/apps/apps.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
@@ -73,6 +74,7 @@ export class AppModule {
 				RolesModule,
 				UsersModule,
 				ModerationModule,
+				AppsModule,
 				// Transit catalog, providers and static data (P3).
 				// This process writes vts.db (and so persists upstream tokens) only with an
 				// in-process tracker; with the worker, the worker owns them.
