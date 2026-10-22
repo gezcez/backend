@@ -10,7 +10,19 @@ import { createApp, mountDocs } from "../../src/app.factory"
 
 const REPO_ROOT = path.resolve(import.meta.dir, "../..")
 
-export interface TestApp {
+/** What the browser and OAuth client helpers need: an in-process app or a running image. */
+export interface ApiTarget {
+	config: Pick<AppConfig, "oauthUiUrl" | "issuer">
+	/** fetch relative to the app's base URL. */
+	fetch(pathname: string, init?: RequestInit): Promise<Response>
+	/** fetch + parse JSON body. */
+	json<T = unknown>(
+		pathname: string,
+		init?: RequestInit,
+	): Promise<{ status: number; headers: Headers; body: T }>
+}
+
+export interface TestApp extends ApiTarget {
 	app: NestExpressApplication
 	config: AppConfig
 	url: string
@@ -56,17 +68,33 @@ export async function createTestApp(env: Record<string, string> = {}): Promise<T
 		dataDir,
 		fetch: doFetch,
 		async json<T>(pathname: string, init?: RequestInit) {
-			const response = await doFetch(pathname, init)
-			const text = await response.text()
-			return {
-				status: response.status,
-				headers: response.headers,
-				body: (text ? JSON.parse(text) : null) as T,
-			}
+			return readJson<T>(await doFetch(pathname, init))
 		},
 		async close() {
 			await app.close()
 			fs.rmSync(dataDir, { recursive: true, force: true })
+		},
+	}
+}
+
+async function readJson<T>(response: Response) {
+	const text = await response.text()
+	return {
+		status: response.status,
+		headers: response.headers,
+		body: (text ? JSON.parse(text) : null) as T,
+	}
+}
+
+/** A running server (for example the published image in test mode), for smoke tests. */
+export function remoteTarget(baseUrl: string, oauthUiUrl: string, issuer = baseUrl): ApiTarget {
+	const url = baseUrl.replace(/\/$/, "")
+	const doFetch = (pathname: string, init?: RequestInit) => fetch(url + pathname, init)
+	return {
+		config: { oauthUiUrl, issuer },
+		fetch: doFetch,
+		async json<T>(pathname: string, init?: RequestInit) {
+			return readJson<T>(await doFetch(pathname, init))
 		},
 	}
 }

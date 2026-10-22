@@ -57,7 +57,8 @@ export const EnvSchema = z
 		REFRESH_GRACE_S: z.coerce.number().int().min(0).max(60).default(10),
 		/** Multiplies every rate limit (tests raise it; 0 is not allowed). */
 		RATE_LIMIT_SCALE: z.coerce.number().positive().default(1),
-		EMAIL_TRANSPORT: z.enum(["ses", "console", "memory"]).default("console"),
+		/** Defaults to memory under NODE_ENV=test (test mailbox), console elsewhere. */
+		EMAIL_TRANSPORT: z.enum(["ses", "console", "memory"]).optional(),
 		EMAIL_FROM: z.string().default("gezcez <noreply@gezcez.com>"),
 		SES_REGION: z.string().optional(),
 		SES_ACCESS_KEY_ID: z.string().optional(),
@@ -131,7 +132,7 @@ export interface AppConfig {
 	refreshGraceS: number
 	rateLimitScale: number
 	email: {
-		transport: Env["EMAIL_TRANSPORT"]
+		transport: NonNullable<Env["EMAIL_TRANSPORT"]>
 		from: string
 		ses: { region?: string; accessKeyId?: string; secretAccessKey?: string }
 	}
@@ -189,7 +190,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 		refreshGraceS: env.REFRESH_GRACE_S,
 		rateLimitScale: env.RATE_LIMIT_SCALE,
 		email: {
-			transport: env.EMAIL_TRANSPORT,
+			transport: env.EMAIL_TRANSPORT ?? (env.NODE_ENV === "test" ? "memory" : "console"),
 			from: env.EMAIL_FROM,
 			ses: {
 				region: env.SES_REGION,

@@ -8,15 +8,6 @@ WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production --ignore-scripts
 
-# ---------- build ----------
-FROM oven/bun:${BUN_VERSION}-slim AS build
-WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --ignore-scripts
-COPY tsconfig.json ./
-COPY src ./src
-RUN bun run build
-
 # ---------- runtime ----------
 FROM oven/bun:${BUN_VERSION}-slim AS runtime
 ARG GIT_SHA=dev
@@ -33,8 +24,10 @@ ENV NODE_ENV=production \
     BUILD_TIME=${BUILD_TIME}
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY package.json ./
+# Bun runs the TypeScript sources directly. Its bundler applies TC39 decorators to files reached
+# through tsconfig path aliases, which breaks Nest's method decorators, so there is no bundle.
+COPY package.json tsconfig.json ./
+COPY src ./src
 COPY drizzle ./drizzle
 RUN mkdir -p /app/data && chown bun:bun /app/data
 USER bun
@@ -42,4 +35,4 @@ VOLUME ["/app/data"]
 EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \
   CMD ["bun", "-e", "fetch('http://127.0.0.1:'+(process.env.PORT||8080)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
-CMD ["bun", "dist/main.js"]
+CMD ["bun", "src/main.ts"]

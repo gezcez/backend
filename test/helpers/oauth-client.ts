@@ -4,7 +4,7 @@
 
 import { createHash, randomBytes } from "node:crypto"
 import { decodeJwt } from "jose"
-import type { TestApp } from "./app"
+import type { ApiTarget } from "./app"
 import { TestBrowser } from "./browser"
 
 export const E2E_REDIRECT = "http://localhost:4710/callback"
@@ -37,7 +37,7 @@ export class TestOAuthClient {
 	readonly state = randomBytes(16).toString("base64url")
 
 	constructor(
-		private readonly t: TestApp,
+		private readonly t: ApiTarget,
 		readonly clientId = "e2e_client",
 		readonly redirectUri = E2E_REDIRECT,
 	) {}
@@ -152,7 +152,7 @@ export function claims(accessToken: string) {
  * `dashboard-dev` is the seeded client that may ask for the `dash` scope.
  */
 export async function accessTokenFor(
-	t: TestApp,
+	t: ApiTarget,
 	email: string,
 	options: { clientId?: string; scope?: string } = {},
 ): Promise<{ accessToken: string; browser: TestBrowser; refreshToken?: string }> {

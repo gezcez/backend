@@ -3,7 +3,7 @@
 // of the identity UI, keeps cookies (ignoring Secure, since tests run on http), and attaches the
 // CSRF token to writes.
 
-import type { TestApp } from "./app"
+import type { ApiTarget } from "./app"
 
 export interface ApiResult<T = unknown> {
 	status: number
@@ -22,7 +22,7 @@ export class TestBrowser {
 	origin: string
 
 	constructor(
-		private readonly t: TestApp,
+		private readonly t: ApiTarget,
 		options: { origin?: string } = {},
 	) {
 		this.origin = options.origin ?? t.config.oauthUiUrl
