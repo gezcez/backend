@@ -1,6 +1,6 @@
 // respect/repositories-only
 // Only repositories touch the database: importing the database module (`@db`, `src/db/*`) is
-// allowed in *.repository.ts, src/db/**, src/app.module.ts, scripts/**, test/** and specs only.
+// allowed in *.repository.ts, src/db/**, src/app.module.ts, src/tracker.worker.ts (composition roots), scripts/**, test/** and specs only.
 // Legacy matched the substring "db" in any import path; this resolves the module id instead.
 
 import { relativeFile, resolveModuleId } from "./module-path.js"
@@ -11,6 +11,7 @@ function isAllowedFile(file) {
 		file.endsWith(".spec.ts") ||
 		file.startsWith("src/db/") ||
 		file === "src/app.module.ts" ||
+		file === "src/tracker.worker.ts" ||
 		file.startsWith("scripts/") ||
 		file.startsWith("test/")
 	)

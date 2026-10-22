@@ -359,6 +359,62 @@
 				],
 				"type": "object"
 			},
+			"BindingStatsDto": {
+				"properties": {
+					"binding_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"live_vehicles": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"open_runs": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"polls": {
+						"additionalProperties": {
+							"maximum": 9007199254740991,
+							"minimum": -9007199254740991,
+							"type": "integer"
+						},
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"positions_hot": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"success_rate": {
+						"items": {
+							"type": "number"
+						},
+						"type": "array"
+					},
+					"window_hours": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					}
+				},
+				"required": [
+					"binding_id",
+					"window_hours",
+					"polls",
+					"success_rate",
+					"positions_hot",
+					"open_runs",
+					"live_vehicles"
+				],
+				"type": "object"
+			},
 			"CityDto": {
 				"properties": {
 					"bbox": {
@@ -1022,6 +1078,192 @@
 					"route_types",
 					"map",
 					"generated_at"
+				],
+				"type": "object"
+			},
+			"ControlResultDto": {
+				"properties": {
+					"error": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"ok": {
+						"type": "boolean"
+					},
+					"status": {
+						"anyOf": [
+							{
+								"properties": {
+									"binding_id": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"consecutive_failures": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"credentials": {
+										"anyOf": [
+											{
+												"properties": {
+													"expires_at": {
+														"type": [
+															"string",
+															"null"
+														]
+													},
+													"failures": {
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													},
+													"realm": {
+														"type": "string"
+													},
+													"refreshed_at": {
+														"type": [
+															"string",
+															"null"
+														]
+													},
+													"secrets_set": {
+														"additionalProperties": {
+															"type": "boolean"
+														},
+														"propertyNames": {
+															"type": "string"
+														},
+														"type": "object"
+													},
+													"state": {
+														"enum": [
+															"ok",
+															"missing",
+															"refreshing",
+															"auth_failed",
+															"unknown"
+														],
+														"type": "string"
+													}
+												},
+												"required": [
+													"realm",
+													"state",
+													"expires_at",
+													"refreshed_at",
+													"failures",
+													"secrets_set"
+												],
+												"type": "object"
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"interval_s": {
+										"type": [
+											"number",
+											"null"
+										]
+									},
+									"last_feed_at": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"last_outcome": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"last_poll_at": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"live_vehicles": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"message": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"next_poll_at": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"state": {
+										"enum": [
+											"ok",
+											"degraded",
+											"down",
+											"paused",
+											"killed",
+											"unknown"
+										],
+										"type": "string"
+									},
+									"subscribers": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"url_variant": {
+										"anyOf": [
+											{
+												"enum": [
+													"primary",
+													"fallback"
+												],
+												"type": "string"
+											},
+											{
+												"type": "null"
+											}
+										]
+									}
+								},
+								"required": [
+									"binding_id",
+									"state",
+									"message",
+									"last_feed_at",
+									"last_poll_at",
+									"last_outcome",
+									"consecutive_failures",
+									"next_poll_at",
+									"interval_s",
+									"url_variant",
+									"live_vehicles",
+									"subscribers",
+									"credentials"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"ok",
+					"error",
+					"status"
 				],
 				"type": "object"
 			},
@@ -3497,6 +3739,154 @@
 				],
 				"type": "object"
 			},
+			"PollPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"properties": {
+								"accepted": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"binding_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"dropped": {
+									"anyOf": [
+										{
+											"additionalProperties": {
+												"type": "number"
+											},
+											"propertyNames": {
+												"type": "string"
+											},
+											"type": "object"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"duration_ms": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"entities": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"error": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"feed_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"http_status": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"inserted": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"outcome": {
+									"type": "string"
+								},
+								"started_at": {
+									"type": "string"
+								},
+								"url_variant": {
+									"anyOf": [
+										{
+											"enum": [
+												"primary",
+												"fallback"
+											],
+											"type": "string"
+										},
+										{
+											"type": "null"
+										}
+									]
+								}
+							},
+							"required": [
+								"id",
+								"binding_id",
+								"started_at",
+								"duration_ms",
+								"url_variant",
+								"http_status",
+								"outcome",
+								"feed_at",
+								"entities",
+								"accepted",
+								"inserted",
+								"dropped",
+								"error"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"prev_cursor": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
 			"PrivacyDto": {
 				"properties": {
 					"location_history_opt_in": {
@@ -5169,6 +5559,214 @@
 					"token_type",
 					"expires_in",
 					"scope"
+				],
+				"type": "object"
+			},
+			"TrackerControlDto": {
+				"properties": {
+					"action": {
+						"enum": [
+							"pause",
+							"resume",
+							"poll-now",
+							"reset-url",
+							"refresh-token"
+						],
+						"type": "string"
+					},
+					"reason": {
+						"maxLength": 500,
+						"type": "string"
+					}
+				},
+				"required": [
+					"action"
+				],
+				"type": "object"
+			},
+			"TrackerOverviewDto": {
+				"properties": {
+					"bindings": {
+						"items": {
+							"properties": {
+								"binding_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"consecutive_failures": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"credentials": {
+									"anyOf": [
+										{
+											"properties": {
+												"expires_at": {
+													"type": [
+														"string",
+														"null"
+													]
+												},
+												"failures": {
+													"maximum": 9007199254740991,
+													"minimum": -9007199254740991,
+													"type": "integer"
+												},
+												"realm": {
+													"type": "string"
+												},
+												"refreshed_at": {
+													"type": [
+														"string",
+														"null"
+													]
+												},
+												"secrets_set": {
+													"additionalProperties": {
+														"type": "boolean"
+													},
+													"propertyNames": {
+														"type": "string"
+													},
+													"type": "object"
+												},
+												"state": {
+													"enum": [
+														"ok",
+														"missing",
+														"refreshing",
+														"auth_failed",
+														"unknown"
+													],
+													"type": "string"
+												}
+											},
+											"required": [
+												"realm",
+												"state",
+												"expires_at",
+												"refreshed_at",
+												"failures",
+												"secrets_set"
+											],
+											"type": "object"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"interval_s": {
+									"type": [
+										"number",
+										"null"
+									]
+								},
+								"last_feed_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"last_outcome": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"last_poll_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"live_vehicles": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"message": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"next_poll_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"state": {
+									"enum": [
+										"ok",
+										"degraded",
+										"down",
+										"paused",
+										"killed",
+										"unknown"
+									],
+									"type": "string"
+								},
+								"subscribers": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"url_variant": {
+									"anyOf": [
+										{
+											"enum": [
+												"primary",
+												"fallback"
+											],
+											"type": "string"
+										},
+										{
+											"type": "null"
+										}
+									]
+								}
+							},
+							"required": [
+								"binding_id",
+								"state",
+								"message",
+								"last_feed_at",
+								"last_poll_at",
+								"last_outcome",
+								"consecutive_failures",
+								"next_poll_at",
+								"interval_s",
+								"url_variant",
+								"live_vehicles",
+								"subscribers",
+								"credentials"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"runner": {
+						"enum": [
+							"worker",
+							"inline",
+							"manual",
+							"external",
+							"off"
+						],
+						"type": "string"
+					},
+					"running": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"runner",
+					"running",
+					"bindings"
 				],
 				"type": "object"
 			},
@@ -7397,6 +7995,228 @@
 				}
 			}
 		},
+		"/v1/dash/networks/{networkId}/bindings/{bindingId}/control": {
+			"post": {
+				"operationId": "TrackerAdmin_control",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "bindingId",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TrackerControlDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/ControlResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: tracker"
+				],
+				"x-gezcez-permission": {
+					"key": "tracker.control",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/bindings/{bindingId}/polls": {
+			"get": {
+				"operationId": "TrackerAdmin_polls",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "bindingId",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PollPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: tracker"
+				],
+				"x-gezcez-permission": {
+					"key": "tracker.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/bindings/{bindingId}/stats": {
+			"get": {
+				"operationId": "TrackerAdmin_stats",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "bindingId",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/BindingStatsDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: tracker"
+				],
+				"x-gezcez-permission": {
+					"key": "tracker.read",
+					"scope": "network"
+				}
+			}
+		},
 		"/v1/dash/networks/{networkId}/bindings/{bindingId}/sync": {
 			"post": {
 				"operationId": "TransitAdmin_run",
@@ -7533,6 +8353,61 @@
 				],
 				"x-gezcez-permission": {
 					"key": "catalog.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/tracker": {
+			"get": {
+				"operationId": "TrackerAdmin_overview",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/TrackerOverviewDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: tracker"
+				],
+				"x-gezcez-permission": {
+					"key": "tracker.read",
 					"scope": "network"
 				}
 			}

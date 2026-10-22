@@ -86,8 +86,8 @@ export const EnvSchema = z
 		PROVIDER_FAKE_ENABLED: boolFlag(true),
 		/** Providers whose bindings are served by the fake provider (local runs without credentials). */
 		PROVIDER_REPLAY: csv,
-		/** worker: Bun Worker (MODE=all); inline: same thread; off: no tracker in this process. */
-		TRACKER_RUNNER: z.enum(["worker", "inline", "off"]).default("worker"),
+		/** worker: Bun Worker (MODE=all); inline: same thread; manual: same thread without timers (tests); off: none. */
+		TRACKER_RUNNER: z.enum(["worker", "inline", "manual", "off"]).default("worker"),
 		UPSTREAM_MAX_IN_FLIGHT: z.coerce.number().int().min(1).max(32).default(4),
 		/** Local quiet hours (HH:MM-HH:MM) with 5 min polling unless vehicles were seen. */
 		TRACKER_QUIET_HOURS: z
@@ -183,7 +183,7 @@ export interface TransitConfig {
 	/** Env level of the provider kill switch, by provider key. */
 	providerEnabled: Record<string, boolean>
 	providerReplay: string[]
-	trackerRunner: "worker" | "inline" | "off"
+	trackerRunner: "worker" | "inline" | "manual" | "off"
 	upstreamMaxInFlight: number
 	quietHours: { start: number; end: number } | null
 	hotDays: number
