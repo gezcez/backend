@@ -26,6 +26,14 @@ const bool = z
 	.optional()
 	.transform((value) => value === "true" || value === "1")
 
+/** Boolean env flag with a default ("true"/"false"/"1"/"0"). */
+function boolFlag(fallback: boolean) {
+	return z
+		.enum(["true", "false", "1", "0"])
+		.optional()
+		.transform((value) => (value === undefined ? fallback : value === "true" || value === "1"))
+}
+
 const secret = z.string().min(32, "must be at least 32 characters")
 
 export const EnvSchema = z
@@ -68,6 +76,33 @@ export const EnvSchema = z
 		ALERT_WEBHOOK_URL: z.string().optional(),
 		GIT_SHA: z.string().default("dev"),
 		BUILD_TIME: z.string().optional(),
+		// ---- transit, providers and tracker (P3) ----
+		KENTKART_CLIENT_ID: z.string().optional(),
+		KENTKART_CLIENT_SECRET: z.string().optional(),
+		KENTKART_REFRESH_TOKEN: z.string().optional(),
+		/** Env hard kill per provider (plan 8.9); needs a restart. */
+		PROVIDER_KENTKART_ENABLED: boolFlag(true),
+		PROVIDER_FAKE_ENABLED: boolFlag(true),
+		/** Providers whose bindings are served by the fake provider (local runs without credentials). */
+		PROVIDER_REPLAY: csv,
+		/** worker: Bun Worker (MODE=all); inline: same thread; off: no tracker in this process. */
+		TRACKER_RUNNER: z.enum(["worker", "inline", "off"]).default("worker"),
+		UPSTREAM_MAX_IN_FLIGHT: z.coerce.number().int().min(1).max(32).default(4),
+		/** Local quiet hours (HH:MM-HH:MM) with 5 min polling unless vehicles were seen. */
+		TRACKER_QUIET_HOURS: z
+			.string()
+			.regex(/^\d{2}:\d{2}-\d{2}:\d{2}$/)
+			.or(z.literal("off"))
+			.default("01:30-05:00"),
+		VTS_HOT_DAYS: z.coerce.number().int().min(1).max(60).default(7),
+		/** Retention deletes only days whose archive is verified (off until the archive ships). */
+		VTS_RETENTION_REQUIRE_ARCHIVE: boolFlag(true),
+		/** Daily static sync time (local, Europe/Istanbul); "off" disables the schedule. */
+		TRANSIT_SYNC_AT: z
+			.string()
+			.regex(/^\d{2}:\d{2}$/)
+			.or(z.literal("off"))
+			.default("04:00"),
 	})
 	.superRefine((env, ctx) => {
 		if (env.NODE_ENV === "production" || env.NODE_ENV === "staging") {
@@ -139,6 +174,26 @@ export interface AppConfig {
 	metricsToken?: string
 	alertWebhookUrl?: string
 	version: { gitSha: string; buildTime?: string; packageVersion: string }
+	transit: TransitConfig
+}
+
+export interface TransitConfig {
+	kentkart: { clientId?: string; clientSecret?: string; refreshToken?: string }
+	/** Env level of the provider kill switch, by provider key. */
+	providerEnabled: Record<string, boolean>
+	providerReplay: string[]
+	trackerRunner: "worker" | "inline" | "off"
+	upstreamMaxInFlight: number
+	quietHours: { start: number; end: number } | null
+	hotDays: number
+	retentionRequireArchive: boolean
+	/** Seconds after local midnight, or null when the schedule is off. */
+	syncAt: number | null
+}
+
+function clockSeconds(value: string): number {
+	const [h, m] = value.split(":").map(Number)
+	return (h ?? 0) * 3600 + (m ?? 0) * 60
 }
 
 export class ConfigError extends Error {
@@ -201,6 +256,30 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 		metricsToken: env.METRICS_TOKEN,
 		alertWebhookUrl: env.ALERT_WEBHOOK_URL,
 		version: { gitSha: env.GIT_SHA, buildTime: env.BUILD_TIME, packageVersion: pkg.version },
+		transit: {
+			kentkart: {
+				clientId: env.KENTKART_CLIENT_ID,
+				clientSecret: env.KENTKART_CLIENT_SECRET,
+				refreshToken: env.KENTKART_REFRESH_TOKEN,
+			},
+			providerEnabled: {
+				kentkart: env.PROVIDER_KENTKART_ENABLED,
+				fake: env.PROVIDER_FAKE_ENABLED,
+			},
+			providerReplay: env.PROVIDER_REPLAY,
+			trackerRunner: env.TRACKER_RUNNER,
+			upstreamMaxInFlight: env.UPSTREAM_MAX_IN_FLIGHT,
+			quietHours:
+				env.TRACKER_QUIET_HOURS === "off"
+					? null
+					: {
+							start: clockSeconds(env.TRACKER_QUIET_HOURS.split("-")[0]!),
+							end: clockSeconds(env.TRACKER_QUIET_HOURS.split("-")[1]!),
+						},
+			hotDays: env.VTS_HOT_DAYS,
+			retentionRequireArchive: env.VTS_RETENTION_REQUIRE_ARCHIVE,
+			syncAt: env.TRANSIT_SYNC_AT === "off" ? null : clockSeconds(env.TRANSIT_SYNC_AT),
+		},
 	}
 }
 

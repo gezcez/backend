@@ -1,0 +1,49 @@
+{
+	"result": { "code": 0, "message": "OK" },
+	"pathList": [
+		{
+			"direction": "1",
+			"direction_name": "UMUTTEPE",
+			"displayRouteCode": "41C",
+			"headSign": "MAŞUKİYE - İZMİT - UMUTTEPE",
+			"path_code": 5502,
+			"pointList": [
+				{ "seq": "1", "lat": "40.803810", "lng": "29.960514" },
+				{ "seq": "2", "lat": "40.823947", "lng": "29.919925" }
+			],
+			"busStopList": [
+				{
+					"seq": "1",
+					"stopId": "80644",
+					"stopName": "Maşukiye Meydan",
+					"lat": "40.803810",
+					"lng": "29.960514",
+					"departure_offset": "0"
+				},
+				{
+					"seq": "2",
+					"stopId": "80647",
+					"stopName": "Maşukiye Köprü",
+					"lat": "40.800708",
+					"lng": "29.981229",
+					"departure_offset": "300"
+				},
+				{
+					"seq": "3",
+					"stopId": "11407",
+					"stopName": "Umuttepe Kampüs",
+					"lat": "40.823947",
+					"lng": "29.919925",
+					"departure_offset": "1500"
+				}
+			],
+			"scheduleList": [
+				{
+					"description": "MTWTFss",
+					"serviceId": "1",
+					"timeList": [{ "departureTime": "07:15", "tripId": "2558900" }]
+				}
+			]
+		}
+	]
+}

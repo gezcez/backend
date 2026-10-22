@@ -1,0 +1,79 @@
+{
+	"header": { "gtfsRealtimeVersion": "2.0", "incrementality": 0, "timestamp": 1738593361 },
+	"entity": [
+		{
+			"id": "1",
+			"vehicle": {
+				"trip": { "tripId": "2558860", "routeId": "42041|0|x", "scheduleRelationship": 0 },
+				"position": {
+					"latitude": 40.8244667,
+					"longitude": 29.921133,
+					"bearing": 19.6,
+					"speed": 2.5
+				},
+				"currentStopSequence": 2,
+				"currentStatus": 1,
+				"timestamp": 1738593311,
+				"stopId": "41003",
+				"vehicle": {
+					"id": "41201|abc",
+					"label": "UMUTTEPE-OTOGAR - İZMİT - MAŞUKİYE",
+					"licensePlate": "41 ABC 123"
+				}
+			}
+		},
+		{
+			"id": "2",
+			"vehicle": {
+				"trip": { "tripId": "2558860", "routeId": "41265|1|x" },
+				"position": {
+					"latitude": 40.8239479,
+					"longitude": 29.9199256,
+					"bearing": 88.8,
+					"speed": 5.83
+				},
+				"currentStopSequence": 1,
+				"currentStatus": 2,
+				"timestamp": 1738593241,
+				"stopId": "11407",
+				"vehicle": {
+					"id": "41200",
+					"label": "UMUTTEPE-OTOGAR - İZMİT - MAŞUKİYE",
+					"licensePlate": "BLD4TEST"
+				}
+			}
+		},
+		{
+			"id": "3",
+			"vehicle": {
+				"trip": { "tripId": "0", "routeId": "41906|1" },
+				"position": { "latitude": 40.77, "longitude": 29.95 },
+				"timestamp": 1738593300,
+				"vehicle": {
+					"id": "41300",
+					"label": "GÖREVLİ6-GÖREVLİ6",
+					"licensePlate": "41 LV 489"
+				}
+			}
+		},
+		{
+			"id": "4",
+			"vehicle": {
+				"trip": { "tripId": "0", "routeId": "44001|0" },
+				"position": { "latitude": 40.8, "longitude": 29.43, "speed": 11.1 },
+				"currentStopSequence": 1,
+				"timestamp": 1738580000,
+				"stopId": "60021",
+				"vehicle": { "id": "44010", "label": "GEBZE-ESENLER", "licensePlate": "34 XYZ 77" }
+			}
+		},
+		{
+			"id": "5",
+			"vehicle": {
+				"position": { "latitude": 0, "longitude": 0 },
+				"vehicle": { "id": "41400" }
+			}
+		},
+		{ "id": "6", "vehicle": { "trip": { "routeId": "42041|0" }, "vehicle": { "id": "41500" } } }
+	]
+}
