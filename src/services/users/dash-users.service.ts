@@ -4,7 +4,7 @@
 
 import { Injectable } from "@nestjs/common"
 import type { Request } from "express"
-import { hasPermission } from "@common/authorization"
+import { actOnUserError, hasPermission } from "@common/authorization"
 import { GezcezError } from "@common/errors"
 import type { Page } from "@common/response"
 import { maskEmail } from "@common/utils"
@@ -191,6 +191,7 @@ export class DashUsersService {
 	/** Revokes one SSO session (with the refresh families issued under it) or one family. */
 	revokeSession(req: Request, publicId: string, id: string, reason: string): { revoked: number } {
 		const user = this.find(publicId)
+		this.assertCanActOn(req, user.id)
 		let revoked = 0
 		if (id.startsWith("sso_")) {
 			const session = this.repository.findLiveSession(user.id, id.slice(4))
@@ -215,6 +216,7 @@ export class DashUsersService {
 	/** Signs the user out everywhere: every SSO session and every refresh family. */
 	revokeAll(req: Request, publicId: string, reason: string): { revoked: number } {
 		const user = this.find(publicId)
+		this.assertCanActOn(req, user.id)
 		const sessions = this.sessions.revokeAllForUser(user.id, "admin_revoked")
 		const families = this.repository.revokeFamilies(user.id, new Date())
 		this.audit.record("users.sessions_revoked", {
@@ -238,6 +240,19 @@ export class DashUsersService {
 		const user = this.repository.findByPublicId(publicId)
 		if (!user) throw new GezcezError("NOT_FOUND", "User not found")
 		return user
+	}
+
+	/** Same level rule as moderation; one's own sessions are always allowed. */
+	private assertCanActOn(req: Request, targetId: number): void {
+		const executorId = req.auth!.userId
+		const error = actOnUserError({
+			executorId,
+			executor: this.permissions.forUser(executorId),
+			targetId,
+			target: this.permissions.forUser(targetId),
+			self: "allow",
+		})
+		if (error) throw new GezcezError(error.code, error.reason)
 	}
 
 	private canReadPii(req: Request): boolean {

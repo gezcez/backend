@@ -76,6 +76,33 @@ export function assignmentError(
 	return null
 }
 
+/** Highest level the user holds anywhere (global or any network). */
+export function highestLevel(permissions: UserPermissions): number {
+	return Math.max(permissions.globalLevel, ...permissions.networkLevels.values())
+}
+
+/**
+ * Why an executor may not act on another user (ban, unban, end their sessions), or null when
+ * allowed: root acts on anyone, everyone else only on users whose highest level is below theirs.
+ * `self` decides whether acting on oneself is allowed (ending one's own sessions is).
+ */
+export function actOnUserError(check: {
+	executorId: number
+	executor: UserPermissions
+	targetId: number
+	target: UserPermissions
+	self: "allow" | "deny"
+}): { code: ErrorCode; reason: string } | null {
+	if (check.executorId === check.targetId)
+		return check.self === "allow"
+			? null
+			: { code: "ROLE_LEVEL_TOO_LOW", reason: "You cannot act on yourself" }
+	if (check.executor.root) return null
+	if (effectiveLevel(check.executor) <= highestLevel(check.target))
+		return { code: "ROLE_LEVEL_TOO_LOW", reason: "The user's role level is not below yours" }
+	return null
+}
+
 /** Keys the executor would grant through a role edit without holding them (globally). */
 export function permissionsNotHeld(
 	executor: UserPermissions,

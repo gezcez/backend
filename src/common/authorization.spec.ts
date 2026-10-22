@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import {
+	actOnUserError,
 	assignmentError,
 	effectiveLevel,
 	emptyPermissions,
@@ -184,5 +185,35 @@ describe("assignment level rules (escalation)", () => {
 		expect(permissionsNotHeld(editor, ["users.read", "users.pii.read"])).toEqual([
 			"users.pii.read",
 		])
+	})
+})
+
+describe("actOnUserError", () => {
+	const root = user({ root: true, globalLevel: 1000 })
+	const admin = user({ globalLevel: 900 })
+	const moderator = user({ globalLevel: 300 })
+	const netAdmin = user({ networkLevels: { 1: 500 } })
+	const check = (executor: UserPermissions, target: UserPermissions, self: "allow" | "deny") =>
+		actOnUserError({ executorId: 1, executor, targetId: 2, target, self })
+
+	test("only strictly lower levels, counting every network of the target", () => {
+		expect(check(admin, root, "allow")?.code).toBe("ROLE_LEVEL_TOO_LOW")
+		expect(check(admin, admin, "allow")?.code).toBe("ROLE_LEVEL_TOO_LOW")
+		expect(check(moderator, netAdmin, "allow")?.code).toBe("ROLE_LEVEL_TOO_LOW")
+		expect(check(admin, moderator, "allow")).toBeNull()
+		expect(check(root, root, "allow")).toBeNull()
+	})
+
+	test("acting on oneself follows the self option", () => {
+		const self = (option: "allow" | "deny") =>
+			actOnUserError({
+				executorId: 1,
+				executor: admin,
+				targetId: 1,
+				target: admin,
+				self: option,
+			})
+		expect(self("allow")).toBeNull()
+		expect(self("deny")?.code).toBe("ROLE_LEVEL_TOO_LOW")
 	})
 })

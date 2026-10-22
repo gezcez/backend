@@ -255,7 +255,7 @@ describe("F5 email-change oracle runs before Turnstile and rate limits", () => {
 })
 
 describe("F6 admin session revocation has no level check", () => {
-	test.failing("admin (900) can sign root out everywhere", async () => {
+	test("admin (900) can sign root out everywhere", async () => {
 		const root = dash.publicId(FIXTURE.root)
 		await dash.token(FIXTURE.root) // root has a live session
 		const res = await dash.call(
@@ -267,6 +267,45 @@ describe("F6 admin session revocation has no level check", () => {
 			},
 		)
 		expect(res.status).toBe(403) // moderation has a level rule; session revocation does not
+	})
+
+	test("admins still end sessions of lower levels and their own", async () => {
+		const moderator = dash.publicId(FIXTURE.moderator)
+		await dash.token(FIXTURE.moderator)
+		const lower = await dash.call(
+			FIXTURE.admin,
+			"POST",
+			`/v1/dash/users/${moderator}/sessions/revoke-all`,
+			{ reason: "review" },
+		)
+		expect(lower.status).toBe(200)
+		dash.forget(FIXTURE.moderator)
+		const self = await dash.call(
+			FIXTURE.admin,
+			"POST",
+			`/v1/dash/users/${dash.publicId(FIXTURE.admin)}/sessions/revoke-all`,
+			{ reason: "lost laptop" },
+		)
+		expect(self.status).toBe(200)
+		dash.forget(FIXTURE.admin)
+	})
+
+	test("a ban placed by an admin cannot be lifted by a moderator", async () => {
+		const email = "banned-by-admin@example.com"
+		await signedIn(email)
+		const user = db().select().from(usersTable).where(eq(usersTable.email, email)).get()!
+		const path = `/v1/dash/users/${user.public_id}`
+		const ban = await dash.call(FIXTURE.admin, "POST", `${path}/ban`, {
+			public_reason: "spam spam",
+			duration: "1d",
+		})
+		expect(ban.status).toBe(200)
+		const moderator = await dash.call(FIXTURE.moderator, "POST", `${path}/unban`, {
+			reason: "mistake",
+		})
+		expect(moderator.body.error.code).toBe("ROLE_LEVEL_TOO_LOW")
+		const admin = await dash.call(FIXTURE.admin, "POST", `${path}/unban`, { reason: "mistake" })
+		expect(admin.status).toBe(200)
 	})
 })
 

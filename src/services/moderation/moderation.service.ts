@@ -6,7 +6,7 @@
 
 import { Injectable } from "@nestjs/common"
 import type { Request } from "express"
-import { effectiveLevel } from "@common/authorization"
+import { actOnUserError, effectiveLevel, highestLevel } from "@common/authorization"
 import { GezcezError } from "@common/errors"
 import type { Page } from "@common/response"
 import { SessionService } from "@services/account/session.service"
@@ -84,6 +84,7 @@ export class ModerationService {
 		if (dashStatus(user) !== "banned")
 			throw new GezcezError("CONFLICT", "The user is not banned")
 		this.assertCanModerate(executorId, user.id)
+		this.assertCanLift(executorId, this.usersRepository.latestBan(user.id)?.created_by)
 		this.repository.unban({ userId: user.id, by: executorId, reason, now: new Date() })
 		const after = user.deletion_due_at ? "pending_deletion" : "active"
 		this.audit.record("moderation.unban", {
@@ -126,13 +127,26 @@ export class ModerationService {
 
 	/** Nobody moderates themselves or someone at or above their own level. */
 	private assertCanModerate(executorId: number, targetId: number): void {
-		if (executorId === targetId)
-			throw new GezcezError("ROLE_LEVEL_TOO_LOW", "You cannot moderate yourself")
+		const error = actOnUserError({
+			executorId,
+			executor: this.permissions.forUser(executorId),
+			targetId,
+			target: this.permissions.forUser(targetId),
+			self: "deny",
+		})
+		if (error) throw new GezcezError(error.code, error.reason)
+	}
+
+	/** Lifting a ban needs at least the level of whoever placed it (root lifts any ban). */
+	private assertCanLift(executorId: number, bannedBy: number | null | undefined): void {
+		if (bannedBy === null || bannedBy === undefined || bannedBy === executorId) return
 		const executor = this.permissions.forUser(executorId)
 		if (executor.root) return
-		const target = this.permissions.forUser(targetId)
-		const targetLevel = Math.max(target.globalLevel, ...target.networkLevels.values())
-		if (effectiveLevel(executor) <= targetLevel)
-			throw new GezcezError("ROLE_LEVEL_TOO_LOW", "The user's role level is not below yours")
+		const banner = this.permissions.forUser(bannedBy)
+		if (banner.root || effectiveLevel(executor) < highestLevel(banner))
+			throw new GezcezError(
+				"ROLE_LEVEL_TOO_LOW",
+				"The ban was placed by someone above your role level",
+			)
 	}
 }
