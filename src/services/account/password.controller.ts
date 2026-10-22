@@ -50,8 +50,12 @@ export class PasswordController {
 	@UseSession()
 	@ApiOperation({ summary: "Re-verify with the password; refreshes auth_time and amr" })
 	@ApiEnvelope(SignedInDto)
-	reauth(@Req() req: Request, @Body() body: ReauthDto): Promise<SignedInDto> {
-		return this.passwords.reauth(req, body.password)
+	reauth(
+		@Req() req: Request,
+		@Res({ passthrough: true }) res: Response,
+		@Body() body: ReauthDto,
+	): Promise<SignedInDto> {
+		return this.passwords.reauth(req, res, body.password)
 	}
 
 	@Put("password")

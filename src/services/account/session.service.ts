@@ -114,12 +114,23 @@ export class SessionService {
 		return this.repository.findById(id)
 	}
 
-	/** Marks a fresh authentication on the current session (re-auth / step-up). */
-	reauthenticate(req: Request, sessionId: string, method: AuthMethod): SessionContext {
+	/**
+	 * Marks a fresh authentication on the current session (re-auth / step-up) and issues a new
+	 * cookie token, so a token captured before the step-up does not gain the new auth_time.
+	 */
+	reauthenticate(
+		req: Request,
+		res: Response,
+		sessionId: string,
+		method: AuthMethod,
+	): SessionContext {
 		const session = this.repository.findById(sessionId)!
 		const amr = [...new Set<AuthMethod>([method, ...session.amr])]
 		const now = new Date()
 		this.repository.updateAuth(sessionId, now, amr)
+		const token = randomToken()
+		this.repository.replaceToken(sessionId, sha256Hex(token), now)
+		this.setCookie(res, token, session.absolute_expires_at)
 		req.session = { ...toContext(session), authTime: now, amr }
 		return req.session
 	}

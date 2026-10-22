@@ -311,12 +311,21 @@ describe("F6 admin session revocation has no level check", () => {
 })
 
 describe("F7 re-auth keeps the same session token", () => {
-	test.failing("the session cookie is not rotated on step-up (plan 6.1.0)", async () => {
+	test("the session cookie is not rotated on step-up (plan 6.1.0)", async () => {
 		const browser = await signedIn()
 		const before = browser.cookies.get("__Host-gz_session")
 		await Bun.sleep(5)
 		await reauthByCode(browser, FIXTURE.rider)
 		expect(browser.cookies.get("__Host-gz_session")).not.toBe(before)
+	})
+
+	test("the rotated cookie keeps working and the old value is dead", async () => {
+		const browser = await signedIn()
+		const before = browser.cookies.get("__Host-gz_session")!
+		await reauthByCode(browser, FIXTURE.rider)
+		expect((await browser.get("/v1/account/session")).status).toBe(200)
+		browser.cookies.set("__Host-gz_session", before)
+		expect((await browser.get("/v1/account/session")).status).toBe(401)
 	})
 })
 

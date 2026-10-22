@@ -86,7 +86,7 @@ export class PasswordService implements OnModuleInit {
 	}
 
 	/** POST /v1/account/reauth: refreshes auth_time and amr on the current session. */
-	async reauth(req: Request, password: string): Promise<SignedInDto> {
+	async reauth(req: Request, res: Response, password: string): Promise<SignedInDto> {
 		const session = req.session
 		if (!session) throw new GezcezError("AUTH_SESSION_REQUIRED")
 		const ip = clientIp(req, this.config.trustCfHeaders)
@@ -96,7 +96,7 @@ export class PasswordService implements OnModuleInit {
 			this.audit.record("auth.login_failed", { req, data: { method: "pwd", reauth: true } })
 			throw new GezcezError("AUTH_PASSWORD_INVALID")
 		}
-		const updated = this.sessions.reauthenticate(req, session.id, "pwd")
+		const updated = this.sessions.reauthenticate(req, res, session.id, "pwd")
 		this.audit.record("auth.reauth", { req, data: { method: "pwd" } })
 		return {
 			status: "signed_in",

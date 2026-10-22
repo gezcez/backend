@@ -369,7 +369,7 @@ export class AccountService {
 			case "reauth": {
 				if (!req.session || req.session.userId !== flow.user_id)
 					throw new GezcezError("AUTH_SESSION_REQUIRED")
-				const session = this.sessions.reauthenticate(req, req.session.id, "otp")
+				const session = this.sessions.reauthenticate(req, res, req.session.id, "otp")
 				this.audit.record("auth.reauth", {
 					req,
 					actorUserId: session.userId,
