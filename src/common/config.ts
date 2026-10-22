@@ -89,6 +89,8 @@ export const EnvSchema = z
 		PROVIDER_FAKE_ENABLED: boolFlag(true),
 		/** Providers whose bindings are served by the fake provider (local runs without credentials). */
 		PROVIDER_REPLAY: csv,
+		/** Minimum vehicles per fake provider feed (load tests); 0 keeps the timetable fleet. */
+		FAKE_VEHICLES: z.coerce.number().int().min(0).max(100_000).default(0),
 		/** worker: Bun Worker (MODE=all); inline: same thread; manual: same thread without timers (tests); off: none. */
 		TRACKER_RUNNER: z.enum(["worker", "inline", "manual", "off"]).default("worker"),
 		UPSTREAM_MAX_IN_FLIGHT: z.coerce.number().int().min(1).max(32).default(4),
@@ -264,6 +266,8 @@ export interface TransitConfig {
 	/** Env level of the provider kill switch, by provider key. */
 	providerEnabled: Record<string, boolean>
 	providerReplay: string[]
+	/** Minimum vehicles per fake provider feed (FAKE_VEHICLES); 0 keeps the timetable fleet. */
+	fakeVehicles: number
 	trackerRunner: "worker" | "inline" | "manual" | "off"
 	upstreamMaxInFlight: number
 	quietHours: { start: number; end: number } | null
@@ -350,6 +354,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 				fake: env.PROVIDER_FAKE_ENABLED,
 			},
 			providerReplay: env.PROVIDER_REPLAY,
+			fakeVehicles: env.FAKE_VEHICLES,
 			trackerRunner: env.TRACKER_RUNNER,
 			upstreamMaxInFlight: env.UPSTREAM_MAX_IN_FLIGHT,
 			quietHours:

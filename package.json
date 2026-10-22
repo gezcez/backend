@@ -23,7 +23,8 @@
 		"openapi:export": "bun scripts/export-openapi.ts",
 		"openapi:check": "bun scripts/export-openapi.ts --check",
 		"keys:rotate": "bun scripts/rotate-keys.ts",
-		"archive:import-observer": "bun scripts/import-observer-db.ts"
+		"archive:import-observer": "bun scripts/import-observer-db.ts",
+		"loadtest": "bun loadtest/run.ts"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1155.0",

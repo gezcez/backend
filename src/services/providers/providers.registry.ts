@@ -35,7 +35,7 @@ export class ProvidersRegistry implements OnModuleInit {
 			maxInFlight: config.transit.upstreamMaxInFlight,
 			defaultRps: 2,
 		})
-		this.fake = new FakeProvider()
+		this.fake = new FakeProvider(Date.now, { vehicles: config.transit.fakeVehicles })
 		this.adapters.set("fake", this.fake)
 		this.adapters.set(
 			"kentkart",

@@ -32,6 +32,6 @@
 			"@test/*": ["./test/*"]
 		}
 	},
-	"include": ["src", "test", "scripts", "eslint-rules", "*.ts"],
+	"include": ["src", "test", "scripts", "loadtest", "eslint-rules", "*.ts"],
 	"exclude": ["node_modules", "dist"]
 }

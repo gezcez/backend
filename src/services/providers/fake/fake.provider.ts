@@ -2,7 +2,8 @@
 // Deterministic provider for tests and `bun dev` without upstream credentials (plan 6.6).
 // It serves a small synthetic network around the binding's city centre whose vehicles move along
 // the timetable, so static data, live vehicles and departures agree. Tests can also script exact
-// feeds per binding with `script()`.
+// feeds per binding with `script()`. `vehicles` (FAKE_VEHICLES) pads every feed with extra
+// vehicles riding the same patterns, so load tests can run a city-sized fleet.
 
 import { localTime, weekdayBit } from "@common/utils"
 import {
@@ -54,6 +55,11 @@ const SERVICES = [
 
 export type ScriptStep = VehicleFeed | ProviderError | ((now: number) => VehicleFeed)
 
+export interface FakeProviderOptions {
+	/** Minimum vehicles per synthetic feed; extra ones are added when the timetable has fewer. */
+	vehicles?: number
+}
+
 function centre(binding: BindingContext): [number, number] {
 	const c = binding.config.centre
 	if (Array.isArray(c) && typeof c[0] === "number" && typeof c[1] === "number")
@@ -88,7 +94,14 @@ export class FakeProvider implements TransitProvider {
 	private readonly alerts = new Map<number, ServiceAlert[] | ProviderError>()
 	private readonly cards = new Map<string, FakeCard>()
 
-	constructor(private readonly now: () => number = Date.now) {}
+	private readonly minVehicles: number
+
+	constructor(
+		private readonly now: () => number = Date.now,
+		options: FakeProviderOptions = {},
+	) {
+		this.minVehicles = Math.max(0, Math.floor(options.vehicles ?? 0))
+	}
 
 	describe(): ProviderDescription {
 		return {
@@ -305,12 +318,54 @@ export class FakeProvider implements TransitProvider {
 				vehicleTs: nowS - 5,
 			})
 		}
+		this.pad(entities, data.patterns, stopById, nowS)
 		return {
 			feedTs: nowS,
 			entities,
 			urlVariant: "primary",
 			bytes: entities.length * 60,
 			invalid: 0,
+		}
+	}
+
+	/**
+	 * Adds `minVehicles - entities.length` vehicles spread over the patterns. Each one loops its
+	 * pattern with a phase from its index, so positions change every poll like a real fleet.
+	 * They carry no trip id (keyed by route, like some Kentkart lines).
+	 */
+	private pad(
+		entities: RawVehicle[],
+		patterns: StaticPattern[],
+		stopById: Map<string, StaticStop>,
+		nowS: number,
+	): void {
+		const missing = this.minVehicles - entities.length
+		if (missing <= 0) return
+		const duration = (STOPS_PER_PATTERN - 1) * FAKE_STOP_SPACING_S
+		for (let i = 0; i < missing; i++) {
+			const pattern = patterns[i % patterns.length]!
+			const elapsed = (nowS + Math.floor((i * duration) / Math.max(1, missing))) % duration
+			const seg = Math.min(STOPS_PER_PATTERN - 2, Math.floor(elapsed / FAKE_STOP_SPACING_S))
+			const frac = (elapsed - seg * FAKE_STOP_SPACING_S) / FAKE_STOP_SPACING_S
+			const a = stopById.get(pattern.stops[seg]!.stopExternalId)!
+			const b = stopById.get(pattern.stops[seg + 1]!.stopExternalId)!
+			// A small per-vehicle offset keeps vehicles on the same segment apart on a map.
+			const jitter = ((i % 97) - 48) * 0.00002
+			entities.push({
+				externalId: `X${String(i).padStart(5, "0")}`,
+				plate: `41 FX ${String(i).padStart(5, "0")}`,
+				label: pattern.headsign,
+				routeExt: pattern.routeExternalId,
+				direction: pattern.direction,
+				stopExt: b.externalId,
+				stopSeq: seg + 2,
+				status: frac > 0.9 ? 0 : 2,
+				lat: a.lat + (b.lat - a.lat) * frac + jitter,
+				lon: a.lon + (b.lon - a.lon) * frac - jitter,
+				bearing: 0,
+				speedMs: 6,
+				vehicleTs: nowS - 5,
+			})
 		}
 	}
 }

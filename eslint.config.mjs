@@ -54,7 +54,7 @@ export default tseslint.config(
 		rules: { "@typescript-eslint/consistent-type-imports": "off" },
 	},
 	{
-		files: ["scripts/**/*.ts"],
+		files: ["scripts/**/*.ts", "loadtest/**/*.ts"],
 		rules: { "no-console": "off" },
 	},
 	{

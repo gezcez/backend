@@ -11,3 +11,4 @@ data
 *.log
 .DS_Store
 deploy/cloudflared-credentials.json
+loadtest/results/
