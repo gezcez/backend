@@ -52,11 +52,14 @@ export class AuthorizationGuard implements CanActivate {
 	) {}
 
 	canActivate(context: ExecutionContext): boolean {
-		const options = this.reflector.get<AuthorizationOptions>(
+		// Handler metadata wins over class metadata, so @UseAuthorization works on either.
+		const options = this.reflector.getAllAndOverride<AuthorizationOptions | undefined>(
 			AUTHORIZATION_KEY,
-			context.getHandler(),
+			[context.getHandler(), context.getClass()],
 		)
-		if (!options) return true
+		// The guard only runs where @UseAuthorization attached it; no options there is a bug, and
+		// failing open would let the route through with only the dash scope.
+		if (!options) throw new Error("AuthorizationGuard without @UseAuthorization metadata")
 		const req = context.switchToHttp().getRequest<Request>()
 		if (!req.auth) throw new GezcezError("AUTH_REQUIRED")
 

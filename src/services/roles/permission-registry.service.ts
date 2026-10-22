@@ -3,11 +3,14 @@
 // MetadataScanner), fails the boot on a key that is not in permission-keys.ts, upserts every key
 // from code, marks keys no longer in code as orphaned, and rebuilds the (method, path) route
 // registry. Code is the source of truth; nothing writes at import time (plan section 6.4).
+// Class-level @UseAuthorization counts (handler metadata wins). A /v1/dash route with neither a
+// permission nor the dash scope fails the boot.
 
 import { Injectable, Logger, RequestMethod, type OnApplicationBootstrap } from "@nestjs/common"
 import { METHOD_METADATA, PATH_METADATA } from "@nestjs/common/constants"
 import { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core"
 import { API_PREFIX } from "@common/constants"
+import { REQUIRED_SCOPES_KEY } from "@common/middlewares/authentication.guard"
 import {
 	AUTHORIZATION_KEY,
 	type AuthorizationOptions,
@@ -73,11 +76,35 @@ export class PermissionRegistryService implements OnApplicationBootstrap {
 			const prototype = Object.getPrototypeOf(instance) as Record<string, unknown>
 			for (const name of this.scanner.getAllMethodNames(prototype)) {
 				const handler = prototype[name] as (...args: unknown[]) => unknown
-				const options = this.reflector.get<AuthorizationOptions | undefined>(
-					AUTHORIZATION_KEY,
+				const method = this.reflector.get<RequestMethod | undefined>(
+					METHOD_METADATA,
 					handler,
 				)
-				if (!options) continue
+				if (method === undefined) continue
+				const path = joinPath(
+					API_PREFIX,
+					controllerPath,
+					this.reflector.get<string | string[]>(PATH_METADATA, handler),
+				)
+				const options = this.reflector.getAllAndOverride<AuthorizationOptions | undefined>(
+					AUTHORIZATION_KEY,
+					[handler, wrapper.metatype],
+				)
+				if (!options) {
+					// A dashboard route declares a permission, or at least the dash scope when it
+					// filters by permission itself (fail the boot, never open).
+					const scopes = this.reflector.getAllAndMerge<string[]>(REQUIRED_SCOPES_KEY, [
+						handler,
+						wrapper.metatype,
+					])
+					const dash =
+						path === `/${API_PREFIX}/dash` || path.startsWith(`/${API_PREFIX}/dash/`)
+					if (dash && !scopes.includes("dash"))
+						throw new Error(
+							`${wrapper.name}.${name} (${path}) has neither @UseAuthorization nor the dash scope`,
+						)
+					continue
+				}
 				if (!isPermissionKey(options.permission)) {
 					throw new Error(
 						`${wrapper.name}.${name} uses unknown permission key "${options.permission}"`,
@@ -89,12 +116,6 @@ export class PermissionRegistryService implements OnApplicationBootstrap {
 						`${wrapper.name}.${name}: "${options.permission}" is a global key on a network route`,
 					)
 				}
-				const method = this.reflector.get<RequestMethod>(METHOD_METADATA, handler)
-				const path = joinPath(
-					API_PREFIX,
-					controllerPath,
-					this.reflector.get<string | string[]>(PATH_METADATA, handler),
-				)
 				if (options.scope === "network" && !path.includes(":networkId")) {
 					throw new Error(
 						`${wrapper.name}.${name}: network routes need a :networkId param`,

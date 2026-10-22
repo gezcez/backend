@@ -459,7 +459,7 @@ describe("F9 reset token race", () => {
 })
 
 describe("F10 class-level @UseAuthorization is silently ignored", () => {
-	test.failing("AuthorizationGuard allows a request when the metadata sits on the class", () => {
+	test("AuthorizationGuard allows a request when the metadata sits on the class", () => {
 		@UseAuthorization({ permission: "users.read", scope: "global", description: "x" })
 		@Controller("dash/x")
 		class X {
@@ -484,6 +484,29 @@ describe("F10 class-level @UseAuthorization is silently ignored", () => {
 			allowed = false
 		}
 		expect(allowed).toBe(false)
+	})
+
+	test("class-level metadata is enforced and a route the user may use passes", () => {
+		@UseAuthorization({ permission: "users.read", scope: "global", description: "x" })
+		@Controller("dash/y")
+		class Y {
+			@Get()
+			list() {
+				return 1
+			}
+		}
+		const allowed = emptyPermissions()
+		allowed.global.add("users.read")
+		const guard = new AuthorizationGuard(new Reflector(), {
+			forUser: () => allowed,
+			resolveNetwork: () => undefined,
+		})
+		const context = {
+			getHandler: () => Y.prototype.list,
+			getClass: () => Y,
+			switchToHttp: () => ({ getRequest: () => ({ auth: { userId: 1 }, params: {} }) }),
+		} as unknown as ExecutionContext
+		expect(guard.canActivate(context)).toBe(true)
 	})
 })
 
