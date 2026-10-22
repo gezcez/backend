@@ -1597,6 +1597,35 @@
 				],
 				"type": "object"
 			},
+			"CreateRoleDto": {
+				"properties": {
+					"description": {
+						"default": "",
+						"maxLength": 280,
+						"type": "string"
+					},
+					"key": {
+						"pattern": "^[a-z][a-z0-9_]{1,31}$",
+						"type": "string"
+					},
+					"level": {
+						"maximum": 999,
+						"minimum": 1,
+						"type": "integer"
+					},
+					"name": {
+						"maxLength": 48,
+						"minLength": 2,
+						"type": "string"
+					}
+				},
+				"required": [
+					"key",
+					"name",
+					"level"
+				],
+				"type": "object"
+			},
 			"CsrfDto": {
 				"properties": {
 					"token": {
@@ -2929,6 +2958,17 @@
 				],
 				"type": "object"
 			},
+			"DeletedDto": {
+				"properties": {
+					"deleted": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"deleted"
+				],
+				"type": "object"
+			},
 			"DeparturesDto": {
 				"properties": {
 					"generated_at": {
@@ -4081,6 +4121,115 @@
 				],
 				"type": "object"
 			},
+			"Member": {
+				"properties": {
+					"email_masked": {
+						"type": "string"
+					},
+					"last_active_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"roles": {
+						"items": {
+							"properties": {
+								"granted_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+									"type": "string"
+								},
+								"granted_by": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/UserRef"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"role": {
+									"$ref": "#/components/schemas/RoleRef"
+								}
+							},
+							"required": [
+								"role",
+								"granted_at",
+								"granted_by"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"user": {
+						"$ref": "#/components/schemas/UserRef"
+					}
+				},
+				"required": [
+					"user",
+					"email_masked",
+					"last_active_at",
+					"roles"
+				],
+				"type": "object"
+			},
+			"MemberPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/Member"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prev_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
 			"ModerationAction": {
 				"properties": {
 					"action": {
@@ -4959,6 +5108,122 @@
 				},
 				"type": "object"
 			},
+			"PermissionBatchDto": {
+				"properties": {
+					"operations": {
+						"items": {
+							"properties": {
+								"op": {
+									"enum": [
+										"grant",
+										"revoke"
+									],
+									"type": "string"
+								},
+								"permission_key": {
+									"$ref": "#/components/schemas/PermissionKey"
+								},
+								"role_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								}
+							},
+							"required": [
+								"role_id",
+								"permission_key",
+								"op"
+							],
+							"type": "object"
+						},
+						"maxItems": 500,
+						"minItems": 1,
+						"type": "array"
+					}
+				},
+				"required": [
+					"operations"
+				],
+				"type": "object"
+			},
+			"PermissionBatchResultDto": {
+				"properties": {
+					"results": {
+						"items": {
+							"properties": {
+								"error_code": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ErrorCode"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"ok": {
+									"type": "boolean"
+								},
+								"op": {
+									"enum": [
+										"grant",
+										"revoke"
+									],
+									"type": "string"
+								},
+								"permission_key": {
+									"$ref": "#/components/schemas/PermissionKey"
+								},
+								"role_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								}
+							},
+							"required": [
+								"role_id",
+								"permission_key",
+								"op",
+								"ok",
+								"error_code"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"results"
+				],
+				"type": "object"
+			},
+			"PermissionInfo": {
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"key": {
+						"$ref": "#/components/schemas/PermissionKey"
+					},
+					"scope": {
+						"enum": [
+							"global",
+							"network"
+						],
+						"type": "string"
+					},
+					"sudo": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"key",
+					"scope",
+					"sudo",
+					"description"
+				],
+				"type": "object"
+			},
 			"PermissionKey": {
 				"enum": [
 					"system.health.read",
@@ -5010,62 +5275,94 @@
 				],
 				"type": "string"
 			},
-			"PermissionListDto": {
+			"PermissionMatrixDto": {
 				"properties": {
-					"keys": {
+					"grants": {
 						"items": {
 							"properties": {
-								"description": {
-									"type": "string"
+								"permissions": {
+									"items": {
+										"$ref": "#/components/schemas/PermissionKey"
+									},
+									"type": "array"
 								},
-								"key": {
-									"type": "string"
-								},
-								"orphaned": {
-									"type": "boolean"
-								},
-								"scope": {
-									"enum": [
-										"global",
-										"network"
-									],
-									"type": "string"
-								},
-								"sudo": {
-									"type": "boolean"
+								"role_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
 								}
 							},
 							"required": [
-								"key",
-								"scope",
-								"description",
-								"sudo",
-								"orphaned"
+								"role_id",
+								"permissions"
 							],
 							"type": "object"
+						},
+						"type": "array"
+					},
+					"permissions": {
+						"items": {
+							"$ref": "#/components/schemas/PermissionInfo"
+						},
+						"type": "array"
+					},
+					"roles": {
+						"items": {
+							"$ref": "#/components/schemas/Role"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"roles",
+					"permissions",
+					"grants"
+				],
+				"type": "object"
+			},
+			"PermissionRegistryEntry": {
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"first_registered_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"key": {
+						"type": "string"
+					},
+					"last_seen_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"orphaned_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"roles": {
+						"items": {
+							"$ref": "#/components/schemas/RoleRef"
 						},
 						"type": "array"
 					},
 					"routes": {
 						"items": {
 							"properties": {
-								"description": {
-									"type": "string"
-								},
 								"method": {
 									"type": "string"
 								},
 								"path": {
-									"type": "string"
-								},
-								"permission_key": {
-									"type": "string"
-								},
-								"scope": {
-									"enum": [
-										"global",
-										"network"
-									],
 									"type": "string"
 								},
 								"sudo": {
@@ -5075,19 +5372,33 @@
 							"required": [
 								"method",
 								"path",
-								"permission_key",
-								"scope",
-								"sudo",
-								"description"
+								"sudo"
 							],
 							"type": "object"
 						},
 						"type": "array"
+					},
+					"scope": {
+						"enum": [
+							"global",
+							"network"
+						],
+						"type": "string"
+					},
+					"sudo": {
+						"type": "boolean"
 					}
 				},
 				"required": [
-					"keys",
-					"routes"
+					"key",
+					"scope",
+					"sudo",
+					"description",
+					"routes",
+					"roles",
+					"first_registered_at",
+					"last_seen_at",
+					"orphaned_at"
 				],
 				"type": "object"
 			},
@@ -5664,6 +5975,21 @@
 				],
 				"type": "object"
 			},
+			"ReplacePermissionsDto": {
+				"properties": {
+					"permissions": {
+						"items": {
+							"$ref": "#/components/schemas/PermissionKey"
+						},
+						"maxItems": 200,
+						"type": "array"
+					}
+				},
+				"required": [
+					"permissions"
+				],
+				"type": "object"
+			},
 			"RevealEmailDto": {
 				"properties": {
 					"email": {
@@ -5707,6 +6033,53 @@
 				},
 				"type": "object"
 			},
+			"Role": {
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"immutable": {
+						"type": "boolean"
+					},
+					"key": {
+						"type": "string"
+					},
+					"level": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"member_count": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					},
+					"permission_count": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					}
+				},
+				"required": [
+					"id",
+					"key",
+					"name",
+					"description",
+					"level",
+					"immutable",
+					"permission_count",
+					"member_count"
+				],
+				"type": "object"
+			},
 			"RoleAssignment": {
 				"properties": {
 					"granted_at": {
@@ -5743,6 +6116,100 @@
 					"role",
 					"granted_at",
 					"granted_by"
+				],
+				"type": "object"
+			},
+			"RoleDetail": {
+				"properties": {
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"immutable": {
+						"type": "boolean"
+					},
+					"key": {
+						"type": "string"
+					},
+					"level": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"member_count": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"members_by_network": {
+						"items": {
+							"properties": {
+								"count": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"network": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/NetworkRef"
+										},
+										{
+											"type": "null"
+										}
+									]
+								}
+							},
+							"required": [
+								"network",
+								"count"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"name": {
+						"type": "string"
+					},
+					"permission_count": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"permissions": {
+						"items": {
+							"$ref": "#/components/schemas/PermissionKey"
+						},
+						"type": "array"
+					},
+					"updated_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"key",
+					"name",
+					"description",
+					"level",
+					"immutable",
+					"permission_count",
+					"member_count",
+					"permissions",
+					"members_by_network",
+					"created_at",
+					"updated_at"
 				],
 				"type": "object"
 			},
@@ -7561,6 +8028,25 @@
 				"required": [
 					"unbanned"
 				],
+				"type": "object"
+			},
+			"UpdateRoleDto": {
+				"properties": {
+					"description": {
+						"maxLength": 280,
+						"type": "string"
+					},
+					"level": {
+						"maximum": 999,
+						"minimum": 1,
+						"type": "integer"
+					},
+					"name": {
+						"maxLength": 48,
+						"minLength": 2,
+						"type": "string"
+					}
+				},
 				"type": "object"
 			},
 			"UserRef": {
@@ -11815,6 +12301,348 @@
 				}
 			}
 		},
+		"/v1/dash/networks/{networkId}/members": {
+			"get": {
+				"description": "Filter `role` (key); sort display_name, level (default desc), last_active_at.",
+				"operationId": "Members_list",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "role",
+						"required": false,
+						"schema": {
+							"maxLength": 32,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/MemberPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Users holding a role in the network, emails masked",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "members.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/members/{userId}/roles": {
+			"post": {
+				"operationId": "Members_assign",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RoleOperationsDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RoleOperationResultsDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Grant or revoke network roles in a batch; level rules per operation",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "members.roles.write",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/members/assignable-roles": {
+			"get": {
+				"operationId": "Members_assignable",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/RoleRef"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Roles strictly below your level in this network",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "members.roles.write",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/members/candidates": {
+			"get": {
+				"operationId": "Members_candidates",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"default": "",
+							"maxLength": 200,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/UserRef"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Users to add: username or name prefix (2+ characters); exact email with users.pii.read",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "members.roles.write",
+					"scope": "network"
+				}
+			}
+		},
 		"/v1/dash/networks/{networkId}/sync-runs": {
 			"get": {
 				"operationId": "TransitAdmin_runs",
@@ -11948,7 +12776,7 @@
 		},
 		"/v1/dash/permissions": {
 			"get": {
-				"operationId": "Roles_list",
+				"operationId": "Roles_permissions",
 				"parameters": [],
 				"responses": {
 					"200": {
@@ -11957,7 +12785,10 @@
 								"schema": {
 									"properties": {
 										"data": {
-											"$ref": "#/components/schemas/PermissionListDto"
+											"items": {
+												"$ref": "#/components/schemas/PermissionInfo"
+											},
+											"type": "array"
 										},
 										"ok": {
 											"enum": [
@@ -11992,7 +12823,132 @@
 						"bearer": []
 					}
 				],
-				"summary": "Permission keys (from code) and the guarded route registry",
+				"summary": "Permission keys from code with scope, sudo and description",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "permissions.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/permissions/{key}": {
+			"delete": {
+				"operationId": "Roles_deletePermission",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "key",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DeletedDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Delete a key that is no longer in code (409 otherwise)",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "permissions.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/permissions/registry": {
+			"get": {
+				"operationId": "Roles_registry",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/PermissionRegistryEntry"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Every stored key with its routes, holders and orphan flag",
 				"tags": [
 					"dash"
 				],
@@ -12194,6 +13150,468 @@
 				],
 				"x-gezcez-permission": {
 					"key": "providers.kill",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/roles": {
+			"get": {
+				"operationId": "Roles_list",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/Role"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Roles with permission and member counts",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "roles.read",
+					"scope": "global"
+				}
+			},
+			"post": {
+				"operationId": "Roles_create",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateRoleDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/Role"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Create a role (no permissions yet); its level must be below yours",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "roles.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/roles/{roleId}": {
+			"get": {
+				"operationId": "Roles_detail",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RoleDetail"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Role detail with its permissions and members per network",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "roles.read",
+					"scope": "global"
+				}
+			},
+			"patch": {
+				"operationId": "Roles_update",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateRoleDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/Role"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Edit a role's name, description or level (not immutable roles)",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "roles.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/roles/{roleId}/permissions": {
+			"put": {
+				"operationId": "Roles_replacePermissions",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ReplacePermissionsDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RoleDetail"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Replace a role's permissions (only keys you hold can be added)",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "roles.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/roles/permission-matrix": {
+			"get": {
+				"operationId": "Roles_matrix",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PermissionMatrixDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Roles x permissions",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "roles.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/roles/permissions:batch": {
+			"post": {
+				"operationId": "Roles_batch",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PermissionBatchDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PermissionBatchResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Matrix editor batch: grant or revoke (role, permission) pairs, a result each",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "roles.write",
 					"scope": "global"
 				},
 				"x-gezcez-sudo": true

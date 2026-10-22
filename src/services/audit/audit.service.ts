@@ -28,10 +28,6 @@ export type AuditAction =
 	| "keys.rotated"
 	| "roles.grant"
 	| "roles.revoke"
-	| "provider.kill"
-	| "provider.unkill"
-	| "catalog.sync"
-	| "tracker.control"
 	| "roles.created"
 	| "roles.updated"
 	| "roles.permissions_changed"
@@ -57,6 +53,10 @@ export type AuditAction =
 	| "account.deletion_scheduled"
 	| "account.deletion_cancelled"
 	| "users.deleted"
+	| "provider.kill"
+	| "provider.unkill"
+	| "catalog.sync"
+	| "tracker.control"
 
 export interface AuditContext {
 	req?: Request

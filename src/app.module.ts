@@ -74,6 +74,7 @@ export class AppModule {
 				OAuthModule,
 				RolesModule,
 				UsersModule,
+				ModerationModule,
 				// Transit catalog, providers and static data (P3).
 				// This process writes vts.db (and so persists upstream tokens) only with an
 				// in-process tracker; with the worker, the worker owns them.
@@ -90,7 +91,6 @@ export class AppModule {
 				// Mobile MVP support (P4).
 				FavouritesModule,
 				TelemetryModule,
-				ModerationModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],

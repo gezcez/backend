@@ -8,7 +8,6 @@ import { assignmentError } from "@common/authorization"
 import { GezcezError, type ErrorCode } from "@common/errors"
 import { AuditService } from "@services/audit/audit.service"
 import { PermissionCacheService } from "./permission-cache.service"
-import type { PermissionListDto } from "./roles.dto"
 import { RolesRepository, type AssignmentDetail, type UserRoleRow } from "./roles.repository"
 
 export interface AssignmentInput {
@@ -111,19 +110,6 @@ export class RolesService {
 
 	assignments(userId: number): AssignmentDetail[] {
 		return this.repository.assignmentsForUser(userId)
-	}
-
-	permissionList(): PermissionListDto {
-		return {
-			keys: this.repository.listPermissions().map((row) => ({
-				key: row.key,
-				scope: row.scope,
-				description: row.description,
-				sudo: row.sudo,
-				orphaned: row.orphaned_at !== null,
-			})),
-			routes: this.repository.listRoutes().map(({ id: _id, ...route }) => route),
-		}
 	}
 
 	private check(req: Request, input: AssignmentInput) {

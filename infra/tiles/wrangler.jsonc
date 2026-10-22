@@ -1,0 +1,24 @@
+// tiles.gezcez.com: one Worker in front of the gezcez-tiles R2 bucket. See README.md for the
+// one-time setup (bucket, custom domain, API token) and how the archive and assets get there.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "gezcez-tiles",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-01",
+	"workers_dev": false,
+	"preview_urls": false,
+	// Creates the proxied DNS record and certificate for the hostname on deploy.
+	"routes": [{ "pattern": "tiles.gezcez.com", "custom_domain": true }],
+	"r2_buckets": [{ "binding": "BUCKET", "bucket_name": "gezcez-tiles" }],
+	"vars": {
+		// Object key of the basemap archive in the bucket (scripts/upload-archive.sh writes it).
+		"ARCHIVE_KEY": "basemap/turkey.pmtiles",
+		// Glyphs live under <prefix>fonts/, sprites under <prefix>sprites/.
+		"ASSETS_PREFIX": "assets/",
+		// Comma separated. "https://*.gezcez.com" matches any single-level subdomain.
+		"ALLOWED_ORIGINS": "https://gezcez.com,https://*.gezcez.com,http://localhost:5173,http://localhost:8081",
+		// Seconds browsers and the edge keep a tile. Archives are rebuilt monthly.
+		"TILE_MAX_AGE": "86400",
+	},
+	"observability": { "enabled": true },
+}

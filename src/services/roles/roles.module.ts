@@ -6,6 +6,8 @@ import { DiscoveryModule } from "@nestjs/core"
 import { PERMISSION_RESOLVER } from "@common/authorization"
 import { PermissionCacheService } from "./permission-cache.service"
 import { PermissionRegistryService } from "./permission-registry.service"
+import { RolesAdminRepository } from "./roles-admin.repository"
+import { RolesAdminService } from "./roles-admin.service"
 import { RolesController } from "./roles.controller"
 import { RolesRepository } from "./roles.repository"
 import { RolesService } from "./roles.service"
@@ -17,10 +19,19 @@ import { RolesService } from "./roles.service"
 	providers: [
 		RolesRepository,
 		RolesService,
+		RolesAdminRepository,
+		RolesAdminService,
 		PermissionCacheService,
 		PermissionRegistryService,
 		{ provide: PERMISSION_RESOLVER, useExisting: PermissionCacheService },
 	],
-	exports: [RolesService, PermissionCacheService, PermissionRegistryService, PERMISSION_RESOLVER],
+	exports: [
+		RolesService,
+		RolesAdminRepository,
+		RolesAdminService,
+		PermissionCacheService,
+		PermissionRegistryService,
+		PERMISSION_RESOLVER,
+	],
 })
 export class RolesModule {}

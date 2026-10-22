@@ -5,14 +5,14 @@
 import { z } from "zod"
 import { ErrorCodeSchema } from "../response"
 
-export const UserRefSchema = z
-	.object({
-		/** public_id */
-		id: z.string(),
-		display_name: z.string(),
-		username: z.string().nullable(),
-	})
-	.meta({ id: "UserRef" })
+/** Without an id, for DTO classes named UserRef (a DTO root must not carry a schema id). */
+export const UserRefBase = z.object({
+	/** public_id */
+	id: z.string(),
+	display_name: z.string(),
+	username: z.string().nullable(),
+})
+export const UserRefSchema = UserRefBase.meta({ id: "UserRef" })
 export type UserRef = z.infer<typeof UserRefSchema>
 
 export const NetworkRefSchema = z
