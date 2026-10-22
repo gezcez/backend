@@ -6650,6 +6650,687 @@
 					"uptime_s"
 				],
 				"type": "object"
+			},
+			"WsClientMessage": {
+				"oneOf": [
+					{
+						"properties": {
+							"token": {
+								"maxLength": 4000,
+								"minLength": 1,
+								"type": "string"
+							},
+							"type": {
+								"const": "auth",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"token"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"channel": {
+								"enum": [
+									"vehicles",
+									"departures",
+									"tracker.status",
+									"tracker.logs"
+								],
+								"type": "string"
+							},
+							"id": {
+								"maxLength": 64,
+								"minLength": 1,
+								"type": "string"
+							},
+							"params": {
+								"additionalProperties": {},
+								"default": {},
+								"propertyNames": {
+									"type": "string"
+								},
+								"type": "object"
+							},
+							"type": {
+								"const": "subscribe",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"id",
+							"channel"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"id": {
+								"maxLength": 64,
+								"minLength": 1,
+								"type": "string"
+							},
+							"type": {
+								"const": "unsubscribe",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"id"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"t": {
+								"type": "number"
+							},
+							"type": {
+								"const": "ping",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"t": {
+								"type": "number"
+							},
+							"type": {
+								"const": "pong",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"WsDeparturesParams": {
+				"properties": {
+					"limit": {
+						"default": 10,
+						"maximum": 30,
+						"minimum": 1,
+						"type": "integer"
+					},
+					"stop": {
+						"maxLength": 80,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"stop"
+				],
+				"type": "object"
+			},
+			"WsServerMessage": {
+				"oneOf": [
+					{
+						"properties": {
+							"heartbeat_s": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"limits": {
+								"properties": {
+									"max_bbox_span_deg": {
+										"type": "number"
+									},
+									"max_routes_per_sub": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"max_subs": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									}
+								},
+								"required": [
+									"max_subs",
+									"max_routes_per_sub",
+									"max_bbox_span_deg"
+								],
+								"type": "object"
+							},
+							"type": {
+								"const": "hello",
+								"type": "string"
+							},
+							"v": {
+								"const": 1,
+								"type": "number"
+							}
+						},
+						"required": [
+							"type",
+							"v",
+							"heartbeat_s",
+							"limits"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"exp": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"type": {
+								"const": "auth_ok",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"exp"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"feed_ts": {
+								"anyOf": [
+									{
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"fields": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"seq": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"sub": {
+								"type": "string"
+							},
+							"type": {
+								"const": "snapshot",
+								"type": "string"
+							},
+							"vehicles": {
+								"items": {
+									"description": "Values in the order given by `fields`",
+									"items": {
+										"type": [
+											"string",
+											"number",
+											"null"
+										]
+									},
+									"type": "array"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"type",
+							"sub",
+							"seq",
+							"feed_ts",
+							"fields",
+							"vehicles"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"feed_ts": {
+								"anyOf": [
+									{
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"remove": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"seq": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"sub": {
+								"type": "string"
+							},
+							"type": {
+								"const": "delta",
+								"type": "string"
+							},
+							"upsert": {
+								"items": {
+									"description": "Values in the order given by `fields`",
+									"items": {
+										"type": [
+											"string",
+											"number",
+											"null"
+										]
+									},
+									"type": "array"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"type",
+							"sub",
+							"seq",
+							"feed_ts",
+							"upsert",
+							"remove"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"generated_at": {
+								"type": "string"
+							},
+							"items": {
+								"items": {
+									"properties": {
+										"cancelled": {
+											"type": "boolean"
+										},
+										"headsign": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"predicted_at": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"route": {
+											"properties": {
+												"agency": {
+													"type": [
+														"string",
+														"null"
+													]
+												},
+												"colour": {
+													"type": [
+														"string",
+														"null"
+													]
+												},
+												"id": {
+													"description": "Stable public id, e.g. 1.42041",
+													"type": "string"
+												},
+												"long_name": {
+													"type": "string"
+												},
+												"mode": {
+													"enum": [
+														"tram",
+														"metro",
+														"rail",
+														"bus",
+														"ferry",
+														"cable_tram",
+														"aerial_lift",
+														"funicular",
+														"trolleybus",
+														"monorail"
+													],
+													"type": "string"
+												},
+												"network_id": {
+													"maximum": 9007199254740991,
+													"minimum": -9007199254740991,
+													"type": "integer"
+												},
+												"route_type": {
+													"maximum": 9007199254740991,
+													"minimum": -9007199254740991,
+													"type": "integer"
+												},
+												"short_name": {
+													"type": "string"
+												},
+												"text_colour": {
+													"type": [
+														"string",
+														"null"
+													]
+												}
+											},
+											"required": [
+												"id",
+												"network_id",
+												"short_name",
+												"long_name",
+												"mode",
+												"route_type",
+												"colour",
+												"text_colour",
+												"agency"
+											],
+											"type": "object"
+										},
+										"scheduled_at": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"source": {
+											"enum": [
+												"schedule",
+												"live",
+												"live_eta"
+											],
+											"type": "string"
+										},
+										"stops_away": {
+											"anyOf": [
+												{
+													"maximum": 9007199254740991,
+													"minimum": -9007199254740991,
+													"type": "integer"
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"trip_id": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"vehicle_id": {
+											"type": [
+												"string",
+												"null"
+											]
+										}
+									},
+									"required": [
+										"route",
+										"headsign",
+										"trip_id",
+										"scheduled_at",
+										"predicted_at",
+										"vehicle_id",
+										"stops_away",
+										"source",
+										"cancelled"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"seq": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"stop": {
+								"type": "string"
+							},
+							"sub": {
+								"type": "string"
+							},
+							"type": {
+								"const": "departures",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"sub",
+							"seq",
+							"stop",
+							"generated_at",
+							"items"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"binding": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"message": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"network": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"seq": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"state": {
+								"enum": [
+									"ok",
+									"degraded",
+									"down",
+									"paused",
+									"killed",
+									"unknown"
+								],
+								"type": "string"
+							},
+							"sub": {
+								"type": "string"
+							},
+							"type": {
+								"const": "status",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"sub",
+							"seq",
+							"network",
+							"binding",
+							"state"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"data": {},
+							"seq": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"sub": {
+								"type": "string"
+							},
+							"type": {
+								"const": "event",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"sub",
+							"seq",
+							"data"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"code": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"message": {
+								"type": "string"
+							},
+							"type": {
+								"const": "error",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"code",
+							"message"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"t": {
+								"type": "number"
+							},
+							"type": {
+								"const": "ping",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type",
+							"t"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"t": {
+								"type": "number"
+							},
+							"type": {
+								"const": "pong",
+								"type": "string"
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"WsVehiclesParams": {
+				"properties": {
+					"bbox": {
+						"description": "[west, south, east, north]",
+						"items": false,
+						"maxItems": 4,
+						"minItems": 4,
+						"prefixItems": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "number"
+							},
+							{
+								"type": "number"
+							},
+							{
+								"type": "number"
+							}
+						],
+						"type": "array"
+					},
+					"detail": {
+						"default": "compact",
+						"enum": [
+							"compact",
+							"full"
+						],
+						"type": "string"
+					},
+					"direction": {
+						"anyOf": [
+							{
+								"const": 0,
+								"type": "number"
+							},
+							{
+								"const": 1,
+								"type": "number"
+							}
+						]
+					},
+					"network": {
+						"anyOf": [
+							{
+								"maxLength": 64,
+								"minLength": 1,
+								"type": "string"
+							},
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							}
+						]
+					},
+					"routes": {
+						"items": {
+							"maxLength": 80,
+							"type": "string"
+						},
+						"maxItems": 12,
+						"type": "array"
+					}
+				},
+				"required": [
+					"network"
+				],
+				"type": "object"
 			}
 		},
 		"securitySchemes": {
