@@ -136,6 +136,19 @@ export const EnvSchema = z
 		DUCKDB_EXTENSION_DIR: z.string().optional(),
 		ANALYTICS_TIMEOUT_MS: z.coerce.number().int().min(100).max(300_000).default(10_000),
 		ANALYTICS_MAX_CONCURRENT: z.coerce.number().int().min(1).max(16).default(2),
+		// ---- trip assistant (mobile L3, plan 6.17; docs/assistant.md) ----
+		/** Off by default; needs ANTHROPIC_API_KEY. `app.kill_switches.assistant` turns it off at runtime. */
+		ASSISTANT_ENABLED: boolFlag(false),
+		/** Read only here and handed to the SDK client; never logged or returned. */
+		ANTHROPIC_API_KEY: z.string().optional(),
+		ASSISTANT_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
+		ASSISTANT_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("low"),
+		ASSISTANT_MAX_TOKENS: z.coerce.number().int().min(256).max(64_000).default(4096),
+		/** Model calls per request (each tool round is one call). */
+		ASSISTANT_MAX_ROUNDS: z.coerce.number().int().min(1).max(10).default(5),
+		/** Server-side refusal fallback ("default" routing); turn off for models without it. */
+		ASSISTANT_FALLBACKS: boolFlag(true),
+		ASSISTANT_TIMEOUT_MS: z.coerce.number().int().min(1000).max(600_000).default(60_000),
 	})
 	.superRefine((env, ctx) => {
 		if (env.ARCHIVE_UPLOAD === "s3") {
@@ -181,6 +194,13 @@ export const EnvSchema = z
 				code: "custom",
 				path: ["STAGING_TEST_OTP"],
 				message: "must not be set on the production API",
+			})
+		}
+		if (env.ASSISTANT_ENABLED && !env.ANTHROPIC_API_KEY && env.NODE_ENV !== "test") {
+			ctx.addIssue({
+				code: "custom",
+				path: ["ANTHROPIC_API_KEY"],
+				message: "required when ASSISTANT_ENABLED=true",
 			})
 		}
 		if (env.EMAIL_TRANSPORT === "memory" && env.NODE_ENV !== "test") {
@@ -232,6 +252,19 @@ export interface AppConfig {
 	version: { gitSha: string; buildTime?: string; packageVersion: string }
 	transit: TransitConfig
 	analytics: AnalyticsConfig
+	assistant: AssistantConfig
+}
+
+export interface AssistantConfig {
+	/** Env level of the feature flag (the runtime kill switch is `app.kill_switches.assistant`). */
+	enabled: boolean
+	apiKey?: string
+	model: string
+	effort: Env["ASSISTANT_EFFORT"]
+	maxTokens: number
+	maxRounds: number
+	fallbacks: boolean
+	timeoutMs: number
 }
 
 export interface AnalyticsConfig {
@@ -389,6 +422,16 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 			},
 			timeoutMs: env.ANALYTICS_TIMEOUT_MS,
 			maxConcurrent: env.ANALYTICS_MAX_CONCURRENT,
+		},
+		assistant: {
+			enabled: env.ASSISTANT_ENABLED,
+			apiKey: env.ANTHROPIC_API_KEY,
+			model: env.ASSISTANT_MODEL,
+			effort: env.ASSISTANT_EFFORT,
+			maxTokens: env.ASSISTANT_MAX_TOKENS,
+			maxRounds: env.ASSISTANT_MAX_ROUNDS,
+			fallbacks: env.ASSISTANT_FALLBACKS,
+			timeoutMs: env.ASSISTANT_TIMEOUT_MS,
 		},
 	}
 }

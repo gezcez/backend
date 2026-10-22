@@ -32,7 +32,7 @@ export const AppConfigSchema = z.object({
 	flags: z.record(z.string(), z.boolean()),
 	kill_switches: z
 		.record(z.string(), z.boolean())
-		.describe("Feature availability: false turns a feature off (cards, live_map, ...)"),
+		.describe("Feature availability: false turns a feature off (cards, live_map, assistant, ...)"),
 	announcement: AnnouncementSchema.nullable(),
 	tiles_style_url: z.object({ light: z.url(), dark: z.url() }),
 	ws_url: z.string(),

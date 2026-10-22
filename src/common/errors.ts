@@ -40,6 +40,8 @@ export const ERROR_CODES = {
 	CAPABILITY_UNSUPPORTED: { status: 404, message: "Capability not supported here" },
 	CARD_NOT_FOUND: { status: 404, message: "Card not found" },
 	ANALYTICS_TIMEOUT: { status: 504, message: "Analytics query timed out" },
+	FEATURE_DISABLED: { status: 503, message: "This feature is turned off" },
+	ASSISTANT_UNAVAILABLE: { status: 502, message: "The assistant is unavailable" },
 	INTERNAL: { status: 500, message: "Internal server error" },
 } as const satisfies Record<string, { status: number; message: string }>
 

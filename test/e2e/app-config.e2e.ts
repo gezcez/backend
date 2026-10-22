@@ -35,7 +35,7 @@ describe("app config", () => {
 			soft_update_version: null,
 			update: "none",
 			flags: {},
-			kill_switches: { cards: true, live_map: true },
+			kill_switches: { cards: true, live_map: true, assistant: false },
 			announcement: null,
 		})
 		expect(res.body.data.tiles_style_url.light).toMatch(/^https:\/\/.+light/)
@@ -61,7 +61,7 @@ describe("app config", () => {
 		expect(ios.min_supported_version).toBe("1.2.0")
 		expect(ios.update).toBe("force")
 		expect(ios.flags).toEqual({ new_search: true })
-		expect(ios.kill_switches).toEqual({ cards: false, live_map: true })
+		expect(ios.kill_switches).toEqual({ cards: false, live_map: true, assistant: false })
 		expect(ios.announcement?.id).toBe("maint-1")
 
 		const android = (await get("?platform=android&version=1.1.9")).body.data

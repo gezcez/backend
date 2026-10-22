@@ -23,6 +23,7 @@ import { AnalyticsModule } from "@services/analytics/analytics.module"
 import { DuckDbModule } from "@services/analytics/duckdb.module"
 import { ArchiveModule } from "@services/archive/archive.module"
 import { AppsModule } from "@services/apps/apps.module"
+import { AssistantModule } from "@services/assistant/assistant.module"
 import { AppConfigModule } from "@services/app-config/app-config.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
@@ -102,6 +103,8 @@ export class AppModule {
 				AppConfigModule,
 				FavouritesModule,
 				TelemetryModule,
+				// Mobile later phases: trip assistant (L3), off unless ASSISTANT_ENABLED.
+				AssistantModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],

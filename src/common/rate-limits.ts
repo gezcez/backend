@@ -11,7 +11,7 @@ import { GezcezError } from "./errors"
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 
-export type RateLimitDimension = "ip" | "email" | "client"
+export type RateLimitDimension = "ip" | "email" | "client" | "user"
 
 export interface RateLimitRule {
 	by: RateLimitDimension
@@ -35,6 +35,12 @@ export const RATE_LIMIT_PRESETS = {
 	reports: [{ by: "ip", limit: 10, windowMs: HOUR }],
 	telemetry: [{ by: "ip", limit: 10, windowMs: HOUR }],
 	cards: [{ by: "ip", limit: 60, windowMs: HOUR }],
+	// Each request is several model calls, so per account and tight (mobile plan L3).
+	assistant: [
+		{ by: "user", limit: 10, windowMs: 10 * MINUTE },
+		{ by: "user", limit: 60, windowMs: 24 * HOUR },
+		{ by: "ip", limit: 120, windowMs: HOUR },
+	],
 } as const satisfies Record<string, readonly RateLimitRule[]>
 
 export type RateLimitPreset = keyof typeof RATE_LIMIT_PRESETS
@@ -43,6 +49,8 @@ export interface RateLimitSubject {
 	ip?: string
 	email?: string
 	client?: string
+	/** Account public id. */
+	user?: string
 }
 
 @Injectable()
@@ -70,7 +78,8 @@ export class RateLimitService {
 				1,
 				Math.floor(rule.limit * this.config.rateLimitScale * (options.factor ?? 1)),
 			)
-			const key = `${preset}:${rule.by}:${value.toLowerCase()}`
+			// The window is part of the key so one dimension can carry a short and a long rule.
+			const key = `${preset}:${rule.by}:${rule.windowMs}:${value.toLowerCase()}`
 			const record = await this.storage.increment(
 				key,
 				rule.windowMs,

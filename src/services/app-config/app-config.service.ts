@@ -6,7 +6,10 @@
 //   app.min_supported_version  "1.0.0" | { ios: "1.0.0", android: "1.0.1" }
 //   app.soft_update_version    same, or null
 //   app.features               { "<flag>": boolean }
-//   app.kill_switches          { cards: boolean, live_map: boolean } (false turns a feature off)
+//   app.kill_switches          { cards, live_map, assistant: boolean } (false turns a feature off)
+//
+// `kill_switches.assistant` is also false unless ASSISTANT_ENABLED and ANTHROPIC_API_KEY are set,
+// so the app shows the assistant entry only when the endpoint will accept requests.
 //   app.announcement           { id, level, title: {tr,en}, body: {tr,en}, url } | null
 
 import { Injectable, Logger } from "@nestjs/common"
@@ -90,6 +93,8 @@ export class AppConfigService {
 			if (parsed.success) announcement = parsed.data
 			else this.logger.warn("app.announcement flag is malformed; ignored")
 		}
+		const kills = booleans(flags.get("app.kill_switches"))
+		const assistantEnv = this.env.assistant.enabled && Boolean(this.env.assistant.apiKey)
 		return {
 			min_supported_version: min,
 			soft_update_version: soft,
@@ -97,7 +102,8 @@ export class AppConfigService {
 			flags: booleans(flags.get("app.features")),
 			kill_switches: {
 				...DEFAULT_KILL_SWITCHES,
-				...booleans(flags.get("app.kill_switches")),
+				...kills,
+				assistant: assistantEnv && kills.assistant !== false,
 			},
 			announcement,
 			tiles_style_url: this.env.tilesStyleUrl,
