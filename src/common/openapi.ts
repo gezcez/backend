@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule, type OpenAPIObject } from "@nestjs/swag
 import { cleanupOpenApiDoc } from "nestjs-zod"
 import { z } from "zod"
 import type { AppConfig } from "./config"
+import { apiDescription, errorCodeDescriptions, tagsFor } from "./openapi.docs"
 import { ApiErrorSchema, ErrorCodeSchema } from "./response"
 
 type SchemaMap = NonNullable<NonNullable<OpenAPIObject["components"]>["schemas"]>
@@ -102,11 +103,7 @@ export function buildOpenApiDocument(app: INestApplication, config: AppConfig): 
 	patchControllerDtos(app)
 	const builder = new DocumentBuilder()
 		.setTitle("gezcez API")
-		.setDescription(
-			"OAuth authorization server, dashboard, mobile and public transit API for gezcez. " +
-				"Every response except /v1/oauth/token, /v1/oauth/revoke, /.well-known/*, /health and " +
-				"/ready is wrapped in `{ ok, data }` or `{ ok: false, error }`.",
-		)
+		.setDescription(apiDescription())
 		.setVersion(config.version.packageVersion)
 		.setOpenAPIVersion("3.1.0")
 		.addServer(config.publicApiUrl)
@@ -121,7 +118,11 @@ export function buildOpenApiDocument(app: INestApplication, config: AppConfig): 
 	document.components ??= {}
 	document.components.schemas = {
 		...document.components.schemas,
-		ErrorCode: jsonSchema(ErrorCodeSchema),
+		ErrorCode: {
+			...jsonSchema(ErrorCodeSchema),
+			description: "Stable error code; clients branch and translate on it",
+			"x-enumDescriptions": errorCodeDescriptions(),
+		} as unknown as SchemaMap[string],
 		ApiError: {
 			...jsonSchema(ApiErrorSchema),
 			properties: {
@@ -140,6 +141,12 @@ export function buildOpenApiDocument(app: INestApplication, config: AppConfig): 
 		},
 	}
 	for (const decorate of decorators) decorate(document)
+	const used = Object.values(document.paths).flatMap((item) =>
+		Object.values(item as Record<string, { tags?: string[] }>).flatMap((op) => op.tags ?? []),
+	)
+	const { tags, groups } = tagsFor(used)
+	document.tags = tags
+	;(document as OpenAPIObject & { "x-tagGroups"?: unknown })["x-tagGroups"] = groups
 	return sortKeys(document) as OpenAPIObject
 }
 

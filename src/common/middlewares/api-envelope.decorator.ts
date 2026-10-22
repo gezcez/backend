@@ -12,6 +12,8 @@ export interface ApiEnvelopeOptions {
 	description?: string
 	/** The route is @RawResponse(): document the DTO without the envelope. */
 	raw?: boolean
+	/** Example `data` (or the bare body for raw routes), published as the response example. */
+	example?: unknown
 }
 
 type AnyZodDto = ZodDto & Type<unknown>
@@ -31,7 +33,18 @@ export function ApiEnvelope(dto: AnyZodDto | [AnyZodDto], options: ApiEnvelopeOp
 			}
 	return applyDecorators(
 		ApiExtraModels(model),
-		ApiResponse({ status, description: options.description ?? "Success", schema }),
+		ApiResponse({
+			status,
+			description: options.description ?? "Success",
+			schema,
+			...(options.example === undefined
+				? {}
+				: {
+						example: options.raw
+							? options.example
+							: { ok: true, data: options.example },
+					}),
+		}),
 		ApiDefaultResponse({
 			description: "Error envelope",
 			schema: { $ref: "#/components/schemas/ErrorResponse" },
