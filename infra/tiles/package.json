@@ -13,9 +13,9 @@
 		"test:watch": "vitest",
 		"styles:build": "bun scripts/build-styles.ts",
 		"styles:check": "bun scripts/build-styles.ts --check",
-		"archive:build": "sh scripts/build-archive.sh",
-		"archive:upload": "sh scripts/upload-archive.sh",
-		"assets:upload": "sh scripts/upload-assets.sh"
+		"archive:build": "bash scripts/build-archive.sh",
+		"archive:upload": "bash scripts/upload-archive.sh",
+		"assets:upload": "bash scripts/upload-assets.sh"
 	},
 	"dependencies": {
 		"pmtiles": "^4.5.0"

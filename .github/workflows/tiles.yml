@@ -1,0 +1,109 @@
+name: tiles
+
+# infra/tiles: the tiles.gezcez.com Worker, map styles and basemap build (README.md in that folder).
+#   check    every PR and main push touching infra/tiles: typecheck, styles current, tests, bundle
+#   deploy   a tiles-v* tag: deploy the Worker (environment "tiles", Cloudflare secrets)
+#   rebuild  monthly or by hand: extract a fresh Turkey basemap and upload it to R2. The schedule
+#            only runs once the repository variable TILES_REBUILD_ENABLED is "true".
+
+on:
+    pull_request:
+        paths: ["infra/tiles/**", ".github/workflows/tiles.yml"]
+    push:
+        branches: [main]
+        paths: ["infra/tiles/**", ".github/workflows/tiles.yml"]
+        tags: ["tiles-v*"]
+    schedule:
+        - cron: "0 3 2 * *"
+    workflow_dispatch:
+        inputs:
+            build:
+                description: Protomaps daily build (YYYYMMDD), empty for the latest
+                required: false
+
+concurrency:
+    group: tiles-${{ github.ref }}-${{ github.event_name }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+    contents: read
+
+defaults:
+    run:
+        working-directory: infra/tiles
+
+env:
+    WRANGLER_SEND_METRICS: "false"
+
+jobs:
+    check:
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version-file: .bun-version
+            - run: bun install --frozen-lockfile
+            - name: Typecheck
+              run: bun run typecheck
+            - name: Styles match scripts/build-styles.ts
+              run: bun run styles:check
+            - name: Tests
+              run: bun run test
+            - name: Bundle
+              run: bunx wrangler deploy --dry-run --outdir dist
+
+    deploy:
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/tiles-v')
+        needs: check
+        runs-on: ubuntu-latest
+        environment:
+            name: tiles
+            url: https://tiles.gezcez.com/tiles.json
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version-file: .bun-version
+            - run: bun install --frozen-lockfile
+            - name: Deploy
+              run: bunx wrangler deploy --message "${{ github.ref_name }} ${{ github.sha }}"
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            - name: Smoke
+              run: |
+                  for i in 1 2 3 4 5; do
+                    if curl -fsS https://tiles.gezcez.com/health \
+                      && curl -fsS -o /dev/null https://tiles.gezcez.com/styles/gezcez-light.json; then
+                      exit 0
+                    fi
+                    sleep 5
+                  done
+                  exit 1
+
+    rebuild:
+        if: >-
+            github.event_name == 'workflow_dispatch' ||
+            (github.event_name == 'schedule' && vars.TILES_REBUILD_ENABLED == 'true')
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        environment: tiles
+        steps:
+            - uses: actions/checkout@v4
+            - name: Extract Turkey from the Protomaps daily build
+              run: bash scripts/build-archive.sh
+              env:
+                  BUILD: ${{ github.event.inputs.build }}
+            - name: Upload to R2
+              run: bash scripts/upload-archive.sh
+              env:
+                  R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  R2_ACCESS_KEY_ID: ${{ secrets.R2_TILES_ACCESS_KEY_ID }}
+                  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_TILES_SECRET_ACCESS_KEY }}
+            - name: Smoke
+              run: curl -fsS https://tiles.gezcez.com/tiles.json
