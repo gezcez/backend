@@ -2,6 +2,26 @@ import { describe, expect, test } from "bun:test"
 import { ConfigError, loadConfig } from "./config"
 
 const SECRET = "x".repeat(32)
+const PRODUCTION = {
+	NODE_ENV: "production",
+	KEY_ENCRYPTION_SECRET: SECRET,
+	SEAL_SECRET: SECRET,
+	CODE_PEPPER: SECRET,
+	CSRF_SECRET: SECRET,
+	TURNSTILE_SECRET: "turnstile-secret",
+	EMAIL_TRANSPORT: "ses",
+	SES_REGION: "eu-central-1",
+}
+
+function issuesOf(env: Record<string, string>): string {
+	try {
+		loadConfig(env)
+	} catch (error) {
+		if (error instanceof ConfigError) return error.issues.join("\n")
+		throw error
+	}
+	return ""
+}
 
 describe("loadConfig", () => {
 	test("defaults are usable for local development", () => {
@@ -30,11 +50,7 @@ describe("loadConfig", () => {
 
 	test("production accepts complete secrets", () => {
 		const config = loadConfig({
-			NODE_ENV: "production",
-			KEY_ENCRYPTION_SECRET: SECRET,
-			SEAL_SECRET: SECRET,
-			CODE_PEPPER: SECRET,
-			CSRF_SECRET: SECRET,
+			...PRODUCTION,
 			PUBLIC_API_URL: "https://api.gezcez.com/",
 			CORS_ORIGINS: "https://oauth.gezcez.com, https://dash.gezcez.com",
 		})
@@ -43,12 +59,62 @@ describe("loadConfig", () => {
 		expect(config.corsOrigins).toEqual(["https://oauth.gezcez.com", "https://dash.gezcez.com"])
 	})
 
+	test("staging and production need Turnstile and the ses transport", () => {
+		for (const NODE_ENV of ["production", "staging"]) {
+			const issues = issuesOf({
+				...PRODUCTION,
+				NODE_ENV,
+				TURNSTILE_SECRET: "",
+				EMAIL_TRANSPORT: "",
+			})
+			expect(issues).toContain("TURNSTILE_SECRET")
+			expect(issues).toContain("EMAIL_TRANSPORT")
+			expect(issuesOf({ ...PRODUCTION, NODE_ENV, EMAIL_TRANSPORT: "console" })).toContain(
+				"EMAIL_TRANSPORT",
+			)
+			expect(issuesOf({ ...PRODUCTION, NODE_ENV, SES_REGION: "" })).toContain("SES_REGION")
+		}
+	})
+
+	test("development defaults only work on a loopback API URL", () => {
+		for (const url of ["http://localhost:8080", "http://127.0.0.1:8080", "http://[::1]:8080"])
+			expect(loadConfig({ PUBLIC_API_URL: url }).env).toBe("development")
+		const issues = issuesOf({ PUBLIC_API_URL: "http://192.168.1.20:8080" })
+		expect(issues).toContain("CODE_PEPPER")
+		expect(issues).toContain("PUBLIC_API_URL is not loopback")
+		const lan = loadConfig({
+			PUBLIC_API_URL: "http://192.168.1.20:8080",
+			KEY_ENCRYPTION_SECRET: SECRET,
+			SEAL_SECRET: SECRET,
+			CODE_PEPPER: SECRET,
+			CSRF_SECRET: SECRET,
+		})
+		expect(lan.secrets.codePepper).toBe(SECRET)
+	})
+
+	test("STAGING_TEST_OTP is refused with NODE_ENV=production whatever the URL", () => {
+		for (const url of [
+			"https://api-staging.gezcez.com",
+			"https://API.gezcez.com:443",
+			"https://api.gezcez.com./",
+		])
+			expect(
+				issuesOf({ ...PRODUCTION, PUBLIC_API_URL: url, STAGING_TEST_OTP: "123456" }),
+			).toContain("STAGING_TEST_OTP")
+	})
+
 	test("STAGING_TEST_OTP is refused on the production API", () => {
-		expect(() =>
-			loadConfig({ PUBLIC_API_URL: "https://api.gezcez.com", STAGING_TEST_OTP: "123456" }),
-		).toThrow(ConfigError)
+		expect(
+			issuesOf({
+				NODE_ENV: "test",
+				PUBLIC_API_URL: "https://api.gezcez.com",
+				STAGING_TEST_OTP: "123456",
+			}),
+		).toContain("STAGING_TEST_OTP")
 		expect(
 			loadConfig({
+				...PRODUCTION,
+				NODE_ENV: "staging",
 				PUBLIC_API_URL: "https://api-staging.gezcez.com",
 				STAGING_TEST_OTP: "123456",
 			}).stagingTestOtp,

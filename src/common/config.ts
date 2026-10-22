@@ -6,10 +6,30 @@ import path from "node:path"
 import { z } from "zod"
 import pkg from "../../package.json"
 
-const PRODUCTION_API_URL = "https://api.gezcez.com"
+const PRODUCTION_API_HOST = "api.gezcez.com"
 
-// Development and test fallbacks for secrets. They are refused in production.
+// Development and test fallbacks for secrets. They are refused in staging and production, and
+// whenever PUBLIC_API_URL is not a loopback address.
 const DEV_SECRET = "dev-only-insecure-secret-change-me-0000000000"
+
+const SECRET_KEYS = ["KEY_ENCRYPTION_SECRET", "SEAL_SECRET", "CODE_PEPPER", "CSRF_SECRET"] as const
+
+/** Lowercased hostname without brackets or a trailing dot; URL handles ports and case. */
+export function hostnameOf(url: string): string {
+	return new URL(url).hostname
+		.toLowerCase()
+		.replace(/^\[|\]$/g, "")
+		.replace(/\.$/, "")
+}
+
+export function isLoopbackHost(hostname: string): boolean {
+	return (
+		hostname === "localhost" ||
+		hostname.endsWith(".localhost") ||
+		hostname === "::1" ||
+		/^127(\.\d{1,3}){3}$/.test(hostname)
+	)
+}
 
 const csv = z
 	.string()
@@ -57,7 +77,8 @@ export const EnvSchema = z
 		REFRESH_GRACE_S: z.coerce.number().int().min(0).max(60).default(10),
 		/** Multiplies every rate limit (tests raise it; 0 is not allowed). */
 		RATE_LIMIT_SCALE: z.coerce.number().positive().default(1),
-		/** Defaults to memory under NODE_ENV=test (test mailbox), console elsewhere. */
+		/** Defaults to memory under NODE_ENV=test (test mailbox), console elsewhere; ses is
+		 * required in staging and production. */
 		EMAIL_TRANSPORT: z.enum(["ses", "console", "memory"]).optional(),
 		EMAIL_FROM: z.string().default("gezcez <noreply@gezcez.com>"),
 		SES_REGION: z.string().optional(),
@@ -71,35 +92,30 @@ export const EnvSchema = z
 		BUILD_TIME: z.string().optional(),
 	})
 	.superRefine((env, ctx) => {
-		if (env.NODE_ENV === "production" || env.NODE_ENV === "staging") {
-			for (const key of [
-				"KEY_ENCRYPTION_SECRET",
-				"SEAL_SECRET",
-				"CODE_PEPPER",
-				"CSRF_SECRET",
-			] as const) {
-				if (!env[key]) {
-					ctx.addIssue({
-						code: "custom",
-						path: [key],
-						message: `required when NODE_ENV=${env.NODE_ENV}`,
-					})
-				}
-			}
+		const issue = (path: string, message: string) =>
+			ctx.addIssue({ code: "custom", path: [path], message })
+		const deployed = env.NODE_ENV === "production" || env.NODE_ENV === "staging"
+		const host = hostnameOf(env.PUBLIC_API_URL)
+		// Fail closed: the dev fallbacks are public, so anything reachable needs real secrets.
+		if (deployed || (env.NODE_ENV === "development" && !isLoopbackHost(host))) {
+			const why = deployed ? `NODE_ENV=${env.NODE_ENV}` : "PUBLIC_API_URL is not loopback"
+			for (const key of SECRET_KEYS) if (!env[key]) issue(key, `required when ${why}`)
 		}
-		if (env.STAGING_TEST_OTP && env.PUBLIC_API_URL.replace(/\/$/, "") === PRODUCTION_API_URL) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["STAGING_TEST_OTP"],
-				message: "must not be set on the production API",
-			})
+		if (deployed) {
+			if (!env.TURNSTILE_SECRET)
+				issue("TURNSTILE_SECRET", `required when NODE_ENV=${env.NODE_ENV}`)
+			if (env.EMAIL_TRANSPORT !== "ses")
+				issue("EMAIL_TRANSPORT", `must be ses when NODE_ENV=${env.NODE_ENV}`)
+			else if (!env.SES_REGION) issue("SES_REGION", `required when NODE_ENV=${env.NODE_ENV}`)
+		}
+		if (
+			env.STAGING_TEST_OTP &&
+			(env.NODE_ENV === "production" || host === PRODUCTION_API_HOST)
+		) {
+			issue("STAGING_TEST_OTP", "must not be set on the production API")
 		}
 		if (env.EMAIL_TRANSPORT === "memory" && env.NODE_ENV !== "test") {
-			ctx.addIssue({
-				code: "custom",
-				path: ["EMAIL_TRANSPORT"],
-				message: "memory transport is only allowed when NODE_ENV=test",
-			})
+			issue("EMAIL_TRANSPORT", "memory transport is only allowed when NODE_ENV=test")
 		}
 	})
 

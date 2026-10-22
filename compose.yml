@@ -1,5 +1,7 @@
 # Local run of the production image: `docker compose up --build`.
 # Production and staging use deploy/compose.yml (with Litestream and cloudflared).
+# The development default only boots on a loopback PUBLIC_API_URL; any other URL needs the four
+# secrets from .env (config fails closed).
 services:
     backend:
         build:

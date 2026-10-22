@@ -78,8 +78,11 @@ return their standard shapes without the envelope.
 ## Configuration
 
 Every environment variable is listed with a comment in `.env.example` and validated by zod at
-boot (`src/common/config.ts`). Staging and production refuse to start without
-`KEY_ENCRYPTION_SECRET`, `SEAL_SECRET`, `CODE_PEPPER` and `CSRF_SECRET`.
+boot (`src/common/config.ts`). It fails closed: staging and production refuse to start without
+`KEY_ENCRYPTION_SECRET`, `SEAL_SECRET`, `CODE_PEPPER`, `CSRF_SECRET`, `TURNSTILE_SECRET` and
+`EMAIL_TRANSPORT=ses` with `SES_REGION`; development refuses the built-in dev secrets unless
+`PUBLIC_API_URL` is loopback; `STAGING_TEST_OTP` is refused with `NODE_ENV=production` or on the
+`api.gezcez.com` host (compared by hostname).
 
 ## Docker
 

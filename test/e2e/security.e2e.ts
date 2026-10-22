@@ -45,15 +45,12 @@ async function reauthByCode(browser: TestBrowser, email: string) {
 }
 
 describe("F1 config fails open", () => {
-	test.failing(
-		"production URL without NODE_ENV boots with public dev secrets, console email, no Turnstile",
-		() => {
-			// Development defaults (public secrets, console email) only on a loopback API URL.
-			expect(() => loadConfig({ PUBLIC_API_URL: "https://api.gezcez.com" })).toThrow()
-		},
-	)
+	test("production URL without NODE_ENV boots with public dev secrets, console email, no Turnstile", () => {
+		// Development defaults (public secrets, console email) only on a loopback API URL.
+		expect(() => loadConfig({ PUBLIC_API_URL: "https://api.gezcez.com" })).toThrow()
+	})
 
-	test.failing("STAGING_TEST_OTP is accepted on production with a URL variant", () => {
+	test("STAGING_TEST_OTP is accepted on production with a URL variant", () => {
 		expect(() =>
 			loadConfig({
 				NODE_ENV: "production",
@@ -67,21 +64,18 @@ describe("F1 config fails open", () => {
 		).toThrow()
 	})
 
-	test.failing(
-		"production boots without TURNSTILE_SECRET and EMAIL_TRANSPORT (codes go to stdout)",
-		() => {
-			expect(() =>
-				loadConfig({
-					NODE_ENV: "production",
-					PUBLIC_API_URL: "https://api.gezcez.com",
-					KEY_ENCRYPTION_SECRET: "x".repeat(32),
-					SEAL_SECRET: "x".repeat(32),
-					CODE_PEPPER: "x".repeat(32),
-					CSRF_SECRET: "x".repeat(32),
-				}),
-			).toThrow()
-		},
-	)
+	test("production boots without TURNSTILE_SECRET and EMAIL_TRANSPORT (codes go to stdout)", () => {
+		expect(() =>
+			loadConfig({
+				NODE_ENV: "production",
+				PUBLIC_API_URL: "https://api.gezcez.com",
+				KEY_ENCRYPTION_SECRET: "x".repeat(32),
+				SEAL_SECRET: "x".repeat(32),
+				CODE_PEPPER: "x".repeat(32),
+				CSRF_SECRET: "x".repeat(32),
+			}),
+		).toThrow()
+	})
 })
 
 describe("F2 every CORS origin is a full identity-UI origin", () => {
