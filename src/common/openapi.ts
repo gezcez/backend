@@ -24,7 +24,69 @@ function jsonSchema(schema: z.ZodType): SchemaMap[string] {
 	return rest as SchemaMap[string]
 }
 
+const PATCHED = Symbol("gezcez:nullable-patched")
+type MetadataFactory = () => Record<string, Record<string, unknown>>
+type DtoClass = { _OPENAPI_METADATA_FACTORY?: MetadataFactory; [PATCHED]?: true }
+
+/**
+ * nestjs-zod describes a top-level nullable property as `type: ["string", "null"]`, which
+ * @nestjs/swagger reads as an array of strings. Rewrites those properties to the
+ * `anyOf: [{type}, {type: "null"}]` form nestjs-zod already uses for other nullable values.
+ */
+export function nullableProperty(meta: Record<string, unknown>): Record<string, unknown> {
+	const type = meta.type
+	if (!Array.isArray(type) || !type.includes("null")) return meta
+	const rest = type.filter((t) => t !== "null") as string[]
+	const outer: Record<string, unknown> = { type: "" }
+	const inner: Record<string, unknown> = {}
+	for (const [key, value] of Object.entries(meta)) {
+		if (key === "type") continue
+		if (key === "description" || key === "required" || key.startsWith("x-")) outer[key] = value
+		else inner[key] = value
+	}
+	outer["x-nestjs_zod-empty-type"] = true
+	const variants = rest.map((t, i) => (i === 0 ? { ...inner, type: t } : { type: t }))
+	outer.anyOf = [...variants, { type: "null" }]
+	return outer
+}
+
+function patchDto(dto: unknown): void {
+	if (typeof dto !== "function") return
+	const cls = dto as DtoClass
+	const factory = cls._OPENAPI_METADATA_FACTORY
+	if (!factory || cls[PATCHED]) return
+	cls[PATCHED] = true
+	cls._OPENAPI_METADATA_FACTORY = () =>
+		Object.fromEntries(
+			Object.entries(factory.call(cls)).map(([key, meta]) => [key, nullableProperty(meta)]),
+		)
+}
+
+/** Every DTO class a controller method names (responses, extra models, parameters). */
+function patchControllerDtos(app: INestApplication): void {
+	const container = (app as unknown as { container: { getModules(): Map<string, Module> } })
+		.container
+	type Module = { controllers: Map<unknown, { metatype?: { prototype: object } | null }> }
+	for (const module of container.getModules().values()) {
+		for (const wrapper of module.controllers.values()) {
+			const proto = wrapper.metatype?.prototype
+			if (!proto) continue
+			for (const name of Object.getOwnPropertyNames(proto)) {
+				if (name === "constructor") continue
+				const handler = (proto as Record<string, unknown>)[name]
+				const models = [
+					...((Reflect.getMetadata("swagger/apiExtraModels", handler as object) as unknown[]) ??
+						[]),
+					...((Reflect.getMetadata("design:paramtypes", proto, name) as unknown[]) ?? []),
+				]
+				for (const model of models) patchDto(model)
+			}
+		}
+	}
+}
+
 export function buildOpenApiDocument(app: INestApplication, config: AppConfig): OpenAPIObject {
+	patchControllerDtos(app)
 	const builder = new DocumentBuilder()
 		.setTitle("gezcez API")
 		.setDescription(
