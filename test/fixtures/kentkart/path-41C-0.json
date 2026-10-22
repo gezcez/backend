@@ -1,0 +1,95 @@
+{
+	"result": { "code": 0, "message": "OK" },
+	"pathList": [
+		{
+			"direction": "0",
+			"direction_name": "MAŞUKİYE",
+			"displayRouteCode": "41C",
+			"headSign": "UMUTTEPE-OTOGAR - İZMİT - MAŞUKİYE",
+			"path_code": 5501,
+			"pointList": [
+				{ "seq": "1", "lat": "40.823947", "lng": "29.919925" },
+				{ "seq": "2", "lat": "40.824466", "lng": "29.921133" },
+				{ "seq": "3", "lat": "40.821903", "lng": "29.934123" },
+				{ "seq": "4", "lat": "40.803810", "lng": "29.960514" }
+			],
+			"busStopList": [
+				{
+					"seq": "1",
+					"stopId": "11407",
+					"stopName": "Umuttepe Kampüs",
+					"lat": "40.823947",
+					"lng": "29.919925",
+					"arrival_offset": "0",
+					"departure_offset": "0"
+				},
+				{
+					"seq": "2",
+					"stopId": "41003",
+					"stopName": "Otogar",
+					"lat": "40.824466",
+					"lng": "29.921133",
+					"arrival_offset": "240",
+					"departure_offset": "240"
+				},
+				{
+					"seq": "3",
+					"stopId": "80218",
+					"stopName": "Şirintepe",
+					"lat": "40.821903",
+					"lng": "29.934123",
+					"arrival_offset": "00:09:00",
+					"departure_offset": "00:09:00"
+				},
+				{
+					"seq": "4",
+					"stopId": "80644",
+					"stopName": "Maşukiye Meydan",
+					"lat": "40.803810",
+					"lng": "29.960514",
+					"arrival_offset": "",
+					"departure_offset": ""
+				}
+			],
+			"scheduleList": [
+				{
+					"description": "MTWTFss",
+					"serviceId": "1",
+					"timeList": [
+						{
+							"departureTime": "06:30",
+							"tripId": "2558860",
+							"patternColor": "0B4F8A",
+							"tripHeadSign": "MAŞUKİYE"
+						},
+						{
+							"departureTime": "23:50",
+							"tripId": "2558861",
+							"patternColor": "0B4F8A",
+							"tripHeadSign": "MAŞUKİYE"
+						},
+						{
+							"departureTime": "00:20",
+							"tripId": "2558862",
+							"patternColor": "0B4F8A",
+							"tripHeadSign": "MAŞUKİYE"
+						}
+					]
+				},
+				{
+					"description": "mtwtfSs",
+					"serviceId": "2",
+					"timeList": [{ "departureTime": "07:00", "tripId": "2558870" }]
+				},
+				{
+					"description": "mtwtfsS",
+					"serviceId": "3",
+					"timeList": [
+						{ "departureTime": "08:00", "tripId": "2558880" },
+						{ "departureTime": "bad", "tripId": "2558881" }
+					]
+				}
+			]
+		}
+	]
+}

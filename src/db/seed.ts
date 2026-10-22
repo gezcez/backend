@@ -7,6 +7,7 @@ import type { AppConfig } from "@common/config"
 import { DEFAULT_ROLES, PERMISSIONS, PERMISSION_KEYS, storedScope } from "@common/permission-keys"
 import { newId } from "@common/utils"
 import type { CoreDatabase } from "./database.module"
+import { catalogStep } from "./seed-catalog"
 import {
 	appsTable,
 	type AppPlatform,
@@ -437,6 +438,7 @@ export const SEED_STEPS: SeedStep[] = [
 	permissionsStep,
 	rolesStep,
 	rootUserStep,
+	catalogStep,
 	testFixturesStep,
 ]
 

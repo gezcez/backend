@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1792681661406,
+      "tag": "0000_vts_hot_window",
+      "breakpoints": true
+    }
+  ]
+}
