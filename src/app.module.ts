@@ -10,6 +10,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from "nestjs-zod"
 import { ConfigModule, type AppConfig } from "@common/config"
 import { pinoHttpParams } from "@common/logger"
 import {
+	AuthenticationGuard,
 	GezcezExceptionFilter,
 	GezcezThrottlerGuard,
 	ResponseInterceptor,
@@ -22,6 +23,7 @@ import { AuditModule } from "@services/audit/audit.module"
 import { EmailModule } from "@services/email/email.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
 import { KeysModule } from "@services/oauth/keys.module"
+import { OAuthModule } from "@services/oauth/oauth.module"
 import { SystemModule } from "@services/system/system.module"
 
 @Module({})
@@ -51,12 +53,15 @@ export class AppModule {
 				EmailModule,
 				AuditModule,
 				AccountModule,
+				OAuthModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],
 			providers: [
 				{ provide: APP_FILTER, useClass: GezcezExceptionFilter },
+				// Guards run in this order: the default IP limit, then the bearer token check.
 				{ provide: APP_GUARD, useClass: GezcezThrottlerGuard },
+				{ provide: APP_GUARD, useClass: AuthenticationGuard },
 				{ provide: APP_PIPE, useClass: ZodValidationPipe },
 				// Order matters: the serializer strips the return value first, then the envelope wraps it.
 				{ provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },

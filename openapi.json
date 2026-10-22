@@ -70,6 +70,211 @@
 				],
 				"type": "object"
 			},
+			"AppInfoDto": {
+				"properties": {
+					"client_id": {
+						"type": "string"
+					},
+					"first_party": {
+						"type": "boolean"
+					},
+					"homepage_url": {
+						"type": "string"
+					},
+					"logo_url": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"scopes": {
+						"items": {
+							"properties": {
+								"i18n_key": {
+									"type": "string"
+								},
+								"key": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"key",
+								"i18n_key"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"type": {
+						"enum": [
+							"public",
+							"confidential"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"client_id",
+					"name",
+					"first_party",
+					"type",
+					"scopes"
+				],
+				"type": "object"
+			},
+			"AuthorizeContinueDto": {
+				"properties": {
+					"session_id": {
+						"maxLength": 64,
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"AuthorizeDecisionDto": {
+				"properties": {
+					"decision": {
+						"enum": [
+							"approve",
+							"deny"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"decision"
+				],
+				"type": "object"
+			},
+			"AuthorizeDto": {
+				"properties": {
+					"params": {
+						"additionalProperties": {
+							"maxLength": 2048,
+							"type": "string"
+						},
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					}
+				},
+				"required": [
+					"params"
+				],
+				"type": "object"
+			},
+			"AuthorizeNextDto": {
+				"properties": {
+					"next": {
+						"enum": [
+							"redirect",
+							"login",
+							"reauth",
+							"choose_account",
+							"consent"
+						],
+						"type": "string"
+					},
+					"redirect_to": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"next"
+				],
+				"type": "object"
+			},
+			"AuthorizeSnapshotDto": {
+				"properties": {
+					"client": {
+						"properties": {
+							"client_id": {
+								"type": "string"
+							},
+							"first_party": {
+								"type": "boolean"
+							},
+							"homepage_url": {
+								"type": "string"
+							},
+							"logo_url": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"type": {
+								"enum": [
+									"public",
+									"confidential"
+								],
+								"type": "string"
+							}
+						},
+						"required": [
+							"client_id",
+							"name",
+							"first_party",
+							"type"
+						],
+						"type": "object"
+					},
+					"login_hint": {
+						"type": "string"
+					},
+					"next": {
+						"enum": [
+							"redirect",
+							"login",
+							"reauth",
+							"choose_account",
+							"consent"
+						],
+						"type": "string"
+					},
+					"prompt": {
+						"type": "string"
+					},
+					"redirect_to": {
+						"type": "string"
+					},
+					"request_id": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"scopes": {
+						"items": {
+							"properties": {
+								"i18n_key": {
+									"type": "string"
+								},
+								"key": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"key",
+								"i18n_key"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"ui_locales": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"request_id",
+					"client",
+					"scopes",
+					"next"
+				],
+				"type": "object"
+			},
 			"CsrfDto": {
 				"properties": {
 					"token": {
@@ -481,6 +686,59 @@
 				],
 				"type": "object"
 			},
+			"LogoutDto": {
+				"properties": {
+					"client_id": {
+						"maxLength": 128,
+						"type": "string"
+					},
+					"post_logout_redirect_uri": {
+						"maxLength": 2048,
+						"type": "string"
+					},
+					"scope": {
+						"default": "session",
+						"enum": [
+							"session",
+							"device"
+						],
+						"type": "string"
+					},
+					"state": {
+						"maxLength": 512,
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"LogoutResultDto": {
+				"properties": {
+					"redirect_to": {
+						"type": "string"
+					},
+					"signed_out": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"signed_out"
+				],
+				"type": "object"
+			},
+			"OAuthErrorDto": {
+				"properties": {
+					"error": {
+						"type": "string"
+					},
+					"error_description": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object"
+			},
 			"OpenIdConfigurationDto": {
 				"properties": {
 					"authorization_endpoint": {
@@ -623,6 +881,49 @@
 				],
 				"type": "object"
 			},
+			"RevokeRequestDto": {
+				"properties": {
+					"client_id": {
+						"type": "string"
+					},
+					"client_secret": {
+						"type": "string"
+					},
+					"token": {
+						"type": "string"
+					},
+					"token_type_hint": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"ScopeListDto": {
+				"properties": {
+					"scopes": {
+						"items": {
+							"properties": {
+								"i18n_key": {
+									"type": "string"
+								},
+								"key": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"key",
+								"i18n_key"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"scopes"
+				],
+				"type": "object"
+			},
 			"SessionInfoDto": {
 				"properties": {
 					"account": {
@@ -750,6 +1051,68 @@
 				},
 				"required": [
 					"session_id"
+				],
+				"type": "object"
+			},
+			"TokenRequestDto": {
+				"properties": {
+					"client_id": {
+						"type": "string"
+					},
+					"client_secret": {
+						"type": "string"
+					},
+					"code": {
+						"type": "string"
+					},
+					"code_verifier": {
+						"type": "string"
+					},
+					"grant_type": {
+						"enum": [
+							"authorization_code",
+							"refresh_token"
+						],
+						"type": "string"
+					},
+					"redirect_uri": {
+						"type": "string"
+					},
+					"refresh_token": {
+						"type": "string"
+					},
+					"scope": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"TokenResponseDto": {
+				"properties": {
+					"access_token": {
+						"type": "string"
+					},
+					"expires_in": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"refresh_token": {
+						"type": "string"
+					},
+					"scope": {
+						"type": "string"
+					},
+					"token_type": {
+						"const": "Bearer",
+						"type": "string"
+					}
+				},
+				"required": [
+					"access_token",
+					"token_type",
+					"expires_in",
+					"scope"
 				],
 				"type": "object"
 			},
@@ -1448,6 +1811,587 @@
 				"summary": "Create the account after a sign-up code (no username)",
 				"tags": [
 					"account"
+				]
+			}
+		},
+		"/v1/oauth/apps/{clientId}": {
+			"get": {
+				"operationId": "OAuth_app",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "clientId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AppInfoDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Client name, logo, scopes and first_party (display only)",
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/v1/oauth/authorize": {
+			"post": {
+				"description": "Client and redirect URI failures are errors (never redirected); later failures come back as next=redirect with an OAuth error redirect_to.",
+				"operationId": "OAuth_start",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AuthorizeDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AuthorizeSnapshotDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Create the authorization request from the raw /authorize query",
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/v1/oauth/authorize/{requestId}": {
+			"get": {
+				"operationId": "OAuth_get",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AuthorizeSnapshotDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Re-fetch the authorization request, next recomputed",
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/v1/oauth/authorize/{requestId}/continue": {
+			"post": {
+				"operationId": "OAuth_continue",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AuthorizeContinueDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AuthorizeNextDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"session": []
+					}
+				],
+				"summary": "Continue after sign-in or account choice",
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/v1/oauth/authorize/{requestId}/decision": {
+			"post": {
+				"operationId": "OAuth_decision",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AuthorizeDecisionDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AuthorizeNextDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"session": []
+					}
+				],
+				"summary": "Consent answer (third-party clients)",
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/v1/oauth/logout": {
+			"post": {
+				"operationId": "OAuth_logout",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LogoutDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/LogoutResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "End the SSO session (scope session) or every session of this browser (device)",
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/v1/oauth/revoke": {
+			"post": {
+				"operationId": "Token_revoke",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RevokeRequestDto"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/RevokeRequestDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Revoked, or the token was unknown"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OAuthErrorDto"
+								}
+							}
+						},
+						"description": "RFC 6749 error"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OAuthErrorDto"
+								}
+							}
+						},
+						"description": "invalid_client"
+					}
+				},
+				"summary": "Revoke a refresh token family (RFC 7009)",
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/v1/oauth/scopes": {
+			"get": {
+				"operationId": "OAuth_scopes",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/ScopeListDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Scope keys with i18n keys",
+				"tags": [
+					"oauth"
+				]
+			}
+		},
+		"/v1/oauth/token": {
+			"post": {
+				"description": "Cookie clients (refresh_cookie) get the refresh token as the gz_rt cookie (Path=/v1/oauth) and may refresh with an empty body.",
+				"operationId": "Token_token",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TokenRequestDto"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/TokenRequestDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenResponseDto"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OAuthErrorDto"
+								}
+							}
+						},
+						"description": "RFC 6749 error"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OAuthErrorDto"
+								}
+							}
+						},
+						"description": "invalid_client"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "authorization_code and refresh_token grants",
+				"tags": [
+					"oauth"
 				]
 			}
 		},
