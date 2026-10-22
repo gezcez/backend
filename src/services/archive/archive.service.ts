@@ -24,7 +24,12 @@ import {
 	utcDayStart,
 	type Dataset,
 } from "./archive.datasets"
-import { ArchiveRepository, type ManifestFilter, type ManifestRow } from "./archive.repository"
+import {
+	ArchiveRepository,
+	type ManifestFilter,
+	type ManifestRow,
+	type RangeStats,
+} from "./archive.repository"
 import { ARCHIVE_UPLOADER, type ArchiveUploader } from "./archive.uploader"
 
 export interface DatasetExport {
@@ -113,15 +118,36 @@ export class ArchiveService {
 		}
 	}
 
-	private async exportDataset(
+	private exportDataset(
 		bindingId: number,
 		date: string,
 		dataset: Dataset,
-		expected: { rows: number; min: number | null; max: number | null },
+		expected: RangeStats,
+	): Promise<DatasetExport> {
+		const from = utcDayStart(date)
+		return this.writePartition(
+			bindingId,
+			date,
+			dataset,
+			this.repository.rows(dataset, bindingId, from, from + 86400),
+			() => expected,
+		)
+	}
+
+	/**
+	 * Writes one partition from staged rows, verifies the Parquet file against `expected`
+	 * (count and min/max of the partition column; read after the rows are consumed, so a
+	 * streaming source can count as it goes), records the manifest and uploads it.
+	 */
+	async writePartition(
+		bindingId: number,
+		date: string,
+		dataset: Dataset,
+		source: Iterable<readonly unknown[]>,
+		expectedOf: () => RangeStats,
 	): Promise<DatasetExport> {
 		const file = partitionFile(this.root, bindingId, date, dataset)
 		const tmp = `${file}.tmp`
-		const from = utcDayStart(date)
 		const result: DatasetExport = {
 			dataset,
 			rows: 0,
@@ -137,11 +163,7 @@ export class ArchiveService {
 			const check = await this.duckdb.withConnection(
 				async (connection) => {
 					await connection.run(stagingDdl(dataset, "stage"))
-					await DuckDBService.append(
-						connection,
-						"stage",
-						this.repository.rows(dataset, bindingId, from, from + 86400),
-					)
+					await DuckDBService.append(connection, "stage", source)
 					await connection.run(
 						`COPY (SELECT ${spec.projection} FROM stage ORDER BY ${spec.orderBy})
 						 TO ${sqlString(tmp)} (FORMAT parquet, COMPRESSION zstd, ROW_GROUP_SIZE 500000)`,
@@ -158,6 +180,7 @@ export class ArchiveService {
 				{ timeoutMs: null },
 			)
 			const [rows, lo, hi] = check as [number, number | null, number | null]
+			const expected = expectedOf()
 			result.rows = rows
 			if (rows !== expected.rows || lo !== expected.min || hi !== expected.max)
 				throw new Error(
