@@ -29,6 +29,7 @@ export const RATE_LIMIT_PRESETS = {
 		{ by: "email", limit: 10, windowMs: 15 * MINUTE },
 		{ by: "ip", limit: 50, windowMs: HOUR },
 	],
+	passkey: [{ by: "ip", limit: 60, windowMs: 10 * MINUTE }],
 	token: [{ by: "ip", limit: 60, windowMs: MINUTE }],
 	"public-read": [{ by: "ip", limit: 300, windowMs: MINUTE }],
 	"analytics-public": [{ by: "ip", limit: 30, windowMs: MINUTE }],

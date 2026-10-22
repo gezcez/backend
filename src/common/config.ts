@@ -65,6 +65,14 @@ export const EnvSchema = z
 			.regex(/^\d{6}$/, "must be 6 digits")
 			.optional(),
 		STEP_UP_MAX_AGE_S: z.coerce.number().int().positive().default(600),
+		/** WebAuthn relying party (P5): the registrable domain passkeys are bound to. */
+		WEBAUTHN_RP_ID: z
+			.string()
+			.regex(/^[a-z0-9.-]+$/, "must be a bare host name")
+			.default("gezcez.com"),
+		WEBAUTHN_RP_NAME: z.string().min(1).default("gezcez"),
+		/** Origins allowed in WebAuthn client data; defaults to OAUTH_UI_URL. */
+		WEBAUTHN_ORIGINS: csv,
 		REFRESH_GRACE_S: z.coerce.number().int().min(0).max(60).default(10),
 		/** Multiplies every rate limit (tests raise it; 0 is not allowed). */
 		RATE_LIMIT_SCALE: z.coerce.number().positive().default(1),
@@ -183,6 +191,14 @@ export const EnvSchema = z
 				message: "must not be set on the production API",
 			})
 		}
+		for (const origin of env.WEBAUTHN_ORIGINS) {
+			if (!z.url().safeParse(origin).success)
+				ctx.addIssue({
+					code: "custom",
+					path: ["WEBAUTHN_ORIGINS"],
+					message: `not a URL: ${origin}`,
+				})
+		}
 		if (env.EMAIL_TRANSPORT === "memory" && env.NODE_ENV !== "test") {
 			ctx.addIssue({
 				code: "custom",
@@ -219,6 +235,7 @@ export interface AppConfig {
 	}
 	stagingTestOtp?: string
 	stepUpMaxAgeS: number
+	webauthn: { rpId: string; rpName: string; origins: string[] }
 	refreshGraceS: number
 	rateLimitScale: number
 	email: {
@@ -324,6 +341,14 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 		},
 		stagingTestOtp: env.STAGING_TEST_OTP,
 		stepUpMaxAgeS: env.STEP_UP_MAX_AGE_S,
+		webauthn: {
+			rpId: env.WEBAUTHN_RP_ID,
+			rpName: env.WEBAUTHN_RP_NAME,
+			origins: (env.WEBAUTHN_ORIGINS.length
+				? env.WEBAUTHN_ORIGINS
+				: [env.OAUTH_UI_URL]
+			).map((origin) => origin.replace(/\/$/, "")),
+		},
 		refreshGraceS: env.REFRESH_GRACE_S,
 		rateLimitScale: env.RATE_LIMIT_SCALE,
 		email: {

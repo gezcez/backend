@@ -7,6 +7,7 @@ import type { Request, Response } from "express"
 import type { DeviceContext, SessionContext } from "@common/auth.types"
 import { InjectConfig, type AppConfig } from "@common/config"
 import { GezcezError } from "@common/errors"
+import type { AuthMethod } from "@common/jwt.types"
 import { RateLimitService } from "@common/rate-limits"
 import {
 	clientIp,
@@ -605,14 +606,14 @@ export class AccountService {
 	// ---------------------------------------------------------------- sign-in
 
 	/**
-	 * Proof of ownership is done (code or password): enforce bans and deletion state, then create
+	 * Proof of ownership is done (code, password or passkey): enforce bans and deletion state, then create
 	 * the session. Pending-deletion accounts are signed in so they can cancel, but get the error.
 	 */
 	signIn(
 		req: Request,
 		res: Response,
 		user: UserRow,
-		method: "otp" | "pwd",
+		method: AuthMethod,
 	): Extract<EmailVerifyResultDto, { status: "signed_in" }> {
 		const now = new Date()
 		this.assertNotBanned(user, now)

@@ -260,3 +260,123 @@ export class PrivacyDto extends zodDto(PrivacySchema) {}
 
 export const PrivacyPatchBody = PrivacySchema.partial()
 export class PrivacyPatchDto extends zodDto(PrivacyPatchBody) {}
+
+// Passkeys (P5, oauth.md sections 4.3, 4.4 and 5.11). Credential and options bodies are the
+// WebAuthn JSON shapes that @simplewebauthn/browser produces and consumes.
+
+const Base64Url = z.string().regex(/^[A-Za-z0-9_-]*$/, "must be base64url")
+const Transport = z.enum(["ble", "cable", "hybrid", "internal", "nfc", "smart-card", "usb"])
+const CredentialDescriptor = z.object({
+	id: z.string(),
+	/** Always "public-key". */
+	type: z.string(),
+	transports: z.array(z.string()).optional(),
+})
+const ExtensionResults = z.record(z.string(), z.unknown())
+const ExtensionInputs = z.object({
+	appid: z.string().optional(),
+	credProps: z.boolean().optional(),
+	hmacCreateSecret: z.boolean().optional(),
+	minPinLength: z.boolean().optional(),
+})
+
+export const RegistrationCredentialSchema = z.object({
+	id: Base64Url.min(1).max(1024),
+	rawId: Base64Url.min(1).max(1024),
+	type: z.literal("public-key"),
+	response: z.object({
+		clientDataJSON: Base64Url.max(8192),
+		attestationObject: Base64Url.max(65536),
+		authenticatorData: Base64Url.max(65536).optional(),
+		transports: z.array(Transport).max(8).optional(),
+		publicKeyAlgorithm: z.number().int().optional(),
+		publicKey: Base64Url.max(8192).optional(),
+	}),
+	authenticatorAttachment: z.enum(["platform", "cross-platform"]).optional(),
+	clientExtensionResults: ExtensionResults.default({}),
+})
+
+export const AuthenticationCredentialSchema = z.object({
+	id: Base64Url.min(1).max(1024),
+	rawId: Base64Url.min(1).max(1024),
+	type: z.literal("public-key"),
+	response: z.object({
+		clientDataJSON: Base64Url.max(8192),
+		authenticatorData: Base64Url.max(65536),
+		signature: Base64Url.max(8192),
+		userHandle: Base64Url.max(1024).optional(),
+	}),
+	authenticatorAttachment: z.enum(["platform", "cross-platform"]).optional(),
+	clientExtensionResults: ExtensionResults.default({}),
+})
+
+export const PasskeyCreationOptionsSchema = z.object({
+	challenge_id: z.string(),
+	challenge: z.string(),
+	rp: z.object({ id: z.string().optional(), name: z.string() }),
+	user: z.object({ id: z.string(), name: z.string(), displayName: z.string() }),
+	pubKeyCredParams: z.array(z.object({ alg: z.number().int(), type: z.literal("public-key") })),
+	timeout: z.number().int().optional(),
+	excludeCredentials: z.array(CredentialDescriptor).optional(),
+	authenticatorSelection: z
+		.object({
+			authenticatorAttachment: z.enum(["platform", "cross-platform"]).optional(),
+			requireResidentKey: z.boolean().optional(),
+			residentKey: z.enum(["discouraged", "preferred", "required"]).optional(),
+			userVerification: z.enum(["discouraged", "preferred", "required"]).optional(),
+		})
+		.optional(),
+	hints: z.array(z.string()).optional(),
+	attestation: z.enum(["direct", "enterprise", "indirect", "none"]).optional(),
+	extensions: ExtensionInputs.optional(),
+})
+export class PasskeyCreationOptionsDto extends zodDto(PasskeyCreationOptionsSchema) {}
+
+export const PasskeyRequestOptionsSchema = z.object({
+	challenge_id: z.string(),
+	challenge: z.string(),
+	timeout: z.number().int().optional(),
+	rpId: z.string().optional(),
+	allowCredentials: z.array(CredentialDescriptor).optional(),
+	userVerification: z.enum(["discouraged", "preferred", "required"]).optional(),
+	hints: z.array(z.string()).optional(),
+	extensions: ExtensionInputs.optional(),
+})
+export class PasskeyRequestOptionsDto extends zodDto(PasskeyRequestOptionsSchema) {}
+
+const PasskeyName = z.string().trim().min(1).max(60)
+const ChallengeId = z.string().min(1).max(64)
+
+export const PasskeyRegisterBody = z.object({
+	challenge_id: ChallengeId,
+	credential: RegistrationCredentialSchema,
+	/** Defaults to the device label of this browser ("iPhone", "Mac"). */
+	name: PasskeyName.optional(),
+})
+export class PasskeyRegisterDto extends zodDto(PasskeyRegisterBody) {}
+
+export const PasskeyRenameBody = z.object({ name: PasskeyName })
+export class PasskeyRenameDto extends zodDto(PasskeyRenameBody) {}
+
+export const PasskeySigninOptionsBody = z.object({ request_id: z.string().max(64).optional() })
+export class PasskeySigninOptionsDto extends zodDto(PasskeySigninOptionsBody) {}
+
+export const PasskeyVerifyBody = z.object({
+	challenge_id: ChallengeId,
+	credential: AuthenticationCredentialSchema,
+})
+export class PasskeyVerifyDto extends zodDto(PasskeyVerifyBody) {}
+
+export const PasskeySchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	created_at: z.iso.datetime(),
+	last_used_at: z.iso.datetime().nullable(),
+	device_hint: z.string().nullable(),
+	/** Synced passkey (iCloud Keychain, Google Password Manager) rather than device-bound. */
+	backed_up: z.boolean(),
+})
+export class PasskeyDto extends zodDto(PasskeySchema) {}
+
+export const PasskeyListSchema = z.object({ passkeys: z.array(PasskeySchema) })
+export class PasskeyListDto extends zodDto(PasskeyListSchema) {}

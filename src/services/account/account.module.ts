@@ -10,6 +10,9 @@ import { BreachedPasswordService } from "./breached-password.service"
 import { AccountCookieAuth } from "./cookie-auth.provider"
 import { CsrfService } from "./csrf.service"
 import { DeviceService } from "./device.service"
+import { PasskeyController } from "./passkey.controller"
+import { PasskeyRepository } from "./passkey.repository"
+import { PasskeyService } from "./passkey.service"
 import { PasswordController } from "./password.controller"
 import { PasswordService } from "./password.service"
 import { RevokedSessionsService } from "./revoked-sessions.service"
@@ -22,11 +25,13 @@ import { TurnstileService } from "./turnstile.service"
 
 @Global()
 @Module({
-	controllers: [AccountController, PasswordController, SelfServiceController],
+	controllers: [AccountController, PasswordController, PasskeyController, SelfServiceController],
 	providers: [
 		AccountService,
 		AccountRepository,
 		PasswordService,
+		PasskeyService,
+		PasskeyRepository,
 		SelfServiceService,
 		SelfServiceRepository,
 		BreachedPasswordService,

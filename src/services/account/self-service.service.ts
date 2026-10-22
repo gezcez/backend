@@ -1,7 +1,7 @@
 // self-service.service.ts
 // Account pages (plan section 6.1.7, oauth.md section 4.4): profile, sessions, authorized apps,
-// security overview and privacy toggles. Email change and passwords live in AccountService and
-// PasswordService; data export and deletion arrive later.
+// security overview and privacy toggles. Email change, passwords and passkeys live in
+// AccountService, PasswordService and PasskeyService; data export and deletion arrive later.
 
 import { Injectable } from "@nestjs/common"
 import type { Request, Response } from "express"
@@ -19,6 +19,7 @@ import type {
 	SecurityDto,
 	SessionListDto,
 } from "./account.dto"
+import { PasskeyRepository } from "./passkey.repository"
 import { describeUserAgent } from "./request-meta"
 import { SelfServiceRepository } from "./self-service.repository"
 import { SessionService } from "./session.service"
@@ -32,6 +33,8 @@ const SECURITY_EVENTS: AuditAction[] = [
 	"auth.password_reset",
 	"auth.password_changed",
 	"auth.email_changed",
+	"auth.passkey_added",
+	"auth.passkey_removed",
 	"auth.refresh_reuse",
 	"auth.session_revoked",
 	"oauth.consent",
@@ -45,6 +48,7 @@ export class SelfServiceService {
 		private readonly accounts: AccountRepository,
 		private readonly repository: SelfServiceRepository,
 		private readonly sessions: SessionService,
+		private readonly passkeys: PasskeyRepository,
 		private readonly audit: AuditService,
 	) {}
 
@@ -59,7 +63,7 @@ export class SelfServiceService {
 			locale: user.locale,
 			created_at: user.created_at.toISOString(),
 			has_password: user.password_hash !== null,
-			passkey_count: 0,
+			passkey_count: this.passkeys.countForUser(user.id),
 			...(user.status === "pending_deletion" && user.deletion_due_at
 				? { deletion: { delete_at: user.deletion_due_at.toISOString() } }
 				: {}),
@@ -200,7 +204,13 @@ export class SelfServiceService {
 			...(user.password_updated_at && user.password_hash
 				? { password_updated_at: user.password_updated_at.toISOString() }
 				: {}),
-			passkeys: [],
+			passkeys: this.passkeys.listForUser(userId).map((row) => ({
+				id: row.id,
+				name: row.name,
+				created_at: row.created_at.toISOString(),
+				last_used_at: row.last_used_at?.toISOString() ?? null,
+				device_hint: row.device_hint,
+			})),
 			recent_events: events.map((event) => {
 				const session =
 					event.target_type === "session"

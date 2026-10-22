@@ -16,6 +16,7 @@ export const ERROR_CODES = {
 	AUTH_PASSWORD_WEAK: { status: 400, message: "Password does not meet the requirements" },
 	AUTH_PASSWORD_BREACHED: { status: 400, message: "Password appears in a known breach" },
 	AUTH_TURNSTILE_FAILED: { status: 400, message: "Bot check failed" },
+	AUTH_PASSKEY_INVALID: { status: 400, message: "Passkey could not be verified" },
 	AUTH_STEP_UP_REQUIRED: { status: 403, message: "Recent authentication required" },
 	CSRF_INVALID: { status: 403, message: "CSRF check failed" },
 	OAUTH_INVALID_CLIENT: { status: 400, message: "Unknown or disabled client" },
