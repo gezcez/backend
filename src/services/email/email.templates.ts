@@ -20,8 +20,11 @@ export interface TemplateVars {
 	signup_code: CodeVars
 	reauth_code: CodeVars
 	reset_code: CodeVars
+	change_email_code: CodeVars
 	reset_unavailable: Record<string, never>
 	password_changed: Record<string, never>
+	/** Sent to the old address; `email` is the new one, masked. */
+	email_changed: { email: string; security_url: string }
 }
 
 export type TemplateKey = keyof TemplateVars
@@ -30,8 +33,10 @@ export const TEMPLATE_KEYS = [
 	"signup_code",
 	"reauth_code",
 	"reset_code",
+	"change_email_code",
 	"reset_unavailable",
 	"password_changed",
+	"email_changed",
 ] as const satisfies TemplateKey[]
 
 function escapeHtml(value: string): string {
@@ -59,7 +64,7 @@ ${body}${codeBlock}
 
 function codeEmail(
 	locale: Locale,
-	prefix: "signin_code" | "signup_code" | "reauth_code" | "reset_code",
+	prefix: "signin_code" | "signup_code" | "reauth_code" | "reset_code" | "change_email_code",
 	vars: CodeVars,
 ): RenderedEmail {
 	const key = (suffix: string) => `email.${prefix}.${suffix}` as LangKey
@@ -79,10 +84,11 @@ function codeEmail(
 
 function noticeEmail(
 	locale: Locale,
-	prefix: "reset_unavailable" | "password_changed",
+	prefix: "reset_unavailable" | "password_changed" | "email_changed",
+	vars: Record<string, string> = {},
 ): RenderedEmail {
 	const title = t(locale, `email.${prefix}.title` as LangKey)
-	const intro = t(locale, `email.${prefix}.intro` as LangKey)
+	const intro = t(locale, `email.${prefix}.intro` as LangKey, vars)
 	return {
 		subject: t(locale, `email.${prefix}.subject` as LangKey),
 		text: `${title}\n\n${intro}\n\n${t(locale, "email.footer")}\n`,
@@ -100,10 +106,13 @@ export function renderTemplate<K extends TemplateKey>(
 		case "signup_code":
 		case "reauth_code":
 		case "reset_code":
+		case "change_email_code":
 			return codeEmail(locale, key, vars as CodeVars)
 		case "reset_unavailable":
 		case "password_changed":
 			return noticeEmail(locale, key)
+		case "email_changed":
+			return noticeEmail(locale, key, vars as TemplateVars["email_changed"])
 		default:
 			throw new Error(`Unknown email template ${String(key)}`)
 	}

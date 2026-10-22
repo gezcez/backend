@@ -30,6 +30,9 @@ export const usersTable = sqliteTable(
 		banned_until: int({ mode: "timestamp_ms" }),
 		deletion_due_at: int({ mode: "timestamp_ms" }),
 		last_login_at: int({ mode: "timestamp_ms" }),
+		/** Privacy toggles (account self-service); both off until the user opts in. */
+		location_history_opt_in: int({ mode: "boolean" }).notNull().default(false),
+		product_emails: int({ mode: "boolean" }).notNull().default(false),
 		created_at: int({ mode: "timestamp_ms" })
 			.notNull()
 			.$defaultFn(() => new Date()),

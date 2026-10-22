@@ -22,6 +22,7 @@ export type AuditAction =
 	| "auth.token_issued"
 	| "auth.password_reset"
 	| "auth.password_changed"
+	| "auth.email_changed"
 	| "oauth.consent"
 	| "oauth.grant_revoked"
 	| "keys.rotated"

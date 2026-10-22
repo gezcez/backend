@@ -105,10 +105,12 @@ export class PasswordService implements OnModuleInit {
 		}
 	}
 
-	/** PUT /v1/account/password (step-up): set or change. Other sessions stay signed in. */
+	/** PUT /v1/account/password (step-up): set or change; other sessions end unless kept. */
 	async set(req: Request, body: PasswordSetDto): Promise<void> {
 		const user = this.repository.findUserById(req.session!.userId)!
 		await this.store(user, body.new_password)
+		if (!body.keep_sessions)
+			this.sessions.revokeOthers(user.id, req.session!.id, "password_reset")
 		this.audit.record("auth.password_changed", {
 			req,
 			target: { type: "user", id: user.id },
