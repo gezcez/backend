@@ -79,61 +79,97 @@ describe("F1 config fails open", () => {
 })
 
 describe("F2 every CORS origin is a full identity-UI origin", () => {
-	test.failing(
-		"the dashboard origin can read the CSRF token and write account settings",
-		async () => {
-			const browser = await signedIn()
-			browser.origin = DASH_ORIGIN
-			browser.csrfToken = undefined
-			const csrf = await browser.get<{ token: string }>("/v1/account/csrf")
-			// credentialed CORS read of the CSRF token from the dashboard origin
-			browser.csrfToken = csrf.data.token
-			const write = await browser.request("PATCH", "/v1/account/profile", {
-				display_name: "pwned-from-dash",
+	test("the dashboard origin can read the CSRF token and write account settings", async () => {
+		const browser = await signedIn()
+		browser.origin = DASH_ORIGIN
+		browser.csrfToken = undefined
+		const csrf = await browser.get<{ token: string }>("/v1/account/csrf")
+		// credentialed CORS read of the CSRF token from the dashboard origin
+		browser.csrfToken = csrf.data.token
+		const write = await browser.request("PATCH", "/v1/account/profile", {
+			display_name: "pwned-from-dash",
+		})
+		expect(write.status).toBe(403) // plan 6.1.0: account writes only from oauth.gezcez.com
+	})
+})
+
+describe("F2 cookie routes and CORS per route group", () => {
+	test("every cookie write refuses the CORS origins other than the identity UI", async () => {
+		const browser = await signedIn()
+		await browser.csrf()
+		browser.origin = DASH_ORIGIN
+		const doc = await t.json<{ paths: Record<string, Record<string, unknown>> }>(
+			"/openapi.json",
+		)
+		const writes = Object.entries(doc.body.paths)
+			.filter(([path]) => /^\/v1\/(account\/|oauth\/(authorize|logout))/.test(path))
+			.flatMap(([path, operations]) =>
+				Object.keys(operations)
+					.filter((method) => ["post", "put", "patch", "delete"].includes(method))
+					.map((method) => [method.toUpperCase(), path.replace(/\{[^}]+\}/g, "x")]),
+			)
+		expect(writes.length).toBeGreaterThan(15)
+		for (const [method, path] of writes) {
+			const res = await browser.request(method!, path!, {})
+			expect([path, res.body.error?.code]).toEqual([path, "CSRF_INVALID"])
+		}
+	})
+
+	test("credentialed CORS: oauth UI on identity routes, dashboard on gz_rt routes only", async () => {
+		const preflight = (path: string, origin: string) =>
+			t.fetch(path, {
+				method: "OPTIONS",
+				headers: { origin, "access-control-request-method": "POST" },
 			})
-			expect(write.status).toBe(403) // plan 6.1.0: account writes only from oauth.gezcez.com
-		},
-	)
+		const oauthUi = t.config.oauthUiUrl
+		const account = await preflight("/v1/account/profile", oauthUi)
+		expect(account.headers.get("access-control-allow-origin")).toBe(oauthUi)
+		expect(account.headers.get("access-control-allow-credentials")).toBe("true")
+		const accountFromDash = await preflight("/v1/account/csrf", DASH_ORIGIN)
+		expect(accountFromDash.headers.get("access-control-allow-origin")).toBeNull()
+		const token = await preflight("/v1/oauth/token", DASH_ORIGIN)
+		expect(token.headers.get("access-control-allow-credentials")).toBe("true")
+		const tokenFromOauthUi = await preflight("/v1/oauth/token", oauthUi)
+		expect(tokenFromOauthUi.headers.get("access-control-allow-credentials")).toBeNull()
+		const bearer = await t.fetch("/v1/system/version", { headers: { origin: DASH_ORIGIN } })
+		expect(bearer.headers.get("access-control-allow-origin")).toBe(DASH_ORIGIN)
+		expect(bearer.headers.get("access-control-allow-credentials")).toBeNull()
+		expect(bearer.headers.get("vary")).toContain("Origin")
+	})
 })
 
 describe("F2c a script on the dashboard origin mints long-lived tokens for another client", () => {
-	test.failing(
-		"POST /v1/oauth/authorize from the dash origin returns a code in readable JSON",
-		async () => {
-			const browser = await signedIn()
-			browser.origin = DASH_ORIGIN
-			browser.csrfToken = undefined
-			await browser.csrf() // readable cross-origin, see F2
-			const attacker = new TestOAuthClient(t, "e2e_client") // attacker-chosen PKCE
-			const start = await attacker.authorize(browser)
-			expect(start.status).toBe(403) // expected CSRF_INVALID for a non identity-UI origin
-			expect(start.body.error.code).toBe("CSRF_INVALID")
-		},
-	)
+	test("POST /v1/oauth/authorize from the dash origin returns a code in readable JSON", async () => {
+		const browser = await signedIn()
+		browser.origin = DASH_ORIGIN
+		browser.csrfToken = undefined
+		await browser.csrf() // readable cross-origin, see F2
+		const attacker = new TestOAuthClient(t, "e2e_client") // attacker-chosen PKCE
+		const start = await attacker.authorize(browser)
+		expect(start.status).toBe(403) // expected CSRF_INVALID for a non identity-UI origin
+		expect(start.body.error.code).toBe("CSRF_INVALID")
+	})
 })
 
 describe("F2b the oauth UI origin can spend the dashboard's gz_rt", () => {
-	test.failing(
-		"cookie refresh from https origin of the identity UI returns a dash token, readable by CORS",
-		async () => {
-			const browser = await signedIn(FIXTURE.admin)
-			const client = new TestOAuthClient(t, "dashboard-dev", `${DASH_ORIGIN}/auth/callback`)
-			const { code } = await client.signInAndAuthorize(browser, {
-				scope: "openid offline_access dash",
-			})
-			browser.origin = DASH_ORIGIN
-			await browser.request("POST", "/v1/oauth/token", {
-				grant_type: "authorization_code",
-				code,
-				redirect_uri: `${DASH_ORIGIN}/auth/callback`,
-				code_verifier: client.pkce.verifier,
-				client_id: "dashboard-dev",
-			})
-			browser.origin = t.config.oauthUiUrl // identity UI origin, not the dashboard
-			const refresh = await browser.request("POST", "/v1/oauth/token", {})
-			expect(refresh.status).toBe(400) // plan 6.1.0: gz_rt only from dash.gezcez.com
-		},
-	)
+	test("cookie refresh from https origin of the identity UI returns a dash token, readable by CORS", async () => {
+		const browser = await signedIn(FIXTURE.admin)
+		const client = new TestOAuthClient(t, "dashboard-dev", `${DASH_ORIGIN}/auth/callback`)
+		const { code } = await client.signInAndAuthorize(browser, {
+			scope: "openid offline_access dash",
+		})
+		browser.origin = DASH_ORIGIN
+		await browser.request("POST", "/v1/oauth/token", {
+			grant_type: "authorization_code",
+			code,
+			redirect_uri: `${DASH_ORIGIN}/auth/callback`,
+			code_verifier: client.pkce.verifier,
+			client_id: "dashboard-dev",
+		})
+		browser.origin = t.config.oauthUiUrl // identity UI origin, not the dashboard
+		const refresh = await browser.request("POST", "/v1/oauth/token", {})
+		expect(refresh.status).toBe(400) // plan 6.1.0: gz_rt only from dash.gezcez.com
+	})
 })
 
 describe("F3 max_age=0 never completes", () => {

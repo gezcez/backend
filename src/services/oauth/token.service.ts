@@ -7,7 +7,7 @@ import type { Request, Response } from "express"
 import { InjectConfig, type AppConfig } from "@common/config"
 import { OAuthProtocolError } from "@common/errors"
 import type { AuthMethod } from "@common/jwt.types"
-import { allowedOrigins } from "@common/middlewares"
+import { normaliseOrigin, refreshCookieOrigins } from "@common/middlewares"
 import { formatScope, parseScope } from "@common/scopes"
 import { newId, randomToken, safeEqual, sha256Hex } from "@common/utils"
 import { AuditService } from "@services/audit/audit.service"
@@ -62,7 +62,7 @@ export class TokenService {
 		private readonly grace: RefreshGraceService,
 		private readonly audit: AuditService,
 	) {
-		this.origins = allowedOrigins(config)
+		this.origins = refreshCookieOrigins(config)
 	}
 
 	async token(req: Request, res: Response, body: Body): Promise<TokenResponseDto> {
@@ -76,6 +76,8 @@ export class TokenService {
 
 	private async codeGrant(req: Request, res: Response, body: Body): Promise<TokenResponseDto> {
 		const app = this.clients.authenticate(req, body)
+		// A browser exchange that would set gz_rt must come from that client's own origin.
+		if (app.refresh_cookie && req.headers.origin !== undefined) this.checkOrigin(req, app)
 		const code = required(body, "code")
 		const redirectUri = required(body, "redirect_uri")
 		const verifier = required(body, "code_verifier")
@@ -159,6 +161,7 @@ export class TokenService {
 			throw new OAuthProtocolError("invalid_grant", "Unknown refresh token")
 		if (viaCookie && !app.refresh_cookie)
 			throw new OAuthProtocolError("invalid_grant", "Client does not use the refresh cookie")
+		if (viaCookie) this.checkOrigin(req, app)
 		if (row.revoked_at) throw new OAuthProtocolError("invalid_grant", "Refresh token revoked")
 
 		const session = this.sessions.find(row.session_id)
@@ -240,6 +243,7 @@ export class TokenService {
 		if (viaCookie) this.checkOrigin(req)
 		const row = this.repository.findRefreshByHash(sha256Hex(token))
 		const app = this.clients.authenticate(req, body, viaCookie ? row?.client_id : undefined)
+		if (viaCookie) this.checkOrigin(req, app)
 		if (row && row.client_id === app.client_id && !row.revoked_at) {
 			this.repository.revokeFamily(row.family_id, "logout", new Date())
 			this.audit.record("auth.logout", {
@@ -348,10 +352,17 @@ export class TokenService {
 		return value && value.length <= 128 ? value : undefined
 	}
 
-	private checkOrigin(req: Request): void {
-		const origin = req.headers.origin?.replace(/\/$/, "")
+	/**
+	 * gz_rt is spent only from a refresh cookie origin (CORS_ORIGINS minus the identity UI) and,
+	 * once the client is known, only from the origin of one of its registered redirect URIs, so
+	 * the dashboard's cookie works from the dashboard alone.
+	 */
+	private checkOrigin(req: Request, app?: AppRow): void {
+		const origin = normaliseOrigin(req.headers.origin)
 		if (!origin || !this.origins.has(origin))
 			throw new OAuthProtocolError("invalid_request", "Origin is not allowed")
+		if (app && !app.redirect_uris.some((uri) => normaliseOrigin(uri) === origin))
+			throw new OAuthProtocolError("invalid_request", "Origin is not allowed for this client")
 	}
 
 	private setRefreshCookie(res: Response, refresh: { token: string; expiresAt: Date }): void {

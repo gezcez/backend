@@ -3,7 +3,8 @@
 //  - @UseDevice(): issues __Host-gz_device if missing and loads the session when there is one
 //  - @UseSession(): same, but a live __Host-gz_session is required (AUTH_SESSION_REQUIRED)
 //  - @UseSession({ stepUp: true }): the session must have authenticated within STEP_UP_MAX_AGE_S
-// Writes need an allowed Origin, Content-Type application/json and X-CSRF-Token (plan 6.1.0).
+// Writes need the identity UI Origin (OAUTH_UI_URL only, never the other CORS_ORIGINS),
+// Content-Type application/json and X-CSRF-Token (plan 6.1.0).
 
 import {
 	applyDecorators,
@@ -27,17 +28,12 @@ import {
 import { InjectConfig, type AppConfig } from "@common/config"
 import { GezcezError } from "@common/errors"
 import { safeEqual } from "@common/utils"
+import { identityOrigins, normaliseOrigin } from "./cors"
 
 const STEP_UP_KEY = "gezcez:session-step-up"
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"])
 
 export const CSRF_HEADER = "x-csrf-token"
-
-export function allowedOrigins(config: AppConfig): Set<string> {
-	return new Set(
-		[config.oauthUiUrl, ...config.corsOrigins].map((origin) => origin.replace(/\/$/, "")),
-	)
-}
 
 @Injectable()
 export class CookieAuthGuard implements CanActivate {
@@ -48,7 +44,7 @@ export class CookieAuthGuard implements CanActivate {
 		@Inject(COOKIE_AUTH) private readonly cookies: CookieAuthProvider,
 		@InjectConfig() private readonly config: AppConfig,
 	) {
-		this.origins = allowedOrigins(config)
+		this.origins = identityOrigins(config)
 	}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -81,8 +77,8 @@ export class CookieAuthGuard implements CanActivate {
 	}
 
 	private checkOrigin(req: Request): void {
-		const origin = req.headers.origin
-		if (!origin || !this.origins.has(origin.replace(/\/$/, ""))) {
+		const origin = normaliseOrigin(req.headers.origin)
+		if (!origin || !this.origins.has(origin)) {
 			throw new GezcezError("CSRF_INVALID", "Origin is not allowed")
 		}
 		const length = Number(req.headers["content-length"] ?? 0)
