@@ -15,6 +15,8 @@ export const permissionsTable = sqliteTable("permissions", {
 	description: text().notNull(),
 	sudo: int({ mode: "boolean" }).notNull().default(false),
 	first_seen_at: int({ mode: "timestamp_ms" }).notNull(),
+	/** Last boot that found the key in code. */
+	last_seen_at: int({ mode: "timestamp_ms" }),
 	orphaned_at: int({ mode: "timestamp_ms" }),
 })
 

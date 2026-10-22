@@ -9,6 +9,7 @@ import { newId } from "@common/utils"
 import type { CoreDatabase } from "./database.module"
 import {
 	appsTable,
+	type AppPlatform,
 	citiesTable,
 	networksTable,
 	permissionsTable,
@@ -39,6 +40,7 @@ const MOBILE_REFRESH_TTL = 7_776_000
 interface SeedApp {
 	client_id: string
 	name: string
+	platform: AppPlatform
 	first_party: boolean
 	system: boolean
 	dev: boolean
@@ -64,6 +66,7 @@ export function seedApps(environment: SeedEnvironment): SeedApp[] {
 		{
 			client_id: "dashboard",
 			name: "gezcez Dashboard",
+			platform: "web",
 			first_party: true,
 			system: true,
 			dev: false,
@@ -81,6 +84,7 @@ export function seedApps(environment: SeedEnvironment): SeedApp[] {
 		{
 			client_id: "dashboard-dev",
 			name: "gezcez Dashboard (dev)",
+			platform: "dev",
 			first_party: true,
 			system: false,
 			dev: true,
@@ -93,6 +97,7 @@ export function seedApps(environment: SeedEnvironment): SeedApp[] {
 		{
 			client_id: "mobile",
 			name: "gezcez",
+			platform: "native",
 			first_party: true,
 			system: true,
 			dev: false,
@@ -111,6 +116,7 @@ export function seedApps(environment: SeedEnvironment): SeedApp[] {
 		{
 			client_id: "mobile-dev",
 			name: "gezcez (dev)",
+			platform: "native",
 			first_party: true,
 			system: false,
 			dev: true,
@@ -124,6 +130,7 @@ export function seedApps(environment: SeedEnvironment): SeedApp[] {
 		{
 			client_id: "e2e_client",
 			name: "E2E client",
+			platform: "dev",
 			first_party: true,
 			system: false,
 			dev: true,
@@ -137,6 +144,7 @@ export function seedApps(environment: SeedEnvironment): SeedApp[] {
 		{
 			client_id: "e2e_third_party",
 			name: "E2E third party",
+			platform: "dev",
 			first_party: false,
 			system: false,
 			dev: true,
@@ -170,6 +178,7 @@ const appsStep: SeedStep = {
 					target: appsTable.client_id,
 					set: {
 						name: row.name,
+						platform: row.platform,
 						first_party: row.first_party,
 						system: row.system,
 						dev: row.dev,

@@ -21,13 +21,21 @@ export const emailsTable = sqliteTable(
 		last_error: text(),
 		created_at: int({ mode: "timestamp_ms" }).notNull(),
 		sent_at: int({ mode: "timestamp_ms" }),
+		/** Last status change (send, bounce, complaint). */
+		updated_at: int({ mode: "timestamp_ms" }),
 	},
-	(t) => [index("emails_status_idx").on(t.status, t.created_at)],
+	(t) => [
+		index("emails_status_idx").on(t.status, t.created_at),
+		index("emails_user_idx").on(t.user_id, t.created_at),
+	],
 )
 
 export const emailSuppressionsTable = sqliteTable("email_suppressions", {
 	email_hash: text().primaryKey(),
 	reason: text().$type<"bounce" | "complaint" | "manual">().notNull(),
+	/** Masked address for the dashboard; the address itself is never stored. */
+	email_masked: text(),
+	detail: text(),
 	created_at: int({ mode: "timestamp_ms" }).notNull(),
 	removed_at: int({ mode: "timestamp_ms" }),
 	removed_by: int(),
@@ -35,3 +43,4 @@ export const emailSuppressionsTable = sqliteTable("email_suppressions", {
 })
 
 export type EmailRow = typeof emailsTable.$inferSelect
+export type EmailSuppressionRow = typeof emailSuppressionsTable.$inferSelect

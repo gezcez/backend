@@ -7,6 +7,8 @@ import { usersTable } from "./users"
 
 export type AppType = "public" | "confidential"
 export type AppStatus = "active" | "disabled"
+/** web: browser clients; native: mobile apps (custom schemes); dev: loopback on any port. */
+export type AppPlatform = "web" | "native" | "dev"
 
 export const appsTable = sqliteTable(
 	"apps",
@@ -14,9 +16,18 @@ export const appsTable = sqliteTable(
 		id: int().primaryKey({ autoIncrement: true }),
 		client_id: text().notNull(),
 		name: text().notNull(),
+		description: text().notNull().default(""),
 		type: text().$type<AppType>().notNull(),
+		platform: text().$type<AppPlatform>().notNull().default("web"),
 		client_secret_hash: text(),
+		/** First characters of the secret, shown in the dashboard to tell secrets apart. */
+		secret_prefix: text(),
+		secret_created_at: int({ mode: "timestamp_ms" }),
+		secret_last_used_at: int({ mode: "timestamp_ms" }),
 		previous_secret_hash: text(),
+		previous_secret_prefix: text(),
+		previous_secret_created_at: int({ mode: "timestamp_ms" }),
+		previous_secret_last_used_at: int({ mode: "timestamp_ms" }),
 		previous_secret_expires_at: int({ mode: "timestamp_ms" }),
 		redirect_uris: text({ mode: "json" }).$type<string[]>().notNull(),
 		post_logout_redirect_uris: text({ mode: "json" }).$type<string[]>().notNull(),
@@ -30,6 +41,8 @@ export const appsTable = sqliteTable(
 		refresh_cookie: int({ mode: "boolean" }).notNull().default(false),
 		access_ttl_s: int().notNull().default(900),
 		refresh_ttl_s: int().notNull().default(2_592_000),
+		/** Hard cap on a refresh family's age, however often it rotates. */
+		refresh_max_s: int().notNull().default(15_552_000),
 		logo_url: text(),
 		homepage_url: text(),
 		status: text().$type<AppStatus>().notNull().default("active"),
