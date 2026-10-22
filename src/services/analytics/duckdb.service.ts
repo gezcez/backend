@@ -48,6 +48,10 @@ function toCell(value: unknown): CellValue {
 	return String(value)
 }
 
+const YIELD_EVERY = 20_000
+/** Connections whose request timed out (the appender loop checks it). */
+const timedOut = new WeakSet<DuckDBConnection>()
+
 interface Waiter {
 	resolve: () => void
 }
@@ -158,21 +162,22 @@ export class DuckDBService implements OnApplicationShutdown {
 		await this.acquire()
 		const started = performance.now()
 		const connection = await instance.connect()
-		let timedOut = false
+		let expired = false
 		const timeoutMs =
 			options.timeoutMs === undefined ? this.config.analytics.timeoutMs : options.timeoutMs
 		const timer =
 			timeoutMs === null
 				? undefined
 				: setTimeout(() => {
-						timedOut = true
+						expired = true
+						timedOut.add(connection)
 						connection.interrupt()
 					}, timeoutMs)
 		try {
 			await connection.run("SET TimeZone = 'UTC'")
 			return await work(connection)
 		} catch (error) {
-			if (timedOut) throw new GezcezError("ANALYTICS_TIMEOUT")
+			if (expired) throw new GezcezError("ANALYTICS_TIMEOUT")
 			throw error
 		} finally {
 			if (timer) clearTimeout(timer)
@@ -218,7 +223,12 @@ export class DuckDBService implements OnApplicationShutdown {
 		try {
 			for (const row of rows) {
 				writer.appendRow(row as readonly JS[])
-				count++
+				// Large hot loads give the event loop (HTTP, timers) a turn now and then, and
+				// stop once the request timed out.
+				if (++count % YIELD_EVERY === 0) {
+					await new Promise((resolve) => setImmediate(resolve))
+					if (timedOut.has(connection)) throw new GezcezError("ANALYTICS_TIMEOUT")
+				}
 			}
 			writer.flush()
 			appender.flushSync()

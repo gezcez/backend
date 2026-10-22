@@ -62,6 +62,19 @@ export class ArchiveRepository {
 
 	constructor(@InjectVtsDb() private readonly db: VtsDatabase) {}
 
+	/**
+	 * A fresh statement for streaming reads: callers may pause between rows (the DuckDB appender
+	 * yields to the event loop), so two requests must never share one cursor.
+	 */
+	private *iterate(text: string, params: (string | number)[]): Generator<Row> {
+		const statement = this.db.$client.prepare<Row, (string | number)[]>(text)
+		try {
+			yield* statement.iterate(...params)
+		} finally {
+			statement.finalize()
+		}
+	}
+
 	private stmt(text: string): Statement<Row> {
 		let statement = this.statements.get(text)
 		if (!statement) {
@@ -77,7 +90,7 @@ export class ArchiveRepository {
 		const text = ordered
 			? `${POSITIONS_SQL} ORDER BY p.vehicle_id, p.vehicle_ts`
 			: POSITIONS_SQL
-		for (const r of this.stmt(text).iterate(bindingId, from, to))
+		for (const r of this.iterate(text, [bindingId, from, to]))
 			yield [
 				r.vehicle_id,
 				r.vehicle_ext,
@@ -98,8 +111,8 @@ export class ArchiveRepository {
 			]
 	}
 
-	private *runRows(statement: Statement<Row>, params: number[]): Generator<unknown[]> {
-		for (const r of statement.iterate(...params))
+	private *runRows(text: string, params: number[]): Generator<unknown[]> {
+		for (const r of this.iterate(text, params))
 			yield [
 				r.id,
 				r.vehicle_id,
@@ -123,16 +136,16 @@ export class ArchiveRepository {
 
 	/** Runs that ended in [from, to). */
 	runs(bindingId: number, from: number, to: number): Generator<unknown[]> {
-		return this.runRows(this.stmt(RUNS_SQL), [bindingId, from, to])
+		return this.runRows(RUNS_SQL, [bindingId, from, to])
 	}
 
 	/** Open runs (never archived) that started in [from, to). */
 	openRuns(bindingId: number, from: number, to: number): Generator<unknown[]> {
-		return this.runRows(this.stmt(OPEN_RUNS_SQL), [bindingId, from, to])
+		return this.runRows(OPEN_RUNS_SQL, [bindingId, from, to])
 	}
 
 	*polls(bindingId: number, from: number, to: number): Generator<unknown[]> {
-		for (const r of this.stmt(POLLS_SQL).iterate(bindingId, from, to)) {
+		for (const r of this.iterate(POLLS_SQL, [bindingId, from, to])) {
 			let dropped: Partial<PollDropped> = {}
 			if (typeof r.dropped === "string") {
 				try {
