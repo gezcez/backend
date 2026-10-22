@@ -206,14 +206,13 @@ export class AuthorizeService {
 	}
 
 	/**
-	 * OIDC max_age in whole seconds. max_age=0 means "authenticate for this request" (like
-	 * prompt=login): an authentication after the request was created satisfies it.
+	 * OIDC max_age. An authentication after the request was created always satisfies it, which
+	 * makes max_age=0 behave like prompt=login instead of asking for a re-auth forever.
 	 */
 	private withinMaxAge(session: SessionContext, request: AuthRequestRow): boolean {
 		if (session.authTime >= request.created_at) return true
 		if (request.max_age === 0) return false
-		const ageS = Math.floor(Date.now() / 1000) - Math.floor(session.authTime.getTime() / 1000)
-		return ageS <= request.max_age!
+		return Date.now() - session.authTime.getTime() <= request.max_age! * 1000
 	}
 
 	private consented(session: SessionContext, request: AuthRequestRow, prompt: string[]): boolean {
