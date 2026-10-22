@@ -4870,6 +4870,7 @@
 					"USER_PENDING_DELETION",
 					"USER_DELETED",
 					"EMAIL_TAKEN",
+					"SIGNUP_CLOSED",
 					"USERNAME_TAKEN",
 					"NOT_FOUND",
 					"CONFLICT",
@@ -5075,6 +5076,206 @@
 					"groups",
 					"tombstones"
 				],
+				"type": "object"
+			},
+			"Flag": {
+				"properties": {
+					"critical": {
+						"type": "boolean"
+					},
+					"default": {},
+					"description": {
+						"type": "string"
+					},
+					"is_default": {
+						"type": "boolean"
+					},
+					"key": {
+						"type": "string"
+					},
+					"updated_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"updated_by": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"value": {}
+				},
+				"required": [
+					"key",
+					"description",
+					"critical",
+					"value",
+					"default",
+					"is_default",
+					"updated_at",
+					"updated_by"
+				],
+				"type": "object"
+			},
+			"FlagDetailDto": {
+				"properties": {
+					"critical": {
+						"type": "boolean"
+					},
+					"default": {},
+					"description": {
+						"type": "string"
+					},
+					"history": {
+						"items": {
+							"properties": {
+								"after": {},
+								"at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+									"type": "string"
+								},
+								"before": {},
+								"by": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/UserRef"
+										},
+										{
+											"type": "null"
+										}
+									]
+								}
+							},
+							"required": [
+								"at",
+								"by",
+								"before",
+								"after"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"is_default": {
+						"type": "boolean"
+					},
+					"key": {
+						"type": "string"
+					},
+					"updated_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"updated_by": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"value": {}
+				},
+				"required": [
+					"key",
+					"description",
+					"critical",
+					"value",
+					"default",
+					"is_default",
+					"updated_at",
+					"updated_by",
+					"history"
+				],
+				"type": "object"
+			},
+			"FlagDto": {
+				"properties": {
+					"critical": {
+						"type": "boolean"
+					},
+					"default": {},
+					"description": {
+						"type": "string"
+					},
+					"is_default": {
+						"type": "boolean"
+					},
+					"key": {
+						"type": "string"
+					},
+					"updated_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"updated_by": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"value": {}
+				},
+				"required": [
+					"key",
+					"description",
+					"critical",
+					"value",
+					"default",
+					"is_default",
+					"updated_at",
+					"updated_by"
+				],
+				"type": "object"
+			},
+			"FlagListDto": {
+				"items": {
+					"$ref": "#/components/schemas/Flag"
+				},
+				"type": "array"
+			},
+			"FlagUpdateDto": {
+				"properties": {
+					"reset": {
+						"type": "boolean"
+					},
+					"value": {}
+				},
 				"type": "object"
 			},
 			"ForgetDeviceAccountResultDto": {
@@ -8986,6 +9187,107 @@
 				],
 				"type": "object"
 			},
+			"SettingsDto": {
+				"properties": {
+					"maintenance": {
+						"additionalProperties": false,
+						"properties": {
+							"enabled": {
+								"type": "boolean"
+							},
+							"message": {
+								"additionalProperties": false,
+								"properties": {
+									"en": {
+										"maxLength": 500,
+										"type": "string"
+									},
+									"tr": {
+										"maxLength": 500,
+										"type": "string"
+									}
+								},
+								"required": [
+									"tr",
+									"en"
+								],
+								"type": "object"
+							}
+						},
+						"required": [
+							"enabled",
+							"message"
+						],
+						"type": "object"
+					},
+					"signup": {
+						"additionalProperties": false,
+						"properties": {
+							"open": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"open"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"signup",
+					"maintenance"
+				],
+				"type": "object"
+			},
+			"SettingsPatchDto": {
+				"additionalProperties": false,
+				"properties": {
+					"maintenance": {
+						"additionalProperties": false,
+						"properties": {
+							"enabled": {
+								"type": "boolean"
+							},
+							"message": {
+								"additionalProperties": false,
+								"properties": {
+									"en": {
+										"maxLength": 500,
+										"type": "string"
+									},
+									"tr": {
+										"maxLength": 500,
+										"type": "string"
+									}
+								},
+								"required": [
+									"tr",
+									"en"
+								],
+								"type": "object"
+							}
+						},
+						"required": [
+							"enabled",
+							"message"
+						],
+						"type": "object"
+					},
+					"signup": {
+						"additionalProperties": false,
+						"properties": {
+							"open": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"open"
+						],
+						"type": "object"
+					}
+				},
+				"type": "object"
+			},
 			"SignedInDto": {
 				"properties": {
 					"account": {
@@ -9508,6 +9810,48 @@
 					"next_cursor",
 					"prev_cursor",
 					"total"
+				],
+				"type": "object"
+			},
+			"SystemNoticeDto": {
+				"properties": {
+					"maintenance": {
+						"anyOf": [
+							{
+								"properties": {
+									"message": {
+										"properties": {
+											"en": {
+												"type": "string"
+											},
+											"tr": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"tr",
+											"en"
+										],
+										"type": "object"
+									}
+								},
+								"required": [
+									"message"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"signup_open": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"maintenance",
+					"signup_open"
 				],
 				"type": "object"
 			},
@@ -14981,6 +15325,201 @@
 				}
 			}
 		},
+		"/v1/dash/flags": {
+			"get": {
+				"operationId": "Flags_list",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/FlagListDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Flags with value, default and last change",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "settings.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/flags/{key}": {
+			"get": {
+				"operationId": "Flags_detail",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "key",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/FlagDetailDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "One flag with its change history from the audit log",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "settings.read",
+					"scope": "global"
+				}
+			},
+			"put": {
+				"description": "The value is validated against the flag's schema. Critical flags need step-up (AUTH_STEP_UP_REQUIRED).",
+				"operationId": "Flags_set",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "key",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FlagUpdateDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/FlagDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Set a flag, or reset it to the default",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "flags.write",
+					"scope": "global"
+				}
+			}
+		},
 		"/v1/dash/moderation": {
 			"get": {
 				"operationId": "Moderation_list",
@@ -17652,6 +18191,127 @@
 				],
 				"x-gezcez-permission": {
 					"key": "roles.write",
+					"scope": "global"
+				},
+				"x-gezcez-sudo": true
+			}
+		},
+		"/v1/dash/settings": {
+			"get": {
+				"operationId": "Flags_settings",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SettingsDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Settings groups",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "settings.read",
+					"scope": "global"
+				}
+			},
+			"patch": {
+				"operationId": "Flags_updateSettings",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SettingsPatchDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SettingsDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Replace the given settings groups (step-up)",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "settings.write",
 					"scope": "global"
 				},
 				"x-gezcez-sudo": true
@@ -20787,6 +21447,53 @@
 				},
 				"tags": [
 					"transit"
+				]
+			}
+		},
+		"/v1/system/notice": {
+			"get": {
+				"operationId": "SystemNotice_notice",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SystemNoticeDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Maintenance banner and whether sign-up is open (web apps)",
+				"tags": [
+					"system"
 				]
 			}
 		},

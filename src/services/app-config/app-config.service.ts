@@ -13,6 +13,7 @@ import { Injectable, Logger } from "@nestjs/common"
 import { InjectConfig, type AppConfig } from "@common/config"
 import type { AppConfigDto, AppConfigQueryDto } from "./app-config.dto"
 import { AnnouncementSchema } from "./app-config.dto"
+import { FlagsService } from "@services/flags/flags.service"
 import { AppConfigRepository } from "./app-config.repository"
 
 const CACHE_MS = 15_000
@@ -60,7 +61,13 @@ export class AppConfigService {
 	constructor(
 		private readonly repository: AppConfigRepository,
 		@InjectConfig() private readonly env: AppConfig,
-	) {}
+		flags: FlagsService,
+	) {
+		// Dashboard flag edits show up in the next /v1/app/config response.
+		flags.onChange((key) => {
+			if (key.startsWith("app.")) this.invalidate()
+		})
+	}
 
 	/** Drops the cache after a flag write. */
 	invalidate(): void {

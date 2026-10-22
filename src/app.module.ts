@@ -27,6 +27,7 @@ import { AppConfigModule } from "@services/app-config/app-config.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
+import { FlagsModule } from "@services/flags/flags.module"
 import { FavouritesModule } from "@services/favourites/favourites.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
 import { ModerationModule } from "@services/moderation/moderation.module"
@@ -75,6 +76,7 @@ export class AppModule {
 				EmailModule,
 				RefsModule,
 				AuditModule,
+				FlagsModule,
 				AccountModule,
 				OAuthModule,
 				RolesModule,

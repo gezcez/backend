@@ -1,6 +1,6 @@
 // app-config.repository.ts
-// Reads the `app.*` flags from core.db for /v1/app/config. A flags service with definitions,
-// per-network overrides and dashboard edits replaces this when it lands; the keys stay.
+// Reads the `app.*` flags from core.db for /v1/app/config. Definitions, validation and
+// dashboard edits live in FlagsService (src/services/flags), which also drops this cache.
 
 import { Injectable } from "@nestjs/common"
 import { like } from "drizzle-orm"

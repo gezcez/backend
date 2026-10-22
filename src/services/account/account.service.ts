@@ -25,6 +25,7 @@ import { normaliseLocale, type Locale } from "@lang"
 import { AuditService } from "@services/audit/audit.service"
 import { EmailService } from "@services/email/email.service"
 import type { TemplateKey } from "@services/email/email.templates"
+import { FlagsService } from "@services/flags/flags.service"
 import { AccountRepository, type EmailCodeRow, type UserRow } from "./account.repository"
 import type {
 	AccountSummaryDto,
@@ -70,6 +71,7 @@ export class AccountService {
 		private readonly turnstile: TurnstileService,
 		private readonly limits: RateLimitService,
 		private readonly audit: AuditService,
+		private readonly flags: FlagsService,
 	) {}
 
 	// ---------------------------------------------------------------- account data
@@ -446,6 +448,8 @@ export class AccountService {
 		if (!payload)
 			throw new GezcezError("AUTH_CODE_EXPIRED", "Profile token expired, start again")
 		if (this.repository.findUserByEmail(payload.email)) throw new GezcezError("EMAIL_TAKEN")
+		// Checked here, after the code: the start step answers the same for every address.
+		if (!this.flags.get("settings.signup").open) throw new GezcezError("SIGNUP_CLOSED")
 		const now = new Date()
 		let user: UserRow
 		try {

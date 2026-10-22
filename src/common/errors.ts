@@ -30,6 +30,7 @@ export const ERROR_CODES = {
 	USER_PENDING_DELETION: { status: 403, message: "Account is scheduled for deletion" },
 	USER_DELETED: { status: 410, message: "Account has been deleted" },
 	EMAIL_TAKEN: { status: 409, message: "Email is already in use" },
+	SIGNUP_CLOSED: { status: 403, message: "Sign-up is closed right now" },
 	USERNAME_TAKEN: { status: 409, message: "Username is already in use" },
 	NOT_FOUND: { status: 404, message: "Not found" },
 	CONFLICT: { status: 409, message: "Conflict" },
