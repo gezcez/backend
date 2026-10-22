@@ -122,6 +122,176 @@
 				],
 				"type": "object"
 			},
+			"ArchiveStatusDto": {
+				"properties": {
+					"can_write": {
+						"type": "boolean"
+					},
+					"entries": {
+						"items": {
+							"properties": {
+								"binding_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"bytes": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"dataset": {
+									"enum": [
+										"positions",
+										"trip_runs",
+										"polls"
+									],
+									"type": "string"
+								},
+								"date": {
+									"type": "string"
+								},
+								"exported_at": {
+									"type": "string"
+								},
+								"path": {
+									"type": "string"
+								},
+								"rows": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"sha256": {
+									"type": "string"
+								},
+								"state": {
+									"enum": [
+										"failed",
+										"verified",
+										"uploaded"
+									],
+									"type": "string"
+								},
+								"uploaded_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"verified_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"binding_id",
+								"date",
+								"dataset",
+								"rows",
+								"bytes",
+								"sha256",
+								"path",
+								"exported_at",
+								"verified_at",
+								"uploaded_at",
+								"state"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"last_run": {
+						"anyOf": [
+							{
+								"properties": {
+									"days": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"failures": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"finished_at": {
+										"type": "string"
+									},
+									"pruned": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"started_at": {
+										"type": "string"
+									},
+									"uploads_retried": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									}
+								},
+								"required": [
+									"started_at",
+									"finished_at",
+									"days",
+									"failures",
+									"uploads_retried",
+									"pruned"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"schedules": {
+						"items": {
+							"properties": {
+								"key": {
+									"enum": [
+										"archive.export",
+										"analytics.aggregates"
+									],
+									"type": "string"
+								},
+								"next_run_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"key",
+								"next_run_at"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"uploader": {
+						"enum": [
+							"none",
+							"local",
+							"s3"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"uploader",
+					"can_write",
+					"schedules",
+					"last_run",
+					"entries"
+				],
+				"type": "object"
+			},
 			"AuthorizeContinueDto": {
 				"properties": {
 					"session_id": {
@@ -2386,6 +2556,81 @@
 				],
 				"type": "object"
 			},
+			"DayExportDto": {
+				"properties": {
+					"binding_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"datasets": {
+						"items": {
+							"properties": {
+								"bytes": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"dataset": {
+									"enum": [
+										"positions",
+										"trip_runs",
+										"polls"
+									],
+									"type": "string"
+								},
+								"error": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"rows": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"sha256": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"uploaded": {
+									"type": "boolean"
+								},
+								"verified": {
+									"type": "boolean"
+								}
+							},
+							"required": [
+								"dataset",
+								"rows",
+								"bytes",
+								"sha256",
+								"verified",
+								"uploaded",
+								"error"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"date": {
+						"type": "string"
+					},
+					"skipped": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"binding_id",
+					"date",
+					"skipped",
+					"datasets"
+				],
+				"type": "object"
+			},
 			"DeparturesDto": {
 				"properties": {
 					"generated_at": {
@@ -3404,6 +3649,184 @@
 					"amr",
 					"global",
 					"networks"
+				],
+				"type": "object"
+			},
+			"MetricCatalogDto": {
+				"properties": {
+					"archive": {
+						"properties": {
+							"first_date": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"last_date": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"first_date",
+							"last_date"
+						],
+						"type": "object"
+					},
+					"h3": {
+						"enum": [
+							"extension",
+							"js"
+						],
+						"type": "string"
+					},
+					"max_days": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"metrics": {
+						"items": {
+							"properties": {
+								"datasets": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"description": {
+									"type": "string"
+								},
+								"key": {
+									"enum": [
+										"fleet.hourly",
+										"fleet.vehicle-days",
+										"runs.runtime",
+										"runs.departures",
+										"headways.observed",
+										"adherence.departure",
+										"speed.heatmap",
+										"segments.travel-time",
+										"dwell.stops",
+										"quality.feed",
+										"coverage.routes",
+										"headways.marey"
+									],
+									"type": "string"
+								}
+							},
+							"required": [
+								"key",
+								"description",
+								"datasets"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"metrics",
+					"max_days",
+					"h3",
+					"archive"
+				],
+				"type": "object"
+			},
+			"MetricResultDto": {
+				"properties": {
+					"columns": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"meta": {
+						"properties": {
+							"binding_ids": {
+								"items": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"type": "array"
+							},
+							"from": {
+								"type": "string"
+							},
+							"generated_at": {
+								"type": "string"
+							},
+							"metric": {
+								"enum": [
+									"fleet.hourly",
+									"fleet.vehicle-days",
+									"runs.runtime",
+									"runs.departures",
+									"headways.observed",
+									"adherence.departure",
+									"speed.heatmap",
+									"segments.travel-time",
+									"dwell.stops",
+									"quality.feed",
+									"coverage.routes",
+									"headways.marey"
+								],
+								"type": "string"
+							},
+							"n": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"source": {
+								"enum": [
+									"hot",
+									"archive",
+									"rollup"
+								],
+								"type": "string"
+							},
+							"timezone": {
+								"type": "string"
+							},
+							"to": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"metric",
+							"n",
+							"generated_at",
+							"source",
+							"timezone",
+							"from",
+							"to",
+							"binding_ids"
+						],
+						"type": "object"
+					},
+					"rows": {
+						"items": {
+							"items": {
+								"type": [
+									"number",
+									"string",
+									"boolean",
+									"null"
+								]
+							},
+							"type": "array"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"columns",
+					"rows",
+					"meta"
 				],
 				"type": "object"
 			},
@@ -9227,6 +9650,173 @@
 				]
 			}
 		},
+		"/v1/dash/archive": {
+			"get": {
+				"operationId": "ArchiveAdmin_status",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "binding_id",
+						"required": false,
+						"schema": {
+							"exclusiveMinimum": 0,
+							"maximum": 9007199254740991,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 150,
+							"maximum": 1000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/ArchiveStatusDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: archive"
+				],
+				"x-gezcez-permission": {
+					"key": "archive.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/archive/{bindingId}/{date}/export": {
+			"post": {
+				"operationId": "ArchiveAdmin_export",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "bindingId",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
+						"name": "date",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DayExportDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: archive"
+				],
+				"x-gezcez-permission": {
+					"key": "archive.write",
+					"scope": "global"
+				}
+			}
+		},
 		"/v1/dash/cities": {
 			"get": {
 				"operationId": "Networks_cities",
@@ -9390,6 +9980,560 @@
 				],
 				"x-gezcez-permission": {
 					"key": "catalog.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/analytics": {
+			"get": {
+				"operationId": "Analytics_catalog",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/MetricCatalogDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: analytics"
+				],
+				"x-gezcez-permission": {
+					"key": "analytics.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/analytics/{metric}": {
+			"get": {
+				"operationId": "Analytics_metric",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "metric",
+						"required": true,
+						"schema": {
+							"enum": [
+								"fleet.hourly",
+								"fleet.vehicle-days",
+								"runs.runtime",
+								"runs.departures",
+								"headways.observed",
+								"adherence.departure",
+								"speed.heatmap",
+								"segments.travel-time",
+								"dwell.stops",
+								"quality.feed",
+								"coverage.routes",
+								"headways.marey"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "First local date (default: 6 days before `to`)",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Last local date, inclusive (default: today)",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "One local day (sets from and to)",
+						"in": "query",
+						"name": "date",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Route id(s), comma separated: external or public `<binding>.<external>`",
+						"in": "query",
+						"name": "route_id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "direction",
+						"required": false,
+						"schema": {
+							"maximum": 1,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "day_type",
+						"required": false,
+						"schema": {
+							"default": "all",
+							"enum": [
+								"all",
+								"weekday",
+								"saturday",
+								"sunday"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "hour_from",
+						"required": false,
+						"schema": {
+							"default": 0,
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "hour_to",
+						"required": false,
+						"schema": {
+							"default": 23,
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "One binding of the network",
+						"in": "query",
+						"name": "binding_id",
+						"required": false,
+						"schema": {
+							"exclusiveMinimum": 0,
+							"maximum": 9007199254740991,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "fleet.hourly bucket size",
+						"in": "query",
+						"name": "granularity",
+						"required": false,
+						"schema": {
+							"default": "1h",
+							"enum": [
+								"5m",
+								"1h",
+								"1d"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "speed.heatmap H3 resolution",
+						"in": "query",
+						"name": "res",
+						"required": false,
+						"schema": {
+							"default": 8,
+							"maximum": 10,
+							"minimum": 5,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "speed.heatmap: one local hour",
+						"in": "query",
+						"name": "hour",
+						"required": false,
+						"schema": {
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "speed.heatmap: minimum samples per cell",
+						"in": "query",
+						"name": "min_samples",
+						"required": false,
+						"schema": {
+							"default": 30,
+							"maximum": 100000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "runs.runtime: minimum max_stop_seq of a run",
+						"in": "query",
+						"name": "min_stops",
+						"required": false,
+						"schema": {
+							"default": 5,
+							"maximum": 1000,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "dwell.stops: one stop, by hour",
+						"in": "query",
+						"name": "stop_id",
+						"required": false,
+						"schema": {
+							"pattern": "^[\\w.:-]{1,80}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "dwell.stops: top N",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 100,
+							"maximum": 5000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/MetricResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: analytics"
+				],
+				"x-gezcez-permission": {
+					"key": "analytics.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/analytics/{metric}/export": {
+			"get": {
+				"operationId": "Analytics_export",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "metric",
+						"required": true,
+						"schema": {
+							"enum": [
+								"fleet.hourly",
+								"fleet.vehicle-days",
+								"runs.runtime",
+								"runs.departures",
+								"headways.observed",
+								"adherence.departure",
+								"speed.heatmap",
+								"segments.travel-time",
+								"dwell.stops",
+								"quality.feed",
+								"coverage.routes",
+								"headways.marey"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "First local date (default: 6 days before `to`)",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Last local date, inclusive (default: today)",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "One local day (sets from and to)",
+						"in": "query",
+						"name": "date",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Route id(s), comma separated: external or public `<binding>.<external>`",
+						"in": "query",
+						"name": "route_id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "direction",
+						"required": false,
+						"schema": {
+							"maximum": 1,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "day_type",
+						"required": false,
+						"schema": {
+							"default": "all",
+							"enum": [
+								"all",
+								"weekday",
+								"saturday",
+								"sunday"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "hour_from",
+						"required": false,
+						"schema": {
+							"default": 0,
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "hour_to",
+						"required": false,
+						"schema": {
+							"default": 23,
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "One binding of the network",
+						"in": "query",
+						"name": "binding_id",
+						"required": false,
+						"schema": {
+							"exclusiveMinimum": 0,
+							"maximum": 9007199254740991,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "fleet.hourly bucket size",
+						"in": "query",
+						"name": "granularity",
+						"required": false,
+						"schema": {
+							"default": "1h",
+							"enum": [
+								"5m",
+								"1h",
+								"1d"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "speed.heatmap H3 resolution",
+						"in": "query",
+						"name": "res",
+						"required": false,
+						"schema": {
+							"default": 8,
+							"maximum": 10,
+							"minimum": 5,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "speed.heatmap: one local hour",
+						"in": "query",
+						"name": "hour",
+						"required": false,
+						"schema": {
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "speed.heatmap: minimum samples per cell",
+						"in": "query",
+						"name": "min_samples",
+						"required": false,
+						"schema": {
+							"default": 30,
+							"maximum": 100000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "runs.runtime: minimum max_stop_seq of a run",
+						"in": "query",
+						"name": "min_stops",
+						"required": false,
+						"schema": {
+							"default": 5,
+							"maximum": 1000,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "dwell.stops: one stop, by hour",
+						"in": "query",
+						"name": "stop_id",
+						"required": false,
+						"schema": {
+							"pattern": "^[\\w.:-]{1,80}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "dwell.stops: top N",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 100,
+							"maximum": 5000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "format",
+						"required": false,
+						"schema": {
+							"default": "csv",
+							"enum": [
+								"csv",
+								"parquet"
+							],
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The metric's rows as a file"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: analytics"
+				],
+				"x-gezcez-permission": {
+					"key": "analytics.export",
 					"scope": "network"
 				}
 			}

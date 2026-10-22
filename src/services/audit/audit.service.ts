@@ -32,6 +32,7 @@ export type AuditAction =
 	| "provider.unkill"
 	| "catalog.sync"
 	| "tracker.control"
+	| "archive.export"
 
 export interface AuditContext {
 	req?: Request
