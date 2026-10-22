@@ -5,7 +5,7 @@
 import { createHash, randomBytes } from "node:crypto"
 import { decodeJwt } from "jose"
 import type { TestApp } from "./app"
-import type { TestBrowser } from "./browser"
+import { TestBrowser } from "./browser"
 
 export const E2E_REDIRECT = "http://localhost:4710/callback"
 
@@ -144,5 +144,32 @@ export function claims(accessToken: string) {
 		amr: string[]
 		exp: number
 		iat: number
+	}
+}
+
+/**
+ * Signs `email` in on a fresh browser and runs the code flow; returns the access token.
+ * `dashboard-dev` is the seeded client that may ask for the `dash` scope.
+ */
+export async function accessTokenFor(
+	t: TestApp,
+	email: string,
+	options: { clientId?: string; scope?: string } = {},
+): Promise<{ accessToken: string; browser: TestBrowser; refreshToken?: string }> {
+	const clientId = options.clientId ?? "dashboard-dev"
+	const redirect =
+		clientId === "dashboard-dev" ? "http://localhost:5173/auth/callback" : E2E_REDIRECT
+	const browser = new TestBrowser(t)
+	await browser.signIn(email)
+	const client = new TestOAuthClient(t, clientId, redirect)
+	const { code } = await client.signInAndAuthorize(browser, {
+		scope: options.scope ?? "openid profile dash",
+	})
+	const token = await client.exchange(code!)
+	if (token.status !== 200) throw new Error(`token failed: ${JSON.stringify(token.body)}`)
+	return {
+		accessToken: token.body.access_token,
+		browser,
+		refreshToken: token.body.refresh_token,
 	}
 }

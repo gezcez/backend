@@ -725,6 +725,201 @@
 				],
 				"type": "object"
 			},
+			"MeDto": {
+				"properties": {
+					"amr": {
+						"items": {
+							"enum": [
+								"otp",
+								"pwd",
+								"webauthn"
+							],
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"auth_time": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"global": {
+						"properties": {
+							"permissions": {
+								"items": {
+									"$ref": "#/components/schemas/PermissionKey"
+								},
+								"type": "array"
+							},
+							"roles": {
+								"items": {
+									"properties": {
+										"id": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"key": {
+											"type": "string"
+										},
+										"level": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"id",
+										"key",
+										"name",
+										"level"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"roles",
+							"permissions"
+						],
+						"type": "object"
+					},
+					"networks": {
+						"items": {
+							"properties": {
+								"city": {
+									"properties": {
+										"id": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"name": {
+											"type": "string"
+										},
+										"slug": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"id",
+										"slug",
+										"name"
+									],
+									"type": "object"
+								},
+								"id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"name": {
+									"type": "string"
+								},
+								"permissions": {
+									"items": {
+										"$ref": "#/components/schemas/PermissionKey"
+									},
+									"type": "array"
+								},
+								"roles": {
+									"items": {
+										"properties": {
+											"id": {
+												"maximum": 9007199254740991,
+												"minimum": -9007199254740991,
+												"type": "integer"
+											},
+											"key": {
+												"type": "string"
+											},
+											"level": {
+												"maximum": 9007199254740991,
+												"minimum": -9007199254740991,
+												"type": "integer"
+											},
+											"name": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"id",
+											"key",
+											"name",
+											"level"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"slug": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"slug",
+								"name",
+								"city",
+								"roles",
+								"permissions"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"user": {
+						"properties": {
+							"avatar_initials": {
+								"type": "string"
+							},
+							"display_name": {
+								"type": "string"
+							},
+							"email_masked": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"locale": {
+								"enum": [
+									"tr",
+									"en"
+								],
+								"type": "string"
+							},
+							"username": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"id",
+							"display_name",
+							"username",
+							"email_masked",
+							"locale",
+							"avatar_initials"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"user",
+					"auth_time",
+					"amr",
+					"global",
+					"networks"
+				],
+				"type": "object"
+			},
 			"OAuthErrorDto": {
 				"properties": {
 					"error": {
@@ -848,6 +1043,155 @@
 					"claims_supported",
 					"prompt_values_supported",
 					"ui_locales_supported"
+				],
+				"type": "object"
+			},
+			"PatchMeDto": {
+				"properties": {
+					"display_name": {
+						"maxLength": 64,
+						"minLength": 1,
+						"type": "string"
+					},
+					"locale": {
+						"enum": [
+							"tr",
+							"en"
+						],
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"PermissionKey": {
+				"enum": [
+					"system.health.read",
+					"system.config.read",
+					"ops.logs",
+					"users.read",
+					"users.pii.read",
+					"users.sessions.revoke",
+					"moderation.read",
+					"moderation.write",
+					"roles.read",
+					"roles.write",
+					"roles.assign",
+					"permissions.read",
+					"permissions.write",
+					"apps.read",
+					"apps.write",
+					"apps.secrets.rotate",
+					"networks.read.all",
+					"catalog.admin",
+					"providers.read",
+					"providers.kill",
+					"archive.read",
+					"archive.write",
+					"email.read",
+					"email.test.send",
+					"email.test.send.any",
+					"settings.read",
+					"settings.write",
+					"flags.write",
+					"jobs.read",
+					"jobs.run",
+					"audit.read",
+					"network.overview.read",
+					"vehicles.live.read",
+					"vehicles.history.read",
+					"tracker.read",
+					"tracker.control",
+					"tracker.config.write",
+					"catalog.read",
+					"catalog.write",
+					"catalog.sync",
+					"analytics.read",
+					"analytics.export",
+					"members.read",
+					"members.roles.write",
+					"support.read",
+					"support.reply"
+				],
+				"type": "string"
+			},
+			"PermissionListDto": {
+				"properties": {
+					"keys": {
+						"items": {
+							"properties": {
+								"description": {
+									"type": "string"
+								},
+								"key": {
+									"type": "string"
+								},
+								"orphaned": {
+									"type": "boolean"
+								},
+								"scope": {
+									"enum": [
+										"global",
+										"network"
+									],
+									"type": "string"
+								},
+								"sudo": {
+									"type": "boolean"
+								}
+							},
+							"required": [
+								"key",
+								"scope",
+								"description",
+								"sudo",
+								"orphaned"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"routes": {
+						"items": {
+							"properties": {
+								"description": {
+									"type": "string"
+								},
+								"method": {
+									"type": "string"
+								},
+								"path": {
+									"type": "string"
+								},
+								"permission_key": {
+									"type": "string"
+								},
+								"scope": {
+									"enum": [
+										"global",
+										"network"
+									],
+									"type": "string"
+								},
+								"sudo": {
+									"type": "boolean"
+								}
+							},
+							"required": [
+								"method",
+								"path",
+								"permission_key",
+								"scope",
+								"sudo",
+								"description"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"keys",
+					"routes"
 				],
 				"type": "object"
 			},
@@ -1811,6 +2155,174 @@
 				"summary": "Create the account after a sign-up code (no username)",
 				"tags": [
 					"account"
+				]
+			}
+		},
+		"/v1/dash/permissions": {
+			"get": {
+				"operationId": "Roles_list",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PermissionListDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Permission keys (from code) and the guarded route registry",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "permissions.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/me": {
+			"get": {
+				"operationId": "Users_me",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/MeDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "The signed-in user, auth_time, amr, roles and permissions",
+				"tags": [
+					"me"
+				]
+			},
+			"patch": {
+				"operationId": "Users_update",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchMeDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/MeDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Change display name or locale",
+				"tags": [
+					"me"
 				]
 			}
 		},
