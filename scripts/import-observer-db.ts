@@ -10,6 +10,7 @@
 // with the tracker stopped or idle; it is safe to re-run (verified days are skipped).
 
 import { drizzle } from "drizzle-orm/bun-sqlite"
+import fs from "node:fs"
 import path from "node:path"
 import { parseArgs } from "node:util"
 import { loadConfig } from "@common/config"
@@ -42,7 +43,14 @@ if (!values.db) {
 const config = loadConfig()
 let bindingId = values.binding ? Number(values.binding) : undefined
 if (bindingId === undefined) {
-	const core = openSqlite(path.join(config.dataDir, "core.db"), { readonly: true })
+	const coreFile = path.join(config.dataDir, "core.db")
+	if (!fs.existsSync(coreFile)) {
+		console.error(
+			`${coreFile} not found; run the server or db:migrate first, or pass --binding`,
+		)
+		process.exit(1)
+	}
+	const core = openSqlite(coreFile, { readonly: true })
 	const row = core
 		.query<{ id: number }, [string]>(
 			"SELECT id FROM provider_bindings WHERE provider_key = 'kentkart' AND external_ref = ?",
