@@ -129,6 +129,152 @@
 				],
 				"type": "object"
 			},
+			"AppConfigDto": {
+				"properties": {
+					"announcement": {
+						"anyOf": [
+							{
+								"properties": {
+									"body": {
+										"properties": {
+											"en": {
+												"type": "string"
+											},
+											"tr": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"tr",
+											"en"
+										],
+										"type": "object"
+									},
+									"id": {
+										"maxLength": 64,
+										"minLength": 1,
+										"type": "string"
+									},
+									"level": {
+										"enum": [
+											"info",
+											"warning"
+										],
+										"type": "string"
+									},
+									"title": {
+										"properties": {
+											"en": {
+												"type": "string"
+											},
+											"tr": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"tr",
+											"en"
+										],
+										"type": "object"
+									},
+									"url": {
+										"anyOf": [
+											{
+												"format": "uri",
+												"type": "string"
+											},
+											{
+												"type": "null"
+											}
+										]
+									}
+								},
+								"required": [
+									"id",
+									"level",
+									"title",
+									"body",
+									"url"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"flags": {
+						"additionalProperties": {
+							"type": "boolean"
+						},
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"kill_switches": {
+						"additionalProperties": {
+							"type": "boolean"
+						},
+						"description": "Feature availability: false turns a feature off (cards, live_map, ...)",
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"min_supported_version": {
+						"description": "Older apps must update (force update)",
+						"type": "string"
+					},
+					"soft_update_version": {
+						"description": "Older apps are nudged to update",
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"tiles_style_url": {
+						"properties": {
+							"dark": {
+								"format": "uri",
+								"type": "string"
+							},
+							"light": {
+								"format": "uri",
+								"type": "string"
+							}
+						},
+						"required": [
+							"light",
+							"dark"
+						],
+						"type": "object"
+					},
+					"update": {
+						"description": "The caller's update state, from `version` (none without it)",
+						"enum": [
+							"none",
+							"soft",
+							"force"
+						],
+						"type": "string"
+					},
+					"ws_url": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"min_supported_version",
+					"soft_update_version",
+					"update",
+					"flags",
+					"kill_switches",
+					"announcement",
+					"tiles_style_url",
+					"ws_url"
+				],
+				"type": "object"
+			},
 			"AppInfoDto": {
 				"properties": {
 					"client_id": {
@@ -11169,6 +11315,76 @@
 				"summary": "Create the account after a sign-up code (no username)",
 				"tags": [
 					"account"
+				]
+			}
+		},
+		"/v1/app/config": {
+			"get": {
+				"operationId": "AppConfig_config",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "platform",
+						"required": false,
+						"schema": {
+							"enum": [
+								"ios",
+								"android"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "version",
+						"required": false,
+						"schema": {
+							"maxLength": 32,
+							"pattern": "^\\d+(\\.\\d+){0,2}([-+].*)?$",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AppConfigDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Remote config: update versions, flags, kill switches, announcement, tiles, WS URL",
+				"tags": [
+					"app"
 				]
 			}
 		},

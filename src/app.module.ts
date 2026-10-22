@@ -19,6 +19,7 @@ import { RATE_LIMIT_PRESETS, RateLimitModule } from "@common/rate-limits"
 import { clientIp } from "@common/utils"
 import { DatabaseModule } from "@db"
 import { AccountModule } from "@services/account/account.module"
+import { AppConfigModule } from "@services/app-config/app-config.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
@@ -89,6 +90,7 @@ export class AppModule {
 				VehiclesModule,
 				WsModule,
 				// Mobile MVP support (P4).
+				AppConfigModule,
 				FavouritesModule,
 				TelemetryModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
