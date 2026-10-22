@@ -450,6 +450,7 @@ export class VehiclesService {
 			items: upcoming.map((i) => ({
 				route: this.transit.routeSummary(i.route, network.id),
 				headsign: i.headsign,
+				direction: i.pattern.direction === 1 ? (1 as const) : (0 as const),
 				trip_id: i.tripExt ? publicRef(bindingId, i.tripExt) : null,
 				scheduled_at: iso(i.scheduledAt),
 				predicted_at: iso(i.predictedAt),

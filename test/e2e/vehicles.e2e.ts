@@ -188,7 +188,7 @@ describe("live vehicles REST", () => {
 		>(`/v1/stops/${bindingId}.900104/departures?limit=50`)
 		expect(res.status).toBe(200)
 		const live = res.body.data.items.find((i) => i.vehicle_id === `${bindingId}.V1`)!
-		expect(live).toMatchObject({ stops_away: 3, route: { short_name: "F1" } })
+		expect(live).toMatchObject({ stops_away: 3, direction: 0, route: { short_name: "F1" } })
 		expect(["live_eta", "live"]).toContain(live.source)
 		const eta = Date.parse(live.predicted_at!) / 1000
 		expect(Math.abs(eta - (Math.floor(Date.now() / 1000) + 360))).toBeLessThan(5)

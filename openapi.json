@@ -3863,6 +3863,19 @@
 								"cancelled": {
 									"type": "boolean"
 								},
+								"direction": {
+									"anyOf": [
+										{
+											"const": 0,
+											"type": "number"
+										},
+										{
+											"const": 1,
+											"type": "number"
+										}
+									],
+									"description": "Direction of the trip's pattern"
+								},
 								"headsign": {
 									"type": [
 										"string",
@@ -3986,6 +3999,7 @@
 							"required": [
 								"route",
 								"headsign",
+								"direction",
 								"trip_id",
 								"scheduled_at",
 								"predicted_at",
@@ -10328,6 +10342,19 @@
 										"cancelled": {
 											"type": "boolean"
 										},
+										"direction": {
+											"anyOf": [
+												{
+													"const": 0,
+													"type": "number"
+												},
+												{
+													"const": 1,
+													"type": "number"
+												}
+											],
+											"description": "Direction of the trip's pattern"
+										},
 										"headsign": {
 											"type": [
 												"string",
@@ -10451,6 +10478,7 @@
 									"required": [
 										"route",
 										"headsign",
+										"direction",
 										"trip_id",
 										"scheduled_at",
 										"predicted_at",
