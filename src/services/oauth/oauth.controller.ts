@@ -85,8 +85,12 @@ export class OAuthController {
 
 	@Post("authorize/:requestId/decision")
 	@HttpCode(200)
-	@UseSession()
-	@ApiOperation({ summary: "Consent answer (third-party clients)" })
+	@UseDevice()
+	@ApiOperation({
+		summary: "Consent answer, or deny from any page",
+		description:
+			"approve needs a session (third-party consent). deny works with only the device cookie, so pages without a session (banned, deleted) can return access_denied to the client.",
+	})
 	@ApiEnvelope(AuthorizeNextDto)
 	decision(
 		@Req() req: Request,

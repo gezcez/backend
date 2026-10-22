@@ -132,7 +132,8 @@ export class AuthorizeService {
 	decision(req: Request, requestId: string, decision: "approve" | "deny"): AuthorizeNextDto {
 		const { request, app } = this.load(req, requestId)
 		const session = req.session
-		if (!session) throw new GezcezError("AUTH_SESSION_REQUIRED")
+		// Deny needs no session: the request is bound to this device, and pages without a
+		// session (banned, deleted) must still be able to send the user back to the client.
 		if (decision === "deny") {
 			this.audit.record("oauth.consent", {
 				req,
@@ -141,6 +142,7 @@ export class AuthorizeService {
 			})
 			return this.fail(request, "access_denied", "The user denied the request")
 		}
+		if (!session) throw new GezcezError("AUTH_SESSION_REQUIRED")
 		const grant = this.repository.findGrant(session.userId, app.client_id)
 		const previous = grant && !grant.revoked_at ? grant.scopes : []
 		const scopes = [...new Set([...previous, ...parseScope(request.scope)])]

@@ -338,6 +338,32 @@ describe("consent for third-party clients", () => {
 		})
 	})
 
+	test("deny works without a session (banned page), only from the request's device", async () => {
+		const browser = new TestBrowser(t)
+		const client = new TestOAuthClient(t, "e2e_client")
+		const start = await client.authorize(browser)
+		expect(start.data.next).toBe("login")
+		const path = `/v1/oauth/authorize/${start.data.request_id}/decision`
+
+		const approve = await browser.post(path, { decision: "approve" })
+		expect(approve.body.error.code).toBe("AUTH_SESSION_REQUIRED")
+		const elsewhere = new TestBrowser(t)
+		await elsewhere.csrf()
+		const foreign = await elsewhere.post(path, { decision: "deny" })
+		expect(foreign.body.error.code).toBe("OAUTH_REQUEST_NOT_FOUND")
+
+		const denied = await browser.post<{ next: string; redirect_to: string }>(path, {
+			decision: "deny",
+		})
+		expect(denied.data.next).toBe("redirect")
+		expect(client.callback(denied.data.redirect_to)).toMatchObject({
+			error: "access_denied",
+			state: client.state,
+		})
+		const twice = await browser.post(path, { decision: "deny" })
+		expect(twice.body.error.code).toBe("OAUTH_REQUEST_EXPIRED")
+	})
+
 	test("the public app endpoint and the scope list are open", async () => {
 		const app = await t.json<{ data: { name: string; scopes: { key: string }[] } }>(
 			"/v1/oauth/apps/e2e_third_party",
