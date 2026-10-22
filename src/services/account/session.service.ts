@@ -79,6 +79,7 @@ export class SessionService {
 			signed_out_at: null,
 			revoked_at: null,
 			revoke_reason: null,
+			forgotten_at: null,
 		})
 		const replaced = this.repository.liveIdsForUserOnDevice(input.userId, input.device.hash, id)
 		this.revoke(replaced, "replaced", false)
@@ -159,6 +160,19 @@ export class SessionService {
 
 	liveIdsForDevice(deviceHash: string): string[] {
 		return this.repository.liveIdsForDevice(deviceHash)
+	}
+
+	/**
+	 * "Forget this account" in the chooser: signs out the user's live sessions on this device and
+	 * hides all of them from it. Returns the user id, or null when the session is not this device's.
+	 */
+	forgetOnDevice(sessionId: string, deviceHash: string): number | null {
+		const session = this.repository.findById(sessionId)
+		if (!session || session.device_id_hash !== deviceHash || session.forgotten_at) return null
+		const live = this.repository.liveIdsForUserOnDevice(session.user_id, deviceHash, "")
+		this.revoke(live, "logout", false)
+		this.repository.forgetOnDevice(session.user_id, deviceHash, new Date())
+		return session.user_id
 	}
 
 	listByDevice(deviceHash: string): SessionWithUser[] {

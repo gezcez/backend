@@ -2,7 +2,7 @@
 // Identity UI backend (oauth.gezcez.com, cookie + CSRF): bootstrap, email-code sign-in and
 // sign-up (plan section 7.1).
 
-import { Body, Controller, Get, HttpCode, Post, Req, Res } from "@nestjs/common"
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Req, Res } from "@nestjs/common"
 import { ApiOperation, ApiTags } from "@nestjs/swagger"
 import type { Request, Response } from "express"
 import type { DeviceContext, SessionContext } from "@common/auth.types"
@@ -24,6 +24,7 @@ import {
 	EmailStartDto,
 	EmailVerifyDto,
 	EmailVerifyResultDto,
+	ForgetDeviceAccountResultDto,
 	SessionInfoDto,
 	SignupCompleteDto,
 	SwitchSessionDto,
@@ -67,6 +68,23 @@ export class AccountController {
 		@CurrentSession() session?: SessionContext,
 	): DeviceAccountsDto {
 		return this.account.deviceAccounts(device, session)
+	}
+
+	@Delete("device-accounts/:sessionId")
+	@UseDevice()
+	@ApiOperation({
+		summary: "Forget an account on this browser",
+		description:
+			"Signs out the account's sessions on this device and removes it from the account chooser. Signing in again brings it back.",
+	})
+	@ApiEnvelope(ForgetDeviceAccountResultDto)
+	forgetDeviceAccount(
+		@Req() req: Request,
+		@Res({ passthrough: true }) res: Response,
+		@CurrentDevice() device: DeviceContext,
+		@Param("sessionId") sessionId: string,
+	): ForgetDeviceAccountResultDto {
+		return this.account.forgetDeviceAccount(req, res, device, sessionId)
 	}
 
 	@Post("session/switch")

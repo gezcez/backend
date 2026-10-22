@@ -4706,6 +4706,21 @@
 				],
 				"type": "object"
 			},
+			"ForgetDeviceAccountResultDto": {
+				"properties": {
+					"forgotten": {
+						"type": "boolean"
+					},
+					"signed_out_current": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"forgotten",
+					"signed_out_current"
+				],
+				"type": "object"
+			},
 			"HealthDto": {
 				"properties": {
 					"status": {
@@ -11341,6 +11356,72 @@
 					}
 				},
 				"summary": "Accounts remembered on this browser (max 5)",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/device-accounts/{sessionId}": {
+			"delete": {
+				"description": "Signs out the account's sessions on this device and removes it from the account chooser. Signing in again brings it back.",
+				"operationId": "Account_forgetDeviceAccount",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/ForgetDeviceAccountResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Forget an account on this browser",
 				"tags": [
 					"account"
 				]
@@ -18891,6 +18972,7 @@
 		},
 		"/v1/oauth/authorize/{requestId}/decision": {
 			"post": {
+				"description": "approve needs a session (third-party consent). deny works with only the device cookie, so pages without a session (banned, deleted) can return access_denied to the client.",
 				"operationId": "OAuth_decision",
 				"parameters": [
 					{
@@ -18958,12 +19040,7 @@
 						"description": "Error envelope"
 					}
 				},
-				"security": [
-					{
-						"session": []
-					}
-				],
-				"summary": "Consent answer (third-party clients)",
+				"summary": "Consent answer, or deny from any page",
 				"tags": [
 					"oauth"
 				]

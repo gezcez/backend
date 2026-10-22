@@ -42,6 +42,8 @@ export const sessionsTable = sqliteTable(
 		/** Set on sign-out; the row stays for the device account chooser. */
 		signed_out_at: int({ mode: "timestamp_ms" }),
 		revoked_at: int({ mode: "timestamp_ms" }),
+		/** Removed from this device's account chooser ("forget this account"). */
+		forgotten_at: int({ mode: "timestamp_ms" }),
 		revoke_reason: text().$type<SessionRevokeReason>(),
 	},
 	(t) => [

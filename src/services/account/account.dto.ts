@@ -47,6 +47,14 @@ export class DeviceAccountsDto extends zodDto(DeviceAccountsSchema) {}
 export const SwitchSessionBody = z.object({ session_id: z.string().min(1).max(64) })
 export class SwitchSessionDto extends zodDto(SwitchSessionBody) {}
 
+export class ForgetDeviceAccountResultDto extends zodDto(
+	z.object({
+		forgotten: z.boolean(),
+		/** True when the forgotten account was the active one (the session cookie is cleared). */
+		signed_out_current: z.boolean(),
+	}),
+) {}
+
 export const AccountResultSchema = z.object({ account: AccountSummarySchema })
 export class AccountResultDto extends zodDto(AccountResultSchema) {}
 

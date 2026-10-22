@@ -123,6 +123,25 @@ export class AccountService {
 		return { accounts }
 	}
 
+	/** DELETE /v1/account/device-accounts/:sessionId: forget an account on this browser. */
+	forgetDeviceAccount(
+		req: Request,
+		res: Response,
+		device: DeviceContext,
+		sessionId: string,
+	): { forgotten: boolean; signed_out_current: boolean } {
+		const userId = this.sessions.forgetOnDevice(sessionId, device.hash)
+		if (userId === null) throw new GezcezError("NOT_FOUND", "No such account on this device")
+		const current = req.session?.userId === userId
+		if (current) this.sessions.clearCookie(res)
+		this.audit.record("auth.device_account_forgotten", {
+			req,
+			actorUserId: userId,
+			target: { type: "session", id: sessionId },
+		})
+		return { forgotten: true, signed_out_current: current }
+	}
+
 	switchSession(
 		req: Request,
 		res: Response,
@@ -335,6 +354,12 @@ export class AccountService {
 		const flow = this.repository.findFlow(flowId)
 		const now = new Date()
 		if (!flow || flow.consumed_at || flow.expires_at <= now)
+			throw new GezcezError("AUTH_CODE_EXPIRED")
+		// Email change and re-auth flows belong to a signed-in user: only that session resends.
+		if (
+			(flow.intent === "change_email" || flow.intent === "reauth") &&
+			req.session?.userId !== flow.user_id
+		)
 			throw new GezcezError("AUTH_CODE_EXPIRED")
 		if (flow.resend_available_at > now) {
 			throw new GezcezError("RATE_LIMITED", "Wait before asking for another code", {

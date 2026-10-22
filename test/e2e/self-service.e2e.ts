@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { eq } from "drizzle-orm"
 import { DatabaseService } from "@db"
-import { sessionsTable } from "@schemas/core"
+import { emailCodesTable, sessionsTable } from "@schemas/core"
 import { createTestApp, type TestApp } from "../helpers/app"
 import { TestBrowser } from "../helpers/browser"
 import { TestOAuthClient } from "../helpers/oauth-client"
@@ -252,6 +252,57 @@ describe("email change", () => {
 			`/v1/__test/mailbox?to=${email}`,
 		)
 		expect(notice.body.data.messages.at(-1)?.template).toBe("email_changed")
+	})
+
+	test("a change code can be resent, only by the session that started it", async () => {
+		const { browser } = await newUser()
+		const address = `resent-${counter}@example.com`
+		const start = await browser.post<{ flow_id: string }>("/v1/account/email/change", {
+			new_email: address,
+		})
+		const first = await browser.lastCode(address)
+		const early = await browser.post("/v1/account/email/resend", {
+			flow_id: start.data.flow_id,
+		})
+		expect(early.body.error.code).toBe("RATE_LIMITED")
+		t.app
+			.get(DatabaseService)
+			.core.update(emailCodesTable)
+			.set({ resend_available_at: new Date(0) })
+			.where(eq(emailCodesTable.flow_id, start.data.flow_id))
+			.run()
+
+		const other = await newUser()
+		const foreign = await other.browser.post("/v1/account/email/resend", {
+			flow_id: start.data.flow_id,
+		})
+		expect(foreign.body.error.code).toBe("AUTH_CODE_EXPIRED")
+
+		const resent = await browser.post<{ resend_available_at: string }>(
+			"/v1/account/email/resend",
+			{ flow_id: start.data.flow_id },
+		)
+		expect(resent.status).toBe(200)
+		const second = await browser.lastCode(address)
+		const mailbox = await t.json<{ data: { messages: { template: string }[] } }>(
+			`/v1/__test/mailbox?to=${address}`,
+		)
+		expect(mailbox.body.data.messages.map((m) => m.template)).toEqual([
+			"change_email_code",
+			"change_email_code",
+		])
+		if (second !== first) {
+			const stale = await browser.post("/v1/account/email/change/verify", {
+				flow_id: start.data.flow_id,
+				code: first,
+			})
+			expect(stale.body.error.code).toBe("AUTH_CODE_INVALID")
+		}
+		const verify = await browser.post<{ email: string }>("/v1/account/email/change/verify", {
+			flow_id: start.data.flow_id,
+			code: second,
+		})
+		expect(verify.data.email).toBe(address)
 	})
 
 	test("taken addresses, other users' flows and stale sessions are refused", async () => {

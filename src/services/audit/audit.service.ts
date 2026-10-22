@@ -16,6 +16,7 @@ export type AuditAction =
 	| "auth.reauth"
 	| "auth.logout"
 	| "auth.session_switch"
+	| "auth.device_account_forgotten"
 	| "auth.session_revoked"
 	| "auth.refresh_reuse"
 	| "auth.code_replay"

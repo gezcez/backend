@@ -43,6 +43,13 @@
       "when": 1792687169113,
       "tag": "0005_favourites_telemetry",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792705164735,
+      "tag": "0006_account_forget",
+      "breakpoints": true
     }
   ]
 }

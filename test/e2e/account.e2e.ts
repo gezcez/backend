@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { eq } from "drizzle-orm"
 import { DatabaseService } from "@db"
-import { moderationActionsTable, usersTable } from "@schemas/core"
+import { moderationActionsTable, sessionsTable, usersTable } from "@schemas/core"
 import { AccountRepository } from "@services/account/account.repository"
 import { createTestApp, type TestApp } from "../helpers/app"
 import { TestBrowser } from "../helpers/browser"
@@ -388,6 +388,59 @@ describe("sessions on a device", () => {
 			"/v1/account/session",
 		)
 		expect(session.data.account.display_name).toBe("Admin Fixture")
+	})
+
+	test("forgetting an account signs it out on this device and hides it from the chooser", async () => {
+		const browser = new TestBrowser(t)
+		await browser.signIn("admin@test.gezcez.com")
+		await browser.signIn("analyst@test.gezcez.com")
+		type Accounts = { accounts: { session_id: string; account: { display_name: string } }[] }
+		const list = await browser.get<Accounts>("/v1/account/device-accounts")
+		const admin = list.data.accounts.find((a) => a.account.display_name === "Admin Fixture")!
+		const analyst = list.data.accounts.find(
+			(a) => a.account.display_name === "Analyst Fixture",
+		)!
+
+		const elsewhere = new TestBrowser(t)
+		await elsewhere.csrf()
+		const foreign = await elsewhere.request(
+			"DELETE",
+			`/v1/account/device-accounts/${admin.session_id}`,
+		)
+		expect(foreign.body.error.code).toBe("NOT_FOUND")
+
+		const forgot = await browser.request<{ forgotten: boolean; signed_out_current: boolean }>(
+			"DELETE",
+			`/v1/account/device-accounts/${admin.session_id}`,
+		)
+		expect(forgot.data).toEqual({ forgotten: true, signed_out_current: false })
+		const after = await browser.get<Accounts>("/v1/account/device-accounts")
+		expect(after.data.accounts.map((a) => a.account.display_name)).toEqual(["Analyst Fixture"])
+		const revoked = db()
+			.select()
+			.from(sessionsTable)
+			.where(eq(sessionsTable.id, admin.session_id))
+			.get()!
+		expect(revoked.revoked_at).not.toBeNull()
+		const switchBack = await browser.post("/v1/account/session/switch", {
+			session_id: admin.session_id,
+		})
+		expect(switchBack.body.error.code).toBe("AUTH_SESSION_REQUIRED")
+
+		// Forgetting the active account also clears the session cookie.
+		const current = await browser.request<{ signed_out_current: boolean }>(
+			"DELETE",
+			`/v1/account/device-accounts/${analyst.session_id}`,
+		)
+		expect(current.data.signed_out_current).toBe(true)
+		expect(browser.cookies.has("__Host-gz_session")).toBe(false)
+		const empty = await browser.get<Accounts>("/v1/account/device-accounts")
+		expect(empty.data.accounts).toEqual([])
+
+		// Signing in again brings the account back.
+		await browser.signIn("admin@test.gezcez.com")
+		const back = await browser.get<Accounts>("/v1/account/device-accounts")
+		expect(back.data.accounts.map((a) => a.account.display_name)).toEqual(["Admin Fixture"])
 	})
 
 	test("switching to a session of another device is refused", async () => {

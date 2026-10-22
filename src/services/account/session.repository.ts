@@ -85,7 +85,12 @@ export class SessionRepository {
 			.select({ session: sessionsTable, user: userColumns })
 			.from(sessionsTable)
 			.innerJoin(usersTable, eq(usersTable.id, sessionsTable.user_id))
-			.where(eq(sessionsTable.device_id_hash, deviceHash))
+			.where(
+				and(
+					eq(sessionsTable.device_id_hash, deviceHash),
+					isNull(sessionsTable.forgotten_at),
+				),
+			)
 			.orderBy(desc(sessionsTable.created_at))
 			.all()
 			.map((row) => ({ ...row.session, user: row.user }))
@@ -176,6 +181,22 @@ export class SessionRepository {
 			)
 			.all()
 			.map((row) => row.id)
+	}
+
+	/** Hides every session of a user on one device from the account chooser. */
+	forgetOnDevice(userId: number, deviceHash: string, now: Date): number {
+		return this.db
+			.update(sessionsTable)
+			.set({ forgotten_at: now })
+			.where(
+				and(
+					eq(sessionsTable.user_id, userId),
+					eq(sessionsTable.device_id_hash, deviceHash),
+					isNull(sessionsTable.forgotten_at),
+				),
+			)
+			.returning({ id: sessionsTable.id })
+			.all().length
 	}
 
 	liveIdsForDevice(deviceHash: string): string[] {
