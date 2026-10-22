@@ -173,7 +173,7 @@ describe("F2b the oauth UI origin can spend the dashboard's gz_rt", () => {
 })
 
 describe("F3 max_age=0 never completes", () => {
-	test.failing("after a fresh re-auth, continue still answers reauth", async () => {
+	test("after a fresh re-auth, continue still answers reauth", async () => {
 		const browser = await signedIn()
 		const client = new TestOAuthClient(t)
 		const start = await client.authorize(browser, { max_age: "0" })

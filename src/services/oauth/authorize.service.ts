@@ -196,16 +196,24 @@ export class AuthorizeService {
 				return interaction("choose_account", "account_selection_required")
 		}
 
-		if (
-			request.max_age !== null &&
-			Date.now() - session.authTime.getTime() > request.max_age * 1000
-		)
+		if (request.max_age !== null && !this.withinMaxAge(session, request))
 			return interaction("reauth", "login_required")
 
 		if (!app.first_party && !this.consented(session, request, prompt))
 			return interaction("consent", "consent_required")
 
 		return this.issueCode(request, session)
+	}
+
+	/**
+	 * OIDC max_age in whole seconds. max_age=0 means "authenticate for this request" (like
+	 * prompt=login): an authentication after the request was created satisfies it.
+	 */
+	private withinMaxAge(session: SessionContext, request: AuthRequestRow): boolean {
+		if (session.authTime >= request.created_at) return true
+		if (request.max_age === 0) return false
+		const ageS = Math.floor(Date.now() / 1000) - Math.floor(session.authTime.getTime() / 1000)
+		return ageS <= request.max_age!
 	}
 
 	private consented(session: SessionContext, request: AuthRequestRow, prompt: string[]): boolean {
