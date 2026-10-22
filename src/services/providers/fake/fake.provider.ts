@@ -9,6 +9,8 @@ import {
 	NO_CAPABILITIES,
 	ProviderError,
 	type BindingContext,
+	type CardBalance,
+	type CardTransaction,
 	type DropReason,
 	type ProviderDescription,
 	type RawVehicle,
@@ -84,6 +86,7 @@ export class FakeProvider implements TransitProvider {
 	private readonly scripts = new Map<number, ScriptStep[]>()
 	private readonly calls = new Map<number, number>()
 	private readonly alerts = new Map<number, ServiceAlert[] | ProviderError>()
+	private readonly cards = new Map<string, FakeCard>()
 
 	constructor(private readonly now: () => number = Date.now) {}
 
@@ -100,6 +103,13 @@ export class FakeProvider implements TransitProvider {
 				realtime_vehicles: true,
 				realtime_departures: "estimated",
 				alerts: true,
+				card: {
+					balance: true,
+					history: true,
+					requires_provider_account: false,
+					number_format: "^[0-9]{10,16}$",
+					label: { tr: "Test kartı", en: "Test card" },
+				},
 			},
 			pulledData: [
 				{
@@ -128,6 +138,31 @@ export class FakeProvider implements TransitProvider {
 		const alerts = this.alerts.get(binding.id) ?? []
 		if (alerts instanceof ProviderError) return Promise.reject(alerts)
 		return Promise.resolve(alerts)
+	}
+
+	/** A card the binding knows from now on (tests, local development). */
+	setCard(bindingId: number, cardNumber: string, card: FakeCard): void {
+		this.cards.set(`${bindingId}|${cardNumber}`, card)
+	}
+
+	cardBalance(binding: BindingContext, cardNumber: string, signal: AbortSignal) {
+		signal.throwIfAborted()
+		const card = this.cards.get(`${binding.id}|${cardNumber}`)
+		if (card instanceof ProviderError) return Promise.reject(card)
+		return Promise.resolve(card ? card.balance : null)
+	}
+
+	cardHistory(binding: BindingContext, cardNumber: string, month: string, signal: AbortSignal) {
+		signal.throwIfAborted()
+		const card = this.cards.get(`${binding.id}|${cardNumber}`)
+		if (card instanceof ProviderError) return Promise.reject(card)
+		if (!card) return Promise.resolve(null)
+		return Promise.resolve({
+			currency: card.balance.currency,
+			items: card.history.filter((t) =>
+				new Date(t.at * 1000).toISOString().startsWith(month),
+			),
+		})
 	}
 
 	clearScript(bindingId: number): void {
@@ -279,3 +314,5 @@ export class FakeProvider implements TransitProvider {
 		}
 	}
 }
+
+export type FakeCard = { balance: CardBalance; history: CardTransaction[] } | ProviderError

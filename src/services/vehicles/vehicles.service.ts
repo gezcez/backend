@@ -3,7 +3,9 @@
 // (network, routes, direction, bbox snapped to z12), compact/full arrays, the REST snapshot,
 // vehicle detail, departures (schedule merged with live vehicles) and observed departures.
 
-import { Injectable } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
+import { BEARER_AUTH, type BearerAuthProvider } from "@common/auth.types"
+import { hasPermission, PERMISSION_RESOLVER, type PermissionResolver } from "@common/authorization"
 import { GezcezError } from "@common/errors"
 import {
 	VEHICLE_FIELDS_COMPACT,
@@ -85,6 +87,8 @@ export class VehiclesService {
 		private readonly timetable: TrackerTimetable,
 		private readonly transitRepo: TransitRepository,
 		private readonly transit: TransitService,
+		@Inject(BEARER_AUTH) private readonly bearer: BearerAuthProvider,
+		@Inject(PERMISSION_RESOLVER) private readonly permissions: PermissionResolver,
 	) {}
 
 	// ---- filters ------------------------------------------------------------------------------
@@ -200,8 +204,17 @@ export class VehiclesService {
 
 	// ---- REST ---------------------------------------------------------------------------------
 
-	snapshot(params: VehicleFilterParams) {
+	/**
+	 * REST snapshot. `full` rows (plate, stop, headsign) need the caller's bearer token with the
+	 * dash scope and vehicles.live.read in the network, the same rule as the WS `detail: "full"`.
+	 */
+	async snapshot(
+		params: VehicleFilterParams,
+		detail: VehicleDetail = "compact",
+		authorization?: string,
+	) {
 		const filter = this.filter(params)
+		if (detail === "full") await this.authorizeFull(authorization, filter.network.id)
 		for (const id of filter.bindingIds) this.host.touch(id)
 		const status = this.networkStatus(filter.network)
 		return {
@@ -209,9 +222,20 @@ export class VehiclesService {
 			feed_ts: this.feedTs(filter),
 			status: status.status,
 			message: status.message,
-			fields: [...this.fields("compact")],
-			vehicles: this.select(filter).map((v) => this.row(v, "compact")),
+			fields: [...this.fields(detail)],
+			vehicles: this.select(filter).map((v) => this.row(v, detail)),
 		}
+	}
+
+	private async authorizeFull(header: string | undefined, networkId: number): Promise<void> {
+		if (!header) throw new GezcezError("AUTH_REQUIRED", "detail=full needs a bearer token")
+		const match = /^Bearer ([A-Za-z0-9._~+/-]+=*)$/.exec(header)
+		if (!match) throw new GezcezError("AUTH_TOKEN_INVALID")
+		const auth = await this.bearer.authenticate(match[1]!)
+		if (!auth.scopes.includes("dash"))
+			throw new GezcezError("SCOPE_MISSING", undefined, { required: ["dash"] })
+		if (!hasPermission(this.permissions.forUser(auth.userId), "vehicles.live.read", networkId))
+			throw new GezcezError("PERMISSION_MISSING", "Missing vehicles.live.read")
 	}
 
 	private publicVehicle(vehicleId: string) {
@@ -426,6 +450,7 @@ export class VehiclesService {
 			items: upcoming.map((i) => ({
 				route: this.transit.routeSummary(i.route, network.id),
 				headsign: i.headsign,
+				direction: i.pattern.direction === 1 ? (1 as const) : (0 as const),
 				trip_id: i.tripExt ? publicRef(bindingId, i.tripExt) : null,
 				scheduled_at: iso(i.scheduledAt),
 				predicted_at: iso(i.predictedAt),

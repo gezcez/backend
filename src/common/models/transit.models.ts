@@ -132,6 +132,7 @@ export const VehicleRowSchema = z
 export const DepartureSchema = z.object({
 	route: RouteSummarySchema,
 	headsign: z.string().nullable(),
+	direction: z.union([z.literal(0), z.literal(1)]).describe("Direction of the trip's pattern"),
 	trip_id: z.string().nullable(),
 	scheduled_at: z.string().nullable(),
 	predicted_at: z.string().nullable(),

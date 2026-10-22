@@ -22,9 +22,12 @@ import { hasPermission, PERMISSION_RESOLVER, type PermissionResolver } from "@co
 import { InjectConfig, type AppConfig } from "@common/config"
 import { GezcezError } from "@common/errors"
 import type { RequestAuth } from "@common/jwt.types"
+import { logRing } from "@common/logger"
 import { registerOpenApiDecorator } from "@common/openapi"
 import { parsePublicRef, publicRef } from "@common/utils"
 import { NetworksService } from "@services/networks/networks.service"
+import { JobEventsBus, type JobRunEvent } from "@services/system/job-events.bus"
+import { SystemService } from "@services/system/system.service"
 import { LiveFeedBus } from "@services/tracker/live-feed.bus"
 import { statusView } from "@services/tracker/tracker.dto"
 import { TrackerHostService, type TrackerLogLine } from "@services/tracker/tracker-host.service"
@@ -36,6 +39,10 @@ import {
 } from "@services/vehicles/vehicles.service"
 import {
 	DeparturesParamsSchema,
+	HealthParamsSchema,
+	JobsParamsSchema,
+	LOG_LEVELS,
+	OpsLogsParamsSchema,
 	TrackerLogsParamsSchema,
 	TrackerStatusParamsSchema,
 	VehiclesParamsSchema,
@@ -55,6 +62,8 @@ const MAX_SOCKETS = 20_000
 const MAX_VIOLATIONS = 5
 const HARD_MAX_PAYLOAD = 64 * 1024
 const SUBSCRIBER_REPORT_MS = 15_000
+export const HEALTH_INTERVAL_MS = 30_000
+const LEVEL_RANK: Record<string, number> = Object.fromEntries(LOG_LEVELS.map((l, i) => [l, i]))
 
 interface BaseSub {
 	id: string
@@ -87,7 +96,21 @@ interface TrackerLogsSub extends BaseSub {
 	bindingId: number
 	staff: true
 }
-type Sub = VehiclesSub | DeparturesSub | TrackerStatusSub | TrackerLogsSub
+interface OpsLogsSub extends BaseSub {
+	channel: "ops.logs"
+	minLevel: number
+	staff: true
+}
+interface HealthSub extends BaseSub {
+	channel: "health"
+	staff: true
+}
+interface JobsSub extends BaseSub {
+	channel: "jobs"
+	staff: true
+}
+type StaffEventSub = TrackerStatusSub | TrackerLogsSub | OpsLogsSub | HealthSub | JobsSub
+type Sub = VehiclesSub | DeparturesSub | StaffEventSub
 
 interface Client {
 	ws: WebSocket
@@ -127,6 +150,7 @@ registerOpenApiDecorator((document) => {
 		WsServerMessage: toSchema(WsServerMessageSchema),
 		WsVehiclesParams: toSchema(VehiclesParamsSchema),
 		WsDeparturesParams: toSchema(DeparturesParamsSchema),
+		WsOpsLogsParams: toSchema(OpsLogsParamsSchema),
 	}
 })
 
@@ -144,6 +168,7 @@ export class RealtimeGateway
 	private readonly perIp = new Map<string, number>()
 	private heartbeat: ReturnType<typeof setInterval> | undefined
 	private reporter: ReturnType<typeof setInterval> | undefined
+	private healthTimer: ReturnType<typeof setInterval> | undefined
 	private lastCounts = ""
 	private server: Server | undefined
 	private readonly unsubscribers: (() => void)[] = []
@@ -159,6 +184,8 @@ export class RealtimeGateway
 		private readonly bus: LiveFeedBus,
 		private readonly host: TrackerHostService,
 		private readonly networks: NetworksService,
+		private readonly system: SystemService,
+		private readonly jobs: JobEventsBus,
 	) {}
 
 	onApplicationBootstrap(): void {
@@ -168,11 +195,15 @@ export class RealtimeGateway
 			this.bus.subscribe((update) => this.onFeedUpdate(update)),
 			this.host.onStatusChange((status) => this.onStatus(status)),
 			this.host.onLogLine((line) => this.onLog(line)),
+			logRing.onLine((line) => this.onOpsLog(line)),
+			this.jobs.subscribe((run) => this.onJob(run)),
 		)
 		this.heartbeat = setInterval(() => this.beat(), HEARTBEAT_S * 1000)
 		this.heartbeat.unref?.()
 		this.reporter = setInterval(() => this.reportSubscribers(false), SUBSCRIBER_REPORT_MS)
 		this.reporter.unref?.()
+		this.healthTimer = setInterval(() => void this.broadcastHealth(), HEALTH_INTERVAL_MS)
+		this.healthTimer.unref?.()
 	}
 
 	/** Sends 1001 to every socket, then drops the ones that do not finish the close handshake. */
@@ -181,6 +212,7 @@ export class RealtimeGateway
 		for (const unsubscribe of this.unsubscribers) unsubscribe()
 		if (this.heartbeat) clearInterval(this.heartbeat)
 		if (this.reporter) clearInterval(this.reporter)
+		if (this.healthTimer) clearInterval(this.healthTimer)
 		const sockets = [...this.clients].map((c) => c.ws)
 		for (const ws of sockets) ws.close(WS_CLOSE.goingAway, "server restarting")
 		if (sockets.length) await Bun.sleep(200)
@@ -376,7 +408,8 @@ export class RealtimeGateway
 
 	private requirePermission(
 		client: Client,
-		key: "vehicles.live.read" | "tracker.read",
+		key:
+			"vehicles.live.read" | "tracker.read" | "ops.logs" | "system.health.read" | "jobs.read",
 		networkId?: number,
 	): void {
 		if (!client.auth) throw new GezcezError("AUTH_REQUIRED", "Send an auth message first")
@@ -476,6 +509,58 @@ export class RealtimeGateway
 					this.event(client, sub, line)
 				break
 			}
+			case "ops.logs": {
+				const p = OpsLogsParamsSchema.parse(params)
+				this.requirePermission(client, "ops.logs")
+				const opsSub: OpsLogsSub = {
+					channel: "ops.logs",
+					id,
+					seq: previous?.seq ?? 0,
+					minLevel: LEVEL_RANK[p.level]!,
+					staff: true,
+				}
+				sub = opsSub
+				client.subs.set(id, sub)
+				if (p.tail) {
+					const lines = logRing
+						.tail(2000)
+						.map(parseLogLine)
+						.filter((l) => l !== null && l.rank >= opsSub.minLevel)
+						.slice(-p.tail)
+					for (const line of lines) this.event(client, opsSub, line!.record)
+				}
+				break
+			}
+			case "health": {
+				HealthParamsSchema.parse(params)
+				this.requirePermission(client, "system.health.read")
+				const healthSub: HealthSub = {
+					channel: "health",
+					id,
+					seq: previous?.seq ?? 0,
+					staff: true,
+				}
+				sub = healthSub
+				client.subs.set(id, sub)
+				void this.health().then((data) => {
+					if (client.subs.get(id) === healthSub) this.event(client, healthSub, data)
+				})
+				break
+			}
+			case "jobs": {
+				JobsParamsSchema.parse(params)
+				this.requirePermission(client, "jobs.read")
+				const jobsSub: JobsSub = {
+					channel: "jobs",
+					id,
+					seq: previous?.seq ?? 0,
+					staff: true,
+				}
+				sub = jobsSub
+				client.subs.set(id, sub)
+				this.event(client, jobsSub, { kind: "snapshot", runs: this.jobs.recent() })
+				break
+			}
 			default:
 				throw new GezcezError("VALIDATION_FAILED", `Unknown channel ${channel}`)
 		}
@@ -549,7 +634,7 @@ export class RealtimeGateway
 		})
 	}
 
-	private event(client: Client, sub: TrackerStatusSub | TrackerLogsSub, data: unknown): void {
+	private event(client: Client, sub: StaffEventSub, data: unknown): void {
 		this.send(client, { type: "event", sub: sub.id, seq: ++sub.seq, data })
 	}
 
@@ -636,6 +721,61 @@ export class RealtimeGateway
 					this.event(client, sub, line)
 	}
 
+	/** Application log lines at or above each subscriber's level; dropped while congested. */
+	private onOpsLog(raw: string): void {
+		let parsed: ReturnType<typeof parseLogLine> | undefined
+		for (const client of this.clients) {
+			for (const sub of client.subs.values()) {
+				if (sub.channel !== "ops.logs") continue
+				parsed ??= parseLogLine(raw)
+				if (!parsed || parsed.rank < sub.minLevel) continue
+				if (client.ws.bufferedAmount > BACKPRESSURE_BYTES) continue
+				this.event(client, sub, parsed.record)
+			}
+		}
+	}
+
+	private onJob(run: JobRunEvent): void {
+		for (const client of this.clients)
+			for (const sub of client.subs.values())
+				if (sub.channel === "jobs") this.event(client, sub, { kind: "run", run })
+	}
+
+	/** Readiness, process stats, sockets and tracker states (the dashboard's health page). */
+	async health() {
+		const readiness = await this.system.readiness()
+		const memory = process.memoryUsage()
+		let subscriptions = 0
+		for (const client of this.clients) subscriptions += client.subs.size
+		return {
+			kind: "health",
+			at: new Date().toISOString(),
+			ready: readiness.ready,
+			checks: readiness.checks,
+			version: this.system.version(),
+			memory: {
+				rss_mb: Math.round(memory.rss / 1048576),
+				heap_used_mb: Math.round(memory.heapUsed / 1048576),
+			},
+			ws: { connections: this.clients.size, subscriptions },
+			trackers: this.bindingsOf(null).map((id) => statusView(this.statusOr(id))),
+		}
+	}
+
+	private async broadcastHealth(): Promise<void> {
+		const targets: [Client, HealthSub][] = []
+		for (const client of this.clients)
+			for (const sub of client.subs.values())
+				if (sub.channel === "health") targets.push([client, sub])
+		if (!targets.length) return
+		try {
+			const data = await this.health()
+			for (const [client, sub] of targets) this.event(client, sub, data)
+		} catch (error) {
+			this.logger.warn(`health broadcast failed: ${(error as Error).message}`)
+		}
+	}
+
 	/** Active vehicle and departures subscribers per binding, sent to the tracker (plan 8.2). */
 	private reportSubscribers(force: boolean): void {
 		const counts: Record<number, number> = {}
@@ -655,5 +795,22 @@ export class RealtimeGateway
 	/** Open sockets (metrics, tests). */
 	connections(): number {
 		return this.clients.size
+	}
+}
+
+/** A pino JSON line with its level rank; null for anything else. */
+function parseLogLine(line: string): { rank: number; record: Record<string, unknown> } | null {
+	try {
+		const record = JSON.parse(line) as Record<string, unknown>
+		const level = record.level
+		const rank =
+			typeof level === "string"
+				? LEVEL_RANK[level]
+				: typeof level === "number"
+					? Math.max(0, Math.min(5, Math.floor(level / 10) - 1))
+					: undefined
+		return rank === undefined ? null : { rank, record }
+	} catch {
+		return null
 	}
 }

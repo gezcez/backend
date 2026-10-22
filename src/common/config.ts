@@ -47,6 +47,9 @@ export const EnvSchema = z
 		PUBLIC_API_URL: z.url().default("http://localhost:8080"),
 		ISSUER: z.url().optional(),
 		OAUTH_UI_URL: z.url().default("http://localhost:5174"),
+		/** MapLibre style URLs handed to the app by /v1/app/config. */
+		TILES_STYLE_URL_LIGHT: z.url().default("https://tiles.gezcez.com/styles/gezcez-light.json"),
+		TILES_STYLE_URL_DARK: z.url().default("https://tiles.gezcez.com/styles/gezcez-dark.json"),
 		CORS_ORIGINS: csv,
 		TRUST_CF_HEADERS: bool,
 		LOG_LEVEL: z
@@ -203,6 +206,7 @@ export interface AppConfig {
 	publicApiUrl: string
 	issuer: string
 	oauthUiUrl: string
+	tilesStyleUrl: { light: string; dark: string }
 	corsOrigins: string[]
 	trustCfHeaders: boolean
 	logLevel: Env["LOG_LEVEL"]
@@ -307,6 +311,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 		publicApiUrl,
 		issuer: (env.ISSUER ?? publicApiUrl).replace(/\/$/, ""),
 		oauthUiUrl: env.OAUTH_UI_URL.replace(/\/$/, ""),
+		tilesStyleUrl: { light: env.TILES_STYLE_URL_LIGHT, dark: env.TILES_STYLE_URL_DARK },
 		corsOrigins: env.CORS_ORIGINS,
 		trustCfHeaders: env.TRUST_CF_HEADERS,
 		logLevel: env.LOG_LEVEL,

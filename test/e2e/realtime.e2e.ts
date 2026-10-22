@@ -1,10 +1,16 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
+import { eq } from "drizzle-orm"
+import { logRing } from "@common/logger"
+import { DatabaseService } from "@db"
+import { appsTable } from "@schemas/core"
+import { JobEventsBus } from "@services/system/job-events.bus"
 import { NetworksService } from "@services/networks/networks.service"
 import { ProvidersRegistry } from "@services/providers/providers.registry"
 import type { RawVehicle, VehicleFeed } from "@services/providers/transit-provider.interface"
 import { TrackerHostService } from "@services/tracker/tracker-host.service"
 import type { TrackerService } from "@services/tracker/tracker.service"
 import { TransitSyncService } from "@services/transit/transit-sync.service"
+import { RealtimeGateway } from "../../src/ws/realtime.ws"
 import { createTestApp, type TestApp } from "../helpers/app"
 import { accessTokenFor } from "../helpers/oauth-client"
 
@@ -13,6 +19,7 @@ let engine: TrackerService
 let bindingId: number
 let netadmin: string
 let analyst: string
+let root: string
 const now = Math.floor(Date.now() / 1000)
 
 type Msg = Record<string, unknown> & { type: string }
@@ -114,6 +121,7 @@ beforeAll(async () => {
 	await poll([feed(now, [vehicle("W1"), vehicle("W2", { lat: 40.95, routeExt: "9002" })])])
 	netadmin = (await accessTokenFor(t, "netadmin@test.gezcez.com")).accessToken
 	analyst = (await accessTokenFor(t, "analyst@test.gezcez.com")).accessToken
+	root = (await accessTokenFor(t, "root@test.gezcez.com")).accessToken
 })
 afterAll(async () => {
 	await t.close()
@@ -308,5 +316,167 @@ describe("realtime gateway", () => {
 		const wrong = new TestSocket(`${t.url.replace("http", "ws")}/v1/wsx`)
 		const code = await wrong.closed
 		expect(code).not.toBe(1000)
+	})
+})
+
+async function authed(token: string): Promise<TestSocket> {
+	const s = connect()
+	await s.next((m) => m.type === "hello")
+	s.send({ type: "auth", token })
+	await s.next((m) => m.type === "auth_ok")
+	return s
+}
+
+describe("realtime staff channels", () => {
+	test("ops.logs sends the recent tail, then new lines at or above the level", async () => {
+		logRing.write(JSON.stringify({ level: "info", msg: "ops-tail-info" }))
+		logRing.write(JSON.stringify({ level: "debug", msg: "ops-tail-debug" }))
+		const s = await authed(root)
+		s.send({ type: "subscribe", id: "logs", channel: "ops.logs", params: { level: "info" } })
+		const tail = await s.next(
+			(m) => m.sub === "logs" && (m.data as Msg).msg === "ops-tail-info",
+		)
+		expect(tail.type).toBe("event")
+		expect(s.messages.some((m) => (m.data as Msg | undefined)?.msg === "ops-tail-debug")).toBe(
+			false,
+		)
+		const at = s.messages.length
+		logRing.write(JSON.stringify({ level: "debug", msg: "live-debug" }))
+		logRing.write(JSON.stringify({ level: "warn", msg: "live-warn" }))
+		const live = await s.next((m) => m.sub === "logs", at)
+		expect((live.data as Msg).msg).toBe("live-warn")
+		s.close()
+
+		const a = await authed(analyst)
+		a.send({ type: "subscribe", id: "logs", channel: "ops.logs", params: {} })
+		expect(await a.next((m) => m.type === "error")).toMatchObject({
+			code: "PERMISSION_MISSING",
+		})
+		a.close()
+	})
+
+	test("health sends readiness, process stats and tracker states on subscribe", async () => {
+		const s = await authed(root)
+		s.send({ type: "subscribe", id: "h", channel: "health", params: {} })
+		const event = await s.next((m) => m.type === "event" && m.sub === "h")
+		const data = event.data as Record<string, unknown>
+		expect(data).toMatchObject({ kind: "health", ready: true })
+		expect((data.ws as { connections: number }).connections).toBeGreaterThanOrEqual(1)
+		expect((data.trackers as { binding_id: number }[]).map((b) => b.binding_id)).toContain(
+			bindingId,
+		)
+		const at = s.messages.length
+		await t.app.get(RealtimeGateway)["broadcastHealth"]()
+		await s.next((m) => m.sub === "h", at)
+		s.close()
+	})
+
+	test("jobs sends recent runs, then each start and finish", async () => {
+		const s = await authed(root)
+		s.send({ type: "subscribe", id: "j", channel: "jobs", params: {} })
+		const snap = await s.next((m) => m.type === "event" && m.sub === "j")
+		const runs = (snap.data as { kind: string; runs: { job: string; state: string }[] }).runs
+		expect((snap.data as { kind: string }).kind).toBe("snapshot")
+		// The beforeAll sync is in the recent runs.
+		expect(runs.some((r) => r.job === "transit.sync" && r.state === "succeeded")).toBe(true)
+
+		const at = s.messages.length
+		await t.app.get(TransitSyncService).sync(bindingId, "manual")
+		const started = await s.next(
+			(m) => m.sub === "j" && (m.data as { run: { state: string } }).run?.state === "running",
+			at,
+		)
+		const finished = await s.next(
+			(m) =>
+				m.sub === "j" && (m.data as { run: { state: string } }).run?.state === "succeeded",
+			at,
+		)
+		const run = (finished.data as { run: Record<string, unknown> }).run
+		expect(run.id).toBe((started.data as { run: { id: number } }).run.id)
+		expect(run).toMatchObject({ job: "transit.sync", trigger: "manual" })
+		expect(typeof run.duration_ms).toBe("number")
+
+		const handle = t.app.get(JobEventsBus).start("test.job", "manual")
+		handle.finish("failed", { error: "boom" })
+		const failed = await s.next(
+			(m) => m.sub === "j" && (m.data as { run: { state: string } }).run?.state === "failed",
+			at,
+		)
+		expect((failed.data as { run: { detail: { error: string } } }).run.detail.error).toBe(
+			"boom",
+		)
+		s.close()
+	})
+
+	test("an expired token ends staff subscriptions with AUTH_TOKEN_EXPIRED; public ones stay", async () => {
+		const db = t.app.get(DatabaseService).core
+		db.update(appsTable)
+			.set({ access_ttl_s: 2 })
+			.where(eq(appsTable.client_id, "dashboard-dev"))
+			.run()
+		let short: string
+		try {
+			short = (await accessTokenFor(t, "netadmin@test.gezcez.com")).accessToken
+		} finally {
+			db.update(appsTable)
+				.set({ access_ttl_s: 900 })
+				.where(eq(appsTable.client_id, "dashboard-dev"))
+				.run()
+		}
+		const s = await authed(short)
+		s.send({
+			type: "subscribe",
+			id: "full",
+			channel: "vehicles",
+			params: { network: "kocaeli-ulasimpark", detail: "full" },
+		})
+		await s.next((m) => m.type === "snapshot" && m.sub === "full")
+		s.send({
+			type: "subscribe",
+			id: "public",
+			channel: "vehicles",
+			params: { network: "kocaeli-ulasimpark" },
+		})
+		await s.next((m) => m.type === "snapshot" && m.sub === "public")
+		const expired = await s.next((m) => m.type === "error", 0, 6000)
+		expect(expired).toMatchObject({ id: "full", code: "AUTH_TOKEN_EXPIRED" })
+
+		// The public subscription still gets updates; the staff one does not.
+		const at = s.messages.length
+		await poll([feed(now + 400, [vehicle("W1", { vehicleTs: now + 395, lat: 40.951 })])])
+		const update = await s.next((m) => m.type === "delta" || m.type === "snapshot", at)
+		expect(update.sub).toBe("public")
+		expect(s.messages.slice(at).some((m) => m.sub === "full")).toBe(false)
+		s.close()
+	}, 30_000)
+
+	test("backpressure: deltas are skipped while congested, then a fresh snapshot follows", async () => {
+		const s = connect()
+		await s.next((m) => m.type === "hello")
+		s.send({
+			type: "subscribe",
+			id: "bp",
+			channel: "vehicles",
+			params: { network: "kocaeli-ulasimpark" },
+		})
+		await s.next((m) => m.type === "snapshot" && m.sub === "bp")
+		const gateway = t.app.get(RealtimeGateway)
+		const clients = gateway["clients"] as Set<{ ws: object; subs: Map<string, unknown> }>
+		const client = [...clients].find((c) => c.subs.has("bp"))!
+		Object.defineProperty(client.ws, "bufferedAmount", {
+			configurable: true,
+			get: () => 8 * 1024 * 1024,
+		})
+		const at = s.messages.length
+		await poll([feed(now + 500, [vehicle("W1", { vehicleTs: now + 495, lat: 40.952 })])])
+		await Bun.sleep(100)
+		expect(s.messages.slice(at).filter((m) => m.sub === "bp")).toEqual([])
+
+		// Drained: the next update is a full snapshot, not a delta on top of a gap.
+		delete (client.ws as { bufferedAmount?: number }).bufferedAmount
+		await poll([feed(now + 530, [vehicle("W1", { vehicleTs: now + 525, lat: 40.953 })])])
+		const next = await s.next((m) => m.sub === "bp", at)
+		expect(next.type).toBe("snapshot")
+		s.close()
 	})
 })

@@ -5,6 +5,7 @@
 import {
 	Injectable,
 	Logger,
+	Optional,
 	type OnApplicationBootstrap,
 	type OnApplicationShutdown,
 } from "@nestjs/common"
@@ -13,6 +14,7 @@ import { GezcezError } from "@common/errors"
 import { localTime, sha256Hex } from "@common/utils"
 import { NetworksService } from "@services/networks/networks.service"
 import { ProvidersRegistry } from "@services/providers/providers.registry"
+import { JobEventsBus } from "@services/system/job-events.bus"
 import type { StaticChunk } from "@services/providers/transit-provider.interface"
 import { TransitRepository, type StaticBundle } from "./transit.repository"
 
@@ -116,6 +118,7 @@ export class TransitSyncService implements OnApplicationBootstrap, OnApplication
 		private readonly repository: TransitRepository,
 		private readonly networks: NetworksService,
 		private readonly providers: ProvidersRegistry,
+		@Optional() private readonly jobs?: JobEventsBus,
 	) {}
 
 	setNormaliser(normaliser: ChunkNormaliser): void {
@@ -198,7 +201,21 @@ export class TransitSyncService implements OnApplicationBootstrap, OnApplication
 	sync(bindingId: number, trigger: "schedule" | "manual" | "boot"): Promise<SyncResult> {
 		const existing = this.running.get(bindingId)
 		if (existing) return existing
-		const promise = this.run(bindingId, trigger).finally(() => this.running.delete(bindingId))
+		const job = this.jobs?.start("transit.sync", trigger, { binding_id: bindingId })
+		const promise = this.run(bindingId, trigger)
+			.then((result) => {
+				job?.finish("succeeded", {
+					status: result.status,
+					version_id: result.version_id,
+					warnings: result.warnings.length,
+				})
+				return result
+			})
+			.catch((error: unknown) => {
+				job?.finish("failed", { error: (error as Error).message })
+				throw error
+			})
+			.finally(() => this.running.delete(bindingId))
 		this.running.set(bindingId, promise)
 		return promise
 	}

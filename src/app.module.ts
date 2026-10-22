@@ -23,6 +23,7 @@ import { AnalyticsModule } from "@services/analytics/analytics.module"
 import { DuckDbModule } from "@services/analytics/duckdb.module"
 import { ArchiveModule } from "@services/archive/archive.module"
 import { AppsModule } from "@services/apps/apps.module"
+import { AppConfigModule } from "@services/app-config/app-config.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
@@ -98,6 +99,7 @@ export class AppModule {
 				AnalyticsModule,
 				WsModule,
 				// Mobile MVP support (P4).
+				AppConfigModule,
 				FavouritesModule,
 				TelemetryModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.

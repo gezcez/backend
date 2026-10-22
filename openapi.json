@@ -49,10 +49,14 @@
 						"type": "string"
 					},
 					"active_to": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"body": {
 						"type": "string"
@@ -83,10 +87,14 @@
 						"type": "string"
 					},
 					"url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -126,6 +134,156 @@
 					"code",
 					"message",
 					"request_id"
+				],
+				"type": "object"
+			},
+			"AppConfigDto": {
+				"properties": {
+					"announcement": {
+						"anyOf": [
+							{
+								"properties": {
+									"body": {
+										"properties": {
+											"en": {
+												"type": "string"
+											},
+											"tr": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"tr",
+											"en"
+										],
+										"type": "object"
+									},
+									"id": {
+										"maxLength": 64,
+										"minLength": 1,
+										"type": "string"
+									},
+									"level": {
+										"enum": [
+											"info",
+											"warning"
+										],
+										"type": "string"
+									},
+									"title": {
+										"properties": {
+											"en": {
+												"type": "string"
+											},
+											"tr": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"tr",
+											"en"
+										],
+										"type": "object"
+									},
+									"url": {
+										"anyOf": [
+											{
+												"format": "uri",
+												"type": "string"
+											},
+											{
+												"type": "null"
+											}
+										]
+									}
+								},
+								"required": [
+									"id",
+									"level",
+									"title",
+									"body",
+									"url"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"flags": {
+						"additionalProperties": {
+							"type": "boolean"
+						},
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"kill_switches": {
+						"additionalProperties": {
+							"type": "boolean"
+						},
+						"description": "Feature availability: false turns a feature off (cards, live_map, ...)",
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"min_supported_version": {
+						"description": "Older apps must update (force update)",
+						"type": "string"
+					},
+					"soft_update_version": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "Older apps are nudged to update"
+					},
+					"tiles_style_url": {
+						"properties": {
+							"dark": {
+								"format": "uri",
+								"type": "string"
+							},
+							"light": {
+								"format": "uri",
+								"type": "string"
+							}
+						},
+						"required": [
+							"light",
+							"dark"
+						],
+						"type": "object"
+					},
+					"update": {
+						"description": "The caller's update state, from `version` (none without it)",
+						"enum": [
+							"none",
+							"soft",
+							"force"
+						],
+						"type": "string"
+					},
+					"ws_url": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"min_supported_version",
+					"soft_update_version",
+					"update",
+					"flags",
+					"kill_switches",
+					"announcement",
+					"tiles_style_url",
+					"ws_url"
 				],
 				"type": "object"
 			},
@@ -1221,10 +1379,14 @@
 						"type": "integer"
 					},
 					"success_rate": {
-						"items": {
-							"type": "number"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"window_hours": {
 						"maximum": 9007199254740991,
@@ -1240,6 +1402,125 @@
 					"positions_hot",
 					"open_runs",
 					"live_vehicles"
+				],
+				"type": "object"
+			},
+			"CardHistoryBodyDto": {
+				"properties": {
+					"card_number": {
+						"type": "string"
+					},
+					"month": {
+						"pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+						"type": "string"
+					}
+				},
+				"required": [
+					"card_number",
+					"month"
+				],
+				"type": "object"
+			},
+			"CardHistoryDto": {
+				"properties": {
+					"currency": {
+						"type": "string"
+					},
+					"items": {
+						"items": {
+							"properties": {
+								"amount": {
+									"type": "number"
+								},
+								"at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+									"type": "string"
+								},
+								"balance_after": {
+									"type": [
+										"number",
+										"null"
+									]
+								},
+								"kind": {
+									"enum": [
+										"boarding",
+										"topup",
+										"transfer",
+										"other"
+									],
+									"type": "string"
+								},
+								"route_short_name": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"at",
+								"kind",
+								"amount",
+								"balance_after",
+								"route_short_name"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"month": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"month",
+					"currency",
+					"items"
+				],
+				"type": "object"
+			},
+			"CardLookupBodyDto": {
+				"properties": {
+					"card_number": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"card_number"
+				],
+				"type": "object"
+			},
+			"CardLookupDto": {
+				"properties": {
+					"as_of": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"balance": {
+						"type": "number"
+					},
+					"card_type": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"currency": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"balance",
+					"currency",
+					"as_of",
+					"card_type"
 				],
 				"type": "object"
 			},
@@ -1912,10 +2193,14 @@
 			"ControlResultDto": {
 				"properties": {
 					"error": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"ok": {
 						"type": "boolean"
@@ -2324,10 +2609,14 @@
 						"type": "string"
 					},
 					"disabled_reason": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"external_ref": {
 						"type": "string"
@@ -2343,10 +2632,14 @@
 						"type": "integer"
 					},
 					"last_feed_at": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"network_id": {
 						"maximum": 9007199254740991,
@@ -2377,10 +2670,14 @@
 						"type": "string"
 					},
 					"state_message": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"status": {
 						"enum": [
@@ -2391,10 +2688,14 @@
 						"type": "string"
 					},
 					"updated_at": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -2448,16 +2749,24 @@
 						]
 					},
 					"center_lat": {
-						"items": {
-							"type": "number"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"center_lon": {
-						"items": {
-							"type": "number"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"country_code": {
 						"type": "string"
@@ -2737,10 +3046,14 @@
 						"type": "integer"
 					},
 					"colour": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"created_at": {
 						"type": "string"
@@ -2762,16 +3075,24 @@
 						"type": "string"
 					},
 					"network_status_message": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"operator_name": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"slug": {
 						"type": "string"
@@ -2785,10 +3106,14 @@
 						"type": "string"
 					},
 					"updated_at": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -2999,10 +3324,14 @@
 						"type": "array"
 					},
 					"disabled_reason": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"enabled": {
 						"description": "Dashboard kill switch (providers.enabled)",
@@ -3013,19 +3342,27 @@
 						"type": "boolean"
 					},
 					"image_url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"key": {
 						"type": "string"
 					},
 					"legal_note": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"name": {
 						"type": "string"
@@ -3082,10 +3419,14 @@
 						"type": "boolean"
 					},
 					"url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -3231,10 +3572,14 @@
 						]
 					},
 					"disabled_reason": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"enabled": {
 						"description": "Dashboard kill switch (providers.enabled)",
@@ -3245,19 +3590,27 @@
 						"type": "boolean"
 					},
 					"image_url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"key": {
 						"type": "string"
 					},
 					"legal_note": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"name": {
 						"type": "string"
@@ -3292,10 +3645,14 @@
 						"type": "boolean"
 					},
 					"url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -3625,6 +3982,19 @@
 								"cancelled": {
 									"type": "boolean"
 								},
+								"direction": {
+									"anyOf": [
+										{
+											"const": 0,
+											"type": "number"
+										},
+										{
+											"const": 1,
+											"type": "number"
+										}
+									],
+									"description": "Direction of the trip's pattern"
+								},
 								"headsign": {
 									"type": [
 										"string",
@@ -3748,6 +4118,7 @@
 							"required": [
 								"route",
 								"headsign",
+								"direction",
 								"trip_id",
 								"scheduled_at",
 								"predicted_at",
@@ -5753,10 +6124,14 @@
 						"type": "integer"
 					},
 					"colour": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"freshness": {
 						"properties": {
@@ -5810,17 +6185,25 @@
 						"type": "string"
 					},
 					"operator_name": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"pack_version": {
-						"description": "Changes whenever the static data changes",
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "Changes whenever the static data changes"
 					},
 					"privacy": {
 						"items": {
@@ -5875,10 +6258,14 @@
 						"type": "string"
 					},
 					"status_message": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -6713,16 +7100,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -6880,19 +7275,27 @@
 						"type": "boolean"
 					},
 					"image_url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"key": {
 						"type": "string"
 					},
 					"legal_note": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"name": {
 						"type": "string"
@@ -6924,10 +7327,14 @@
 						"type": "array"
 					},
 					"url": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -7814,16 +8221,24 @@
 			"RouteDetailDto": {
 				"properties": {
 					"agency": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"colour": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"directions": {
 						"items": {
@@ -7962,10 +8377,14 @@
 						"type": "string"
 					},
 					"text_colour": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -8057,16 +8476,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -8654,10 +9081,14 @@
 			"StopDetailDto": {
 				"properties": {
 					"code": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"id": {
 						"description": "Stable public id, e.g. 1.41003",
@@ -8804,16 +9235,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -8879,10 +9318,14 @@
 						"type": "object"
 					},
 					"error": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"run_id": {
 						"maximum": 9007199254740991,
@@ -9028,16 +9471,24 @@
 						"type": "array"
 					},
 					"next_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"prev_cursor": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"total": {
 						"anyOf": [
@@ -9130,10 +9581,14 @@
 			"TimetableDto": {
 				"properties": {
 					"date": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"day_type": {
 						"enum": [
@@ -9757,10 +10212,14 @@
 			"VehicleDetailDto": {
 				"properties": {
 					"accessible": {
-						"items": {
-							"type": "boolean"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "boolean"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"current_run": {
 						"anyOf": [
@@ -9883,10 +10342,14 @@
 						"type": "string"
 					},
 					"label": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"last_seen_at": {
 						"type": "string"
@@ -9900,10 +10363,14 @@
 						"type": "integer"
 					},
 					"plate": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"position": {
 						"anyOf": [
@@ -10135,10 +10602,14 @@
 						"type": "array"
 					},
 					"stop_id": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"stop_seq": {
 						"anyOf": [
@@ -10153,10 +10624,14 @@
 						]
 					},
 					"trip_id": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					}
 				},
 				"required": [
@@ -10200,10 +10675,14 @@
 						"type": "array"
 					},
 					"message": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
 					},
 					"network_id": {
 						"maximum": 9007199254740991,
@@ -10315,7 +10794,10 @@
 									"vehicles",
 									"departures",
 									"tracker.status",
-									"tracker.logs"
+									"tracker.logs",
+									"ops.logs",
+									"health",
+									"jobs"
 								],
 								"type": "string"
 							},
@@ -10411,6 +10893,29 @@
 				"required": [
 					"stop"
 				],
+				"type": "object"
+			},
+			"WsOpsLogsParams": {
+				"properties": {
+					"level": {
+						"default": "info",
+						"enum": [
+							"trace",
+							"debug",
+							"info",
+							"warn",
+							"error",
+							"fatal"
+						],
+						"type": "string"
+					},
+					"tail": {
+						"default": 100,
+						"maximum": 500,
+						"minimum": 0,
+						"type": "integer"
+					}
+				},
 				"type": "object"
 			},
 			"WsServerMessage": {
@@ -10605,6 +11110,19 @@
 										"cancelled": {
 											"type": "boolean"
 										},
+										"direction": {
+											"anyOf": [
+												{
+													"const": 0,
+													"type": "number"
+												},
+												{
+													"const": 1,
+													"type": "number"
+												}
+											],
+											"description": "Direction of the trip's pattern"
+										},
 										"headsign": {
 											"type": [
 												"string",
@@ -10728,6 +11246,7 @@
 									"required": [
 										"route",
 										"headsign",
+										"direction",
 										"trip_id",
 										"scheduled_at",
 										"predicted_at",
@@ -12823,6 +13342,76 @@
 				"summary": "Create the account after a sign-up code (no username)",
 				"tags": [
 					"account"
+				]
+			}
+		},
+		"/v1/app/config": {
+			"get": {
+				"operationId": "AppConfig_config",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "platform",
+						"required": false,
+						"schema": {
+							"enum": [
+								"ios",
+								"android"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "version",
+						"required": false,
+						"schema": {
+							"maxLength": 32,
+							"pattern": "^\\d+(\\.\\d+){0,2}([-+].*)?$",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AppConfigDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Remote config: update versions, flags, kill switches, announcement, tiles, WS URL",
+				"tags": [
+					"app"
 				]
 			}
 		},
@@ -18358,6 +18947,138 @@
 				]
 			}
 		},
+		"/v1/networks/{networkId}/cards/history": {
+			"post": {
+				"operationId": "Cards_history",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CardHistoryBodyDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/CardHistoryDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "One month of card transactions (capability card)",
+				"tags": [
+					"transit: cards"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/cards/lookup": {
+			"post": {
+				"operationId": "Cards_lookup",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CardLookupBodyDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/CardLookupDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Card balance by card number (capability card)",
+				"tags": [
+					"transit: cards"
+				]
+			}
+		},
 		"/v1/networks/{networkId}/pack": {
 			"get": {
 				"operationId": "Pack_pack",
@@ -18657,6 +19378,28 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"description": "full adds plate, stop and headsign; needs a bearer token with the dash scope and vehicles.live.read",
+						"in": "query",
+						"name": "detail",
+						"required": false,
+						"schema": {
+							"default": "compact",
+							"enum": [
+								"compact",
+								"full"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "header",
+						"name": "authorization",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -18683,7 +19426,7 @@
 								}
 							}
 						},
-						"description": "Live vehicles as compact arrays in the order of `fields` (same as the WS snapshot)"
+						"description": "Live vehicles as arrays in the order of `fields` (same as the WS snapshot). Public for compact rows; detail=full needs a dash token with vehicles.live.read"
 					},
 					"default": {
 						"content": {
@@ -18696,6 +19439,11 @@
 						"description": "Error envelope"
 					}
 				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
 				"tags": [
 					"transit: live"
 				]
