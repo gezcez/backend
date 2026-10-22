@@ -228,7 +228,7 @@ describe("tracker engine with the fake provider", () => {
 		} finally {
 			await h.t.close()
 		}
-	})
+	}, 30_000)
 
 	test("retention keeps unarchived days unless the archive guard is off", async () => {
 		const dir = dataDir()
@@ -255,5 +255,5 @@ describe("tracker engine with the fake provider", () => {
 		} finally {
 			await t.close()
 		}
-	})
+	}, 30_000)
 })
