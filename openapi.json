@@ -8873,7 +8873,10 @@
 									"vehicles",
 									"departures",
 									"tracker.status",
-									"tracker.logs"
+									"tracker.logs",
+									"ops.logs",
+									"health",
+									"jobs"
 								],
 								"type": "string"
 							},
@@ -8969,6 +8972,29 @@
 				"required": [
 					"stop"
 				],
+				"type": "object"
+			},
+			"WsOpsLogsParams": {
+				"properties": {
+					"level": {
+						"default": "info",
+						"enum": [
+							"trace",
+							"debug",
+							"info",
+							"warn",
+							"error",
+							"fatal"
+						],
+						"type": "string"
+					},
+					"tail": {
+						"default": 100,
+						"maximum": 500,
+						"minimum": 0,
+						"type": "integer"
+					}
+				},
 				"type": "object"
 			},
 			"WsServerMessage": {

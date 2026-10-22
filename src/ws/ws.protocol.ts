@@ -51,12 +51,34 @@ export const TrackerStatusParamsSchema = z.object({
 
 export const TrackerLogsParamsSchema = z.object({ binding: z.number().int() })
 
+export const LOG_LEVELS = ["trace", "debug", "info", "warn", "error", "fatal"] as const
+
+export const OpsLogsParamsSchema = z.object({
+	/** Lowest level sent. */
+	level: z.enum(LOG_LEVELS).default("info"),
+	/** Recent lines sent on subscribe. */
+	tail: z.number().int().min(0).max(500).default(100),
+})
+
+export const HealthParamsSchema = z.object({})
+export const JobsParamsSchema = z.object({})
+
+export const WS_CHANNELS = [
+	"vehicles",
+	"departures",
+	"tracker.status",
+	"tracker.logs",
+	"ops.logs",
+	"health",
+	"jobs",
+] as const
+
 export const WsClientMessageSchema = z.discriminatedUnion("type", [
 	z.object({ type: z.literal("auth"), token: z.string().min(1).max(4000) }),
 	z.object({
 		type: z.literal("subscribe"),
 		id: SubId,
-		channel: z.enum(["vehicles", "departures", "tracker.status", "tracker.logs"]),
+		channel: z.enum(WS_CHANNELS),
 		params: z.record(z.string(), z.unknown()).default({}),
 	}),
 	z.object({ type: z.literal("unsubscribe"), id: SubId }),

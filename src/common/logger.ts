@@ -25,13 +25,32 @@ export const REDACT_PATHS = [
 /** Keeps the last `capacity` serialised log lines in memory. */
 export class LogRingBuffer implements DestinationStream {
 	private readonly lines: string[] = []
+	private readonly listeners = new Set<(line: string) => void>()
+	private emitting = false
 
 	constructor(private readonly capacity = 2000) {}
 
 	write(line: string): void {
-		this.lines.push(line.trimEnd())
+		const trimmed = line.trimEnd()
+		this.lines.push(trimmed)
 		if (this.lines.length > this.capacity)
 			this.lines.splice(0, this.lines.length - this.capacity)
+		// A listener that logs must not loop back into itself.
+		if (this.emitting || !this.listeners.size) return
+		this.emitting = true
+		try {
+			for (const listener of this.listeners) listener(trimmed)
+		} catch {
+			// Live tails are best effort.
+		} finally {
+			this.emitting = false
+		}
+	}
+
+	/** Every new line (the ops.logs WS channel). Returns the unsubscribe function. */
+	onLine(listener: (line: string) => void): () => void {
+		this.listeners.add(listener)
+		return () => this.listeners.delete(listener)
 	}
 
 	tail(count = this.capacity): string[] {
