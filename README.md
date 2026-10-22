@@ -92,6 +92,14 @@ docker run --rm -p 8080:8080 -v gezcez-data:/app/data \
 The image runs as a non-root user, keeps all state in `/app/data` and has a health check on
 `/health`. `compose.yml` runs the same image locally (`docker compose up --build`).
 
+## Deploy
+
+`deploy/compose.yml` runs the published image behind a Cloudflare tunnel (no open ports) with
+Litestream replicating `core.db` to R2 (`litestream.yml`); a one-shot `restore` service
+restores from R2 when the volume is empty. Copy `deploy/.env.example` to `deploy/.env`, add
+`deploy/cloudflared-credentials.json`, then `docker compose up -d` in `deploy/`.
+`deploy/restore.md` is the restore runbook.
+
 ## Test mode for client e2e suites
 
 Client repos (oauth, dashboard, mobile) run their e2e suites against the published image:

@@ -1,0 +1,57 @@
+# Production and staging on one VPS: `docker compose --env-file .env up -d` in this folder.
+# No port is published; cloudflared is the only way in. See restore.md for disaster recovery.
+name: gezcez
+
+x-litestream: &litestream
+    image: litestream/litestream:0.3.13
+    env_file: .env
+    # Same uid as the backend image's `bun` user, so restored files stay writable.
+    user: "1000:1000"
+    volumes:
+        - data:/data
+        - ../litestream.yml:/etc/litestream.yml:ro
+
+services:
+    # One-shot: restores core.db from R2 when the volume is empty (new host or lost disk).
+    restore:
+        <<: *litestream
+        command: ["restore", "-if-db-not-exists", "-if-replica-exists", "/data/core.db"]
+        restart: "no"
+
+    backend:
+        image: ghcr.io/gezcez/backend:${BACKEND_TAG:-latest}
+        env_file: .env
+        environment:
+            MODE: ${MODE:-all}
+            TRUST_CF_HEADERS: "true"
+        volumes:
+            - data:/app/data
+        read_only: true
+        tmpfs:
+            - /tmp
+        restart: unless-stopped
+        depends_on:
+            restore:
+                condition: service_completed_successfully
+
+    litestream:
+        <<: *litestream
+        command: ["replicate"]
+        restart: unless-stopped
+        depends_on:
+            backend:
+                condition: service_healthy
+
+    cloudflared:
+        image: cloudflare/cloudflared:2026.9.3
+        command: ["tunnel", "--no-autoupdate", "--config", "/etc/cloudflared/config.yml", "run"]
+        volumes:
+            - ./${CLOUDFLARED_CONFIG:-cloudflared.yml}:/etc/cloudflared/config.yml:ro
+            - ./cloudflared-credentials.json:/etc/cloudflared/credentials.json:ro
+        restart: unless-stopped
+        depends_on:
+            backend:
+                condition: service_healthy
+
+volumes:
+    data:

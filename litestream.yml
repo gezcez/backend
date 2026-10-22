@@ -1,0 +1,16 @@
+# Litestream: continuous replication of core.db to R2 (plan section 12). transit.db joins when
+# it exists (P3); vts.db is never replicated (its durable form is the daily Parquet archive).
+# Values come from the environment (deploy/.env).
+dbs:
+    - path: /data/core.db
+      replicas:
+          - type: s3
+            bucket: ${R2_BUCKET_BACKUP}
+            path: ${LITESTREAM_PREFIX}/core.db
+            endpoint: https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com
+            region: auto
+            access-key-id: ${R2_ACCESS_KEY_ID}
+            secret-access-key: ${R2_SECRET_ACCESS_KEY}
+            sync-interval: 10s
+            snapshot-interval: 24h
+            retention: 720h
