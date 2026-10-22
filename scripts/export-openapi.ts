@@ -23,6 +23,8 @@ try {
 		LOG_LEVEL: "silent",
 		EMAIL_TRANSPORT: "memory",
 		PUBLIC_API_URL: "https://api.gezcez.com",
+		TRACKER_RUNNER: "off",
+		TRANSIT_SYNC_AT: "off",
 	})
 	const app = await createApp(config, { quiet: true })
 	await app.init()

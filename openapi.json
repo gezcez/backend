@@ -28,6 +28,672 @@
 				],
 				"type": "object"
 			},
+			"CityDto": {
+				"properties": {
+					"bbox": {
+						"anyOf": [
+							{
+								"description": "[west, south, east, north]",
+								"items": false,
+								"maxItems": 4,
+								"minItems": 4,
+								"prefixItems": [
+									{
+										"type": "number"
+									},
+									{
+										"type": "number"
+									},
+									{
+										"type": "number"
+									},
+									{
+										"type": "number"
+									}
+								],
+								"type": "array"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"centre": {
+						"anyOf": [
+							{
+								"description": "[lon, lat]",
+								"items": false,
+								"maxItems": 2,
+								"minItems": 2,
+								"prefixItems": [
+									{
+										"type": "number"
+									},
+									{
+										"type": "number"
+									}
+								],
+								"type": "array"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"country_code": {
+						"type": "string"
+					},
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"name": {
+						"properties": {
+							"en": {
+								"type": "string"
+							},
+							"tr": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"tr",
+							"en"
+						],
+						"type": "object"
+					},
+					"networks": {
+						"items": {
+							"properties": {
+								"colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"modes": {
+									"items": {
+										"enum": [
+											"tram",
+											"metro",
+											"rail",
+											"bus",
+											"ferry",
+											"cable_tram",
+											"aerial_lift",
+											"funicular",
+											"trolleybus",
+											"monorail"
+										],
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"name": {
+									"type": "string"
+								},
+								"operator_name": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"slug": {
+									"type": "string"
+								},
+								"status": {
+									"enum": [
+										"active",
+										"degraded",
+										"disabled"
+									],
+									"type": "string"
+								},
+								"status_message": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"id",
+								"slug",
+								"name",
+								"operator_name",
+								"colour",
+								"status",
+								"status_message",
+								"modes"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"timezone": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"slug",
+					"name",
+					"country_code",
+					"timezone",
+					"centre",
+					"bbox",
+					"networks"
+				],
+				"type": "object"
+			},
+			"CityManifestDto": {
+				"properties": {
+					"city": {
+						"properties": {
+							"bbox": {
+								"anyOf": [
+									{
+										"description": "[west, south, east, north]",
+										"items": false,
+										"maxItems": 4,
+										"minItems": 4,
+										"prefixItems": [
+											{
+												"type": "number"
+											},
+											{
+												"type": "number"
+											},
+											{
+												"type": "number"
+											},
+											{
+												"type": "number"
+											}
+										],
+										"type": "array"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"centre": {
+								"anyOf": [
+									{
+										"description": "[lon, lat]",
+										"items": false,
+										"maxItems": 2,
+										"minItems": 2,
+										"prefixItems": [
+											{
+												"type": "number"
+											},
+											{
+												"type": "number"
+											}
+										],
+										"type": "array"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"country_code": {
+								"type": "string"
+							},
+							"id": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"name": {
+								"properties": {
+									"en": {
+										"type": "string"
+									},
+									"tr": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"tr",
+									"en"
+								],
+								"type": "object"
+							},
+							"slug": {
+								"type": "string"
+							},
+							"timezone": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"id",
+							"slug",
+							"name",
+							"country_code",
+							"timezone",
+							"centre",
+							"bbox"
+						],
+						"type": "object"
+					},
+					"generated_at": {
+						"type": "string"
+					},
+					"map": {
+						"properties": {
+							"bbox": {
+								"anyOf": [
+									{
+										"description": "[west, south, east, north]",
+										"items": false,
+										"maxItems": 4,
+										"minItems": 4,
+										"prefixItems": [
+											{
+												"type": "number"
+											},
+											{
+												"type": "number"
+											},
+											{
+												"type": "number"
+											},
+											{
+												"type": "number"
+											}
+										],
+										"type": "array"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"centre": {
+								"anyOf": [
+									{
+										"description": "[lon, lat]",
+										"items": false,
+										"maxItems": 2,
+										"minItems": 2,
+										"prefixItems": [
+											{
+												"type": "number"
+											},
+											{
+												"type": "number"
+											}
+										],
+										"type": "array"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"initial_zoom": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"centre",
+							"bbox",
+							"initial_zoom"
+						],
+						"type": "object"
+					},
+					"networks": {
+						"items": {
+							"properties": {
+								"attribution": {
+									"items": {
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"provider": {
+												"type": "string"
+											},
+											"url": {
+												"type": [
+													"string",
+													"null"
+												]
+											}
+										},
+										"required": [
+											"provider",
+											"name",
+											"url"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"capabilities": {
+									"properties": {
+										"alerts": {
+											"type": "boolean"
+										},
+										"bike_share": {
+											"const": false,
+											"type": "boolean"
+										},
+										"card": {
+											"anyOf": [
+												{
+													"properties": {
+														"balance": {
+															"type": "boolean"
+														},
+														"history": {
+															"type": "boolean"
+														},
+														"label": {
+															"properties": {
+																"en": {
+																	"type": "string"
+																},
+																"tr": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"tr",
+																"en"
+															],
+															"type": "object"
+														},
+														"number_format": {
+															"type": [
+																"string",
+																"null"
+															]
+														},
+														"requires_provider_account": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"balance",
+														"history",
+														"requires_provider_account",
+														"number_format",
+														"label"
+													],
+													"type": "object"
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"realtime_departures": {
+											"enum": [
+												"none",
+												"estimated",
+												"live"
+											],
+											"type": "string"
+										},
+										"realtime_vehicles": {
+											"type": "boolean"
+										},
+										"routes": {
+											"type": "boolean"
+										},
+										"shapes": {
+											"type": "boolean"
+										},
+										"stops": {
+											"type": "boolean"
+										},
+										"timetables": {
+											"type": "boolean"
+										},
+										"trip_planner": {
+											"const": false,
+											"type": "boolean"
+										},
+										"trip_updates": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"stops",
+										"routes",
+										"timetables",
+										"shapes",
+										"realtime_vehicles",
+										"realtime_departures",
+										"trip_updates",
+										"alerts",
+										"card",
+										"trip_planner",
+										"bike_share"
+									],
+									"type": "object"
+								},
+								"city_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"freshness": {
+									"properties": {
+										"realtime_feed_at": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"static_may_be_outdated": {
+											"type": "boolean"
+										},
+										"static_synced_at": {
+											"type": [
+												"string",
+												"null"
+											]
+										}
+									},
+									"required": [
+										"static_synced_at",
+										"realtime_feed_at",
+										"static_may_be_outdated"
+									],
+									"type": "object"
+								},
+								"id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"modes": {
+									"items": {
+										"enum": [
+											"tram",
+											"metro",
+											"rail",
+											"bus",
+											"ferry",
+											"cable_tram",
+											"aerial_lift",
+											"funicular",
+											"trolleybus",
+											"monorail"
+										],
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"name": {
+									"type": "string"
+								},
+								"operator_name": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"pack_version": {
+									"description": "Changes whenever the static data changes",
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"privacy": {
+									"items": {
+										"properties": {
+											"provider": {
+												"type": "string"
+											},
+											"pulled_data": {
+												"items": {
+													"properties": {
+														"can_optout": {
+															"type": "boolean"
+														},
+														"details": {
+															"type": "string"
+														},
+														"is_collected": {
+															"type": "boolean"
+														},
+														"key": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"key",
+														"is_collected",
+														"can_optout",
+														"details"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											}
+										},
+										"required": [
+											"provider",
+											"pulled_data"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"slug": {
+									"type": "string"
+								},
+								"status": {
+									"enum": [
+										"active",
+										"degraded",
+										"disabled"
+									],
+									"type": "string"
+								},
+								"status_message": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"id",
+								"slug",
+								"name",
+								"operator_name",
+								"colour",
+								"status",
+								"status_message",
+								"modes",
+								"city_id",
+								"capabilities",
+								"pack_version",
+								"attribution",
+								"privacy",
+								"freshness"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"route_types": {
+						"items": {
+							"properties": {
+								"label": {
+									"properties": {
+										"en": {
+											"type": "string"
+										},
+										"tr": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"tr",
+										"en"
+									],
+									"type": "object"
+								},
+								"mode": {
+									"enum": [
+										"tram",
+										"metro",
+										"rail",
+										"bus",
+										"ferry",
+										"cable_tram",
+										"aerial_lift",
+										"funicular",
+										"trolleybus",
+										"monorail"
+									],
+									"type": "string"
+								}
+							},
+							"required": [
+								"mode",
+								"label"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"city",
+					"networks",
+					"route_types",
+					"map",
+					"generated_at"
+				],
+				"type": "object"
+			},
 			"ErrorCode": {
 				"enum": [
 					"VALIDATION_FAILED",
@@ -149,6 +815,350 @@
 				],
 				"type": "object"
 			},
+			"NearbyDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"properties": {
+								"code": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"distance_m": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"id": {
+									"description": "Stable public id, e.g. 1.41003",
+									"type": "string"
+								},
+								"lat": {
+									"type": "number"
+								},
+								"lon": {
+									"type": "number"
+								},
+								"name": {
+									"type": "string"
+								},
+								"network_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"route_ids": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								}
+							},
+							"required": [
+								"id",
+								"network_id",
+								"name",
+								"code",
+								"lat",
+								"lon",
+								"distance_m",
+								"route_ids"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"items"
+				],
+				"type": "object"
+			},
+			"NetworkManifestDto": {
+				"properties": {
+					"attribution": {
+						"items": {
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"provider": {
+									"type": "string"
+								},
+								"url": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"provider",
+								"name",
+								"url"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"capabilities": {
+						"properties": {
+							"alerts": {
+								"type": "boolean"
+							},
+							"bike_share": {
+								"const": false,
+								"type": "boolean"
+							},
+							"card": {
+								"anyOf": [
+									{
+										"properties": {
+											"balance": {
+												"type": "boolean"
+											},
+											"history": {
+												"type": "boolean"
+											},
+											"label": {
+												"properties": {
+													"en": {
+														"type": "string"
+													},
+													"tr": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"tr",
+													"en"
+												],
+												"type": "object"
+											},
+											"number_format": {
+												"type": [
+													"string",
+													"null"
+												]
+											},
+											"requires_provider_account": {
+												"type": "boolean"
+											}
+										},
+										"required": [
+											"balance",
+											"history",
+											"requires_provider_account",
+											"number_format",
+											"label"
+										],
+										"type": "object"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"realtime_departures": {
+								"enum": [
+									"none",
+									"estimated",
+									"live"
+								],
+								"type": "string"
+							},
+							"realtime_vehicles": {
+								"type": "boolean"
+							},
+							"routes": {
+								"type": "boolean"
+							},
+							"shapes": {
+								"type": "boolean"
+							},
+							"stops": {
+								"type": "boolean"
+							},
+							"timetables": {
+								"type": "boolean"
+							},
+							"trip_planner": {
+								"const": false,
+								"type": "boolean"
+							},
+							"trip_updates": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"stops",
+							"routes",
+							"timetables",
+							"shapes",
+							"realtime_vehicles",
+							"realtime_departures",
+							"trip_updates",
+							"alerts",
+							"card",
+							"trip_planner",
+							"bike_share"
+						],
+						"type": "object"
+					},
+					"city_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"colour": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"freshness": {
+						"properties": {
+							"realtime_feed_at": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"static_may_be_outdated": {
+								"type": "boolean"
+							},
+							"static_synced_at": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"static_synced_at",
+							"realtime_feed_at",
+							"static_may_be_outdated"
+						],
+						"type": "object"
+					},
+					"id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"modes": {
+						"items": {
+							"enum": [
+								"tram",
+								"metro",
+								"rail",
+								"bus",
+								"ferry",
+								"cable_tram",
+								"aerial_lift",
+								"funicular",
+								"trolleybus",
+								"monorail"
+							],
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"name": {
+						"type": "string"
+					},
+					"operator_name": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"pack_version": {
+						"description": "Changes whenever the static data changes",
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"privacy": {
+						"items": {
+							"properties": {
+								"provider": {
+									"type": "string"
+								},
+								"pulled_data": {
+									"items": {
+										"properties": {
+											"can_optout": {
+												"type": "boolean"
+											},
+											"details": {
+												"type": "string"
+											},
+											"is_collected": {
+												"type": "boolean"
+											},
+											"key": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"key",
+											"is_collected",
+											"can_optout",
+											"details"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							},
+							"required": [
+								"provider",
+								"pulled_data"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"status": {
+						"enum": [
+							"active",
+							"degraded",
+							"disabled"
+						],
+						"type": "string"
+					},
+					"status_message": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"slug",
+					"name",
+					"operator_name",
+					"colour",
+					"status",
+					"status_message",
+					"modes",
+					"city_id",
+					"capabilities",
+					"pack_version",
+					"attribution",
+					"privacy",
+					"freshness"
+				],
+				"type": "object"
+			},
 			"OpenIdConfigurationDto": {
 				"properties": {
 					"authorization_endpoint": {
@@ -261,6 +1271,73 @@
 				],
 				"type": "object"
 			},
+			"ProviderPublicDto": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"image_url": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"key": {
+						"type": "string"
+					},
+					"legal_note": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"name": {
+						"type": "string"
+					},
+					"pulled_data": {
+						"items": {
+							"properties": {
+								"can_optout": {
+									"type": "boolean"
+								},
+								"details": {
+									"type": "string"
+								},
+								"is_collected": {
+									"type": "boolean"
+								},
+								"key": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"key",
+								"is_collected",
+								"can_optout",
+								"details"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"url": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"key",
+					"name",
+					"url",
+					"image_url",
+					"enabled",
+					"pulled_data",
+					"legal_note"
+				],
+				"type": "object"
+			},
 			"ReadyDto": {
 				"properties": {
 					"checks": {
@@ -288,6 +1365,754 @@
 				"required": [
 					"ready",
 					"checks"
+				],
+				"type": "object"
+			},
+			"RouteDetailDto": {
+				"properties": {
+					"agency": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"colour": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"directions": {
+						"items": {
+							"properties": {
+								"direction": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"headsign": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"patterns": {
+									"items": {
+										"properties": {
+											"headsign": {
+												"type": "string"
+											},
+											"id": {
+												"type": "string"
+											},
+											"length_m": {
+												"maximum": 9007199254740991,
+												"minimum": -9007199254740991,
+												"type": "integer"
+											},
+											"stops": {
+												"items": {
+													"properties": {
+														"id": {
+															"description": "Stable public id, e.g. 1.41003",
+															"type": "string"
+														},
+														"lat": {
+															"type": "number"
+														},
+														"lon": {
+															"type": "number"
+														},
+														"name": {
+															"type": "string"
+														},
+														"network_id": {
+															"maximum": 9007199254740991,
+															"minimum": -9007199254740991,
+															"type": "integer"
+														},
+														"offset_s": {
+															"anyOf": [
+																{
+																	"maximum": 9007199254740991,
+																	"minimum": -9007199254740991,
+																	"type": "integer"
+																},
+																{
+																	"type": "null"
+																}
+															]
+														},
+														"seq": {
+															"maximum": 9007199254740991,
+															"minimum": -9007199254740991,
+															"type": "integer"
+														}
+													},
+													"required": [
+														"id",
+														"network_id",
+														"name",
+														"lat",
+														"lon",
+														"seq",
+														"offset_s"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											}
+										},
+										"required": [
+											"id",
+											"headsign",
+											"length_m",
+											"stops"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							},
+							"required": [
+								"direction",
+								"headsign",
+								"patterns"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"id": {
+						"description": "Stable public id, e.g. 1.42041",
+						"type": "string"
+					},
+					"long_name": {
+						"type": "string"
+					},
+					"mode": {
+						"enum": [
+							"tram",
+							"metro",
+							"rail",
+							"bus",
+							"ferry",
+							"cable_tram",
+							"aerial_lift",
+							"funicular",
+							"trolleybus",
+							"monorail"
+						],
+						"type": "string"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"route_type": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"short_name": {
+						"type": "string"
+					},
+					"text_colour": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"network_id",
+					"short_name",
+					"long_name",
+					"mode",
+					"route_type",
+					"colour",
+					"text_colour",
+					"agency",
+					"directions"
+				],
+				"type": "object"
+			},
+			"RoutePageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"properties": {
+								"agency": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"description": "Stable public id, e.g. 1.42041",
+									"type": "string"
+								},
+								"long_name": {
+									"type": "string"
+								},
+								"mode": {
+									"enum": [
+										"tram",
+										"metro",
+										"rail",
+										"bus",
+										"ferry",
+										"cable_tram",
+										"aerial_lift",
+										"funicular",
+										"trolleybus",
+										"monorail"
+									],
+									"type": "string"
+								},
+								"network_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"route_type": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"short_name": {
+									"type": "string"
+								},
+								"text_colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"id",
+								"network_id",
+								"short_name",
+								"long_name",
+								"mode",
+								"route_type",
+								"colour",
+								"text_colour",
+								"agency"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"prev_cursor": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
+			"RouteShapeDto": {
+				"properties": {
+					"precision": {
+						"const": 6,
+						"type": "number"
+					},
+					"route_id": {
+						"type": "string"
+					},
+					"shapes": {
+						"items": {
+							"properties": {
+								"direction": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"pattern_id": {
+									"type": "string"
+								},
+								"polyline": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"direction",
+								"pattern_id",
+								"polyline"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"route_id",
+					"precision",
+					"shapes"
+				],
+				"type": "object"
+			},
+			"SearchResultDto": {
+				"properties": {
+					"routes": {
+						"items": {
+							"properties": {
+								"agency": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"description": "Stable public id, e.g. 1.42041",
+									"type": "string"
+								},
+								"long_name": {
+									"type": "string"
+								},
+								"mode": {
+									"enum": [
+										"tram",
+										"metro",
+										"rail",
+										"bus",
+										"ferry",
+										"cable_tram",
+										"aerial_lift",
+										"funicular",
+										"trolleybus",
+										"monorail"
+									],
+									"type": "string"
+								},
+								"network_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"route_type": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"short_name": {
+									"type": "string"
+								},
+								"text_colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"id",
+								"network_id",
+								"short_name",
+								"long_name",
+								"mode",
+								"route_type",
+								"colour",
+								"text_colour",
+								"agency"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"stops": {
+						"items": {
+							"properties": {
+								"code": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"description": "Stable public id, e.g. 1.41003",
+									"type": "string"
+								},
+								"lat": {
+									"type": "number"
+								},
+								"lon": {
+									"type": "number"
+								},
+								"name": {
+									"type": "string"
+								},
+								"network_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								}
+							},
+							"required": [
+								"id",
+								"network_id",
+								"name",
+								"code",
+								"lat",
+								"lon"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"routes",
+					"stops"
+				],
+				"type": "object"
+			},
+			"StopDetailDto": {
+				"properties": {
+					"code": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"id": {
+						"description": "Stable public id, e.g. 1.41003",
+						"type": "string"
+					},
+					"lat": {
+						"type": "number"
+					},
+					"lon": {
+						"type": "number"
+					},
+					"name": {
+						"type": "string"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"routes": {
+						"items": {
+							"properties": {
+								"agency": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"description": "Stable public id, e.g. 1.42041",
+									"type": "string"
+								},
+								"long_name": {
+									"type": "string"
+								},
+								"mode": {
+									"enum": [
+										"tram",
+										"metro",
+										"rail",
+										"bus",
+										"ferry",
+										"cable_tram",
+										"aerial_lift",
+										"funicular",
+										"trolleybus",
+										"monorail"
+									],
+									"type": "string"
+								},
+								"network_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"route_type": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"short_name": {
+									"type": "string"
+								},
+								"text_colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"id",
+								"network_id",
+								"short_name",
+								"long_name",
+								"mode",
+								"route_type",
+								"colour",
+								"text_colour",
+								"agency"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"network_id",
+					"name",
+					"code",
+					"lat",
+					"lon",
+					"routes"
+				],
+				"type": "object"
+			},
+			"StopPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"properties": {
+								"code": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"description": "Stable public id, e.g. 1.41003",
+									"type": "string"
+								},
+								"lat": {
+									"type": "number"
+								},
+								"lon": {
+									"type": "number"
+								},
+								"name": {
+									"type": "string"
+								},
+								"network_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								}
+							},
+							"required": [
+								"id",
+								"network_id",
+								"name",
+								"code",
+								"lat",
+								"lon"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"prev_cursor": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
+			"TimetableDto": {
+				"properties": {
+					"date": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"day_type": {
+						"enum": [
+							"weekday",
+							"saturday",
+							"sunday"
+						],
+						"type": "string"
+					},
+					"patterns": {
+						"items": {
+							"properties": {
+								"departures": {
+									"items": {
+										"properties": {
+											"headsign": {
+												"type": [
+													"string",
+													"null"
+												]
+											},
+											"start": {
+												"type": "string"
+											},
+											"start_s": {
+												"maximum": 9007199254740991,
+												"minimum": -9007199254740991,
+												"type": "integer"
+											},
+											"trip_id": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"trip_id",
+											"start",
+											"start_s",
+											"headsign"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"direction": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"headsign": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								},
+								"stops": {
+									"items": {
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"name": {
+												"type": "string"
+											},
+											"offset_s": {
+												"anyOf": [
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"id",
+											"name",
+											"offset_s"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							},
+							"required": [
+								"id",
+								"direction",
+								"headsign",
+								"stops",
+								"departures"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"route_id": {
+						"type": "string"
+					},
+					"service_labels": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"route_id",
+					"date",
+					"day_type",
+					"service_labels",
+					"patterns"
 				],
 				"type": "object"
 			},
@@ -475,6 +2300,857 @@
 				},
 				"tags": [
 					"system"
+				]
+			}
+		},
+		"/v1/cities": {
+			"get": {
+				"operationId": "Cities_list",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/CityDto"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Public cities with centre, bbox and networks"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/cities/{slug}/manifest": {
+			"get": {
+				"operationId": "Cities_manifest",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "slug",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/CityManifestDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "City manifest; honours If-None-Match"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/networks/{networkId}": {
+			"get": {
+				"operationId": "Cities_network",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/NetworkManifestDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "One network's slice of the city manifest"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/routes": {
+			"get": {
+				"operationId": "Transit_routes",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "type",
+						"required": false,
+						"schema": {
+							"maximum": 20,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 100,
+							"minLength": 1,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RoutePageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Routes of a network (pagination when limit is set)"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/stops": {
+			"get": {
+				"operationId": "Transit_stops",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 100,
+							"minLength": 1,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "bbox",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/StopPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Stops of a network, optionally inside a bbox"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/providers": {
+			"get": {
+				"operationId": "Cities_providers",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/ProviderPublicDto"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Providers and what data they collect"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/routes/{routeId}": {
+			"get": {
+				"operationId": "Transit_route",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routeId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RouteDetailDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/routes/{routeId}/shape": {
+			"get": {
+				"operationId": "Transit_shape",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routeId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "direction",
+						"required": false,
+						"schema": {
+							"maximum": 1,
+							"minimum": 0,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/RouteShapeDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Encoded polylines (precision 6) per direction"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/routes/{routeId}/timetable": {
+			"get": {
+				"operationId": "Transit_timetable",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routeId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "direction",
+						"required": false,
+						"schema": {
+							"maximum": 1,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "date",
+						"required": false,
+						"schema": {
+							"format": "date",
+							"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "day_type",
+						"required": false,
+						"schema": {
+							"enum": [
+								"weekday",
+								"saturday",
+								"sunday"
+							],
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/TimetableDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Timetable for a date or a day type"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/search": {
+			"get": {
+				"operationId": "Transit_search",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "q",
+						"required": true,
+						"schema": {
+							"maxLength": 100,
+							"minLength": 1,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "city",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "network",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 20,
+							"maximum": 50,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SearchResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Routes and stops (FTS5, Turkish folding)"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/stops/{stopId}": {
+			"get": {
+				"operationId": "Transit_stop",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stopId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/StopDetailDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/stops/nearby": {
+			"get": {
+				"operationId": "Transit_nearby",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "lat",
+						"required": true,
+						"schema": {
+							"maximum": 90,
+							"minimum": -90,
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "lon",
+						"required": true,
+						"schema": {
+							"maximum": 180,
+							"minimum": -180,
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "radius",
+						"required": false,
+						"schema": {
+							"default": 500,
+							"maximum": 1500,
+							"minimum": 50,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "network",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 30,
+							"maximum": 30,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/NearbyDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Nearby stops; coordinates are never logged or stored"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
 				]
 			}
 		},

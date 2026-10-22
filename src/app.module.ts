@@ -17,10 +17,14 @@ import {
 import { RATE_LIMIT_PRESETS, RateLimitModule } from "@common/rate-limits"
 import { clientIp } from "@common/utils"
 import { DatabaseModule } from "@db"
+import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
 import { KeysModule } from "@services/oauth/keys.module"
+import { NetworksModule } from "@services/networks/networks.module"
+import { ProvidersModule } from "@services/providers/providers.module"
 import { SystemModule } from "@services/system/system.module"
+import { TransitModule } from "@services/transit/transit.module"
 
 @Module({})
 export class AppModule {
@@ -47,6 +51,11 @@ export class AppModule {
 				SystemModule,
 				KeysModule,
 				EmailModule,
+				// Transit catalog, providers and static data (P3).
+				ProvidersModule,
+				NetworksModule,
+				TransitModule,
+				CitiesModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],
