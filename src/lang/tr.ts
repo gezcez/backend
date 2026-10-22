@@ -1,0 +1,31 @@
+// tr.ts
+// Turkish strings (siz register) for emails and other server-rendered text.
+
+import type { LangKey } from "./en"
+
+export const tr: Record<LangKey, string> = {
+	"email.footer":
+		"gezcez, herkes için toplu taşıma. Bu e-postayı, bu adres gezcez'de kullanıldığı için aldınız.",
+	"email.ignore": "Bu işlemi siz yapmadıysanız bu e-postayı yok sayabilirsiniz.",
+	"email.code_valid": "Kod {minutes} dakika geçerlidir.",
+	"email.signin_code.subject": "gezcez giriş kodunuz: {code}",
+	"email.signin_code.title": "gezcez'e giriş yapın",
+	"email.signin_code.intro": "Giriş yapmak için bu kodu kullanın:",
+	"email.signup_code.subject": "gezcez kayıt kodunuz: {code}",
+	"email.signup_code.title": "gezcez hesabınızı oluşturun",
+	"email.signup_code.intro": "Hesabınızı oluşturmayı tamamlamak için bu kodu kullanın:",
+	"email.reauth_code.subject": "Kimliğinizi doğrulayın: {code}",
+	"email.reauth_code.title": "Kimliğinizi doğrulayın",
+	"email.reauth_code.intro": "Hesabınızdaki hassas bir işlemi onaylamak için bu kodu kullanın:",
+	"email.reset_code.subject": "gezcez şifre sıfırlama kodunuz: {code}",
+	"email.reset_code.title": "Şifrenizi sıfırlayın",
+	"email.reset_code.intro": "Yeni bir şifre belirlemek için bu kodu kullanın:",
+	"email.reset_unavailable.subject": "Şifre sıfırlama isteği",
+	"email.reset_unavailable.title": "Şifre sıfırlama isteği",
+	"email.reset_unavailable.intro":
+		"Bu adres için şifre sıfırlama istendi, ancak sıfırlanacak bir şifre yok. E-postanıza gönderilen bir kodla her zaman giriş yapabilirsiniz.",
+	"email.password_changed.subject": "gezcez şifreniz değiştirildi",
+	"email.password_changed.title": "Şifre değiştirildi",
+	"email.password_changed.intro":
+		"gezcez hesabınızın şifresi az önce değiştirildi ve diğer tüm oturumlar kapatıldı. Bu işlemi siz yapmadıysanız hemen şifrenizi sıfırlayın ve info@gezcez.com adresine yazın.",
+}

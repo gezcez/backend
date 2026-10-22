@@ -9,6 +9,8 @@ import { ConfigModule, type AppConfig } from "@common/config"
 import { pinoHttpParams } from "@common/logger"
 import { GezcezExceptionFilter, ResponseInterceptor } from "@common/middlewares"
 import { DatabaseModule } from "@db"
+import { EmailModule } from "@services/email/email.module"
+import { TestMailboxModule } from "@services/email/test-mailbox.controller"
 import { KeysModule } from "@services/oauth/keys.module"
 import { SystemModule } from "@services/system/system.module"
 
@@ -23,6 +25,9 @@ export class AppModule {
 				DatabaseModule,
 				SystemModule,
 				KeysModule,
+				EmailModule,
+				// Test-only routes are not even registered outside NODE_ENV=test.
+				...(config.isTest ? [TestMailboxModule] : []),
 			],
 			providers: [
 				{ provide: APP_FILTER, useClass: GezcezExceptionFilter },
