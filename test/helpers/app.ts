@@ -34,6 +34,8 @@ export function testConfig(dataDir: string, env: Record<string, string> = {}): A
 		EMAIL_TRANSPORT: "memory",
 		PUBLIC_API_URL: "http://localhost:8080",
 		PORT: "0",
+		// Suites send many codes from one IP; ratelimit.e2e.ts tests the real limits.
+		RATE_LIMIT_SCALE: "50",
 		...env,
 	})
 }

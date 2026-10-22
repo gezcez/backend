@@ -55,6 +55,8 @@ export const EnvSchema = z
 			.optional(),
 		STEP_UP_MAX_AGE_S: z.coerce.number().int().positive().default(600),
 		REFRESH_GRACE_S: z.coerce.number().int().min(0).max(60).default(10),
+		/** Multiplies every rate limit (tests raise it; 0 is not allowed). */
+		RATE_LIMIT_SCALE: z.coerce.number().positive().default(1),
 		EMAIL_TRANSPORT: z.enum(["ses", "console", "memory"]).default("console"),
 		EMAIL_FROM: z.string().default("gezcez <noreply@gezcez.com>"),
 		SES_REGION: z.string().optional(),
@@ -127,6 +129,7 @@ export interface AppConfig {
 	stagingTestOtp?: string
 	stepUpMaxAgeS: number
 	refreshGraceS: number
+	rateLimitScale: number
 	email: {
 		transport: Env["EMAIL_TRANSPORT"]
 		from: string
@@ -184,6 +187,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 		stagingTestOtp: env.STAGING_TEST_OTP,
 		stepUpMaxAgeS: env.STEP_UP_MAX_AGE_S,
 		refreshGraceS: env.REFRESH_GRACE_S,
+		rateLimitScale: env.RATE_LIMIT_SCALE,
 		email: {
 			transport: env.EMAIL_TRANSPORT,
 			from: env.EMAIL_FROM,
