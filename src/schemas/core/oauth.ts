@@ -66,6 +66,7 @@ export type RefreshRevokeReason =
 	| "ban"
 	| "user_revoked"
 	| "app_revoked"
+	| "admin_revoked"
 	| "session_revoked"
 	| "code_replayed"
 	| "password_reset"

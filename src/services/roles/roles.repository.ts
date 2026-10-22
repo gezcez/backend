@@ -116,6 +116,10 @@ export class RolesRepository {
 			?.id
 	}
 
+	findRoleById(id: number): RoleRow | undefined {
+		return this.db.select().from(rolesTable).where(eq(rolesTable.id, id)).get()
+	}
+
 	findRoleByKey(key: string): RoleRow | undefined {
 		return this.db.select().from(rolesTable).where(eq(rolesTable.key, key)).get()
 	}

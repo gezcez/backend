@@ -24,6 +24,7 @@ import { EmailModule } from "@services/email/email.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
 import { KeysModule } from "@services/oauth/keys.module"
 import { OAuthModule } from "@services/oauth/oauth.module"
+import { RefsModule } from "@services/refs/refs.module"
 import { RolesModule } from "@services/roles/roles.module"
 import { SystemModule } from "@services/system/system.module"
 import { UsersModule } from "@services/users/users.module"
@@ -53,6 +54,7 @@ export class AppModule {
 				SystemModule,
 				KeysModule,
 				EmailModule,
+				RefsModule,
 				AuditModule,
 				AccountModule,
 				OAuthModule,

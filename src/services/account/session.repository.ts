@@ -44,6 +44,8 @@ function refreshReason(reason: SessionRevokeReason): RefreshRevokeReason {
 			return "reuse_detected"
 		case "password_reset":
 			return "password_reset"
+		case "admin_revoked":
+			return "admin_revoked"
 		default:
 			return "session_revoked"
 	}
