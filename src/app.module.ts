@@ -19,10 +19,14 @@ import { RATE_LIMIT_PRESETS, RateLimitModule } from "@common/rate-limits"
 import { clientIp } from "@common/utils"
 import { DatabaseModule } from "@db"
 import { AccountModule } from "@services/account/account.module"
+import { AnalyticsModule } from "@services/analytics/analytics.module"
+import { DuckDbModule } from "@services/analytics/duckdb.module"
+import { ArchiveModule } from "@services/archive/archive.module"
 import { AppsModule } from "@services/apps/apps.module"
 import { AuditModule } from "@services/audit/audit.module"
 import { CitiesModule } from "@services/cities/cities.module"
 import { EmailModule } from "@services/email/email.module"
+import { FavouritesModule } from "@services/favourites/favourites.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
 import { ModerationModule } from "@services/moderation/moderation.module"
 import { NetworksCoreModule } from "@services/networks/networks-core.module"
@@ -33,6 +37,7 @@ import { ProvidersModule } from "@services/providers/providers.module"
 import { RefsModule } from "@services/refs/refs.module"
 import { RolesModule } from "@services/roles/roles.module"
 import { SystemModule } from "@services/system/system.module"
+import { TelemetryModule } from "@services/telemetry/telemetry.module"
 import { trackerRunner } from "@services/tracker/tracker-host.service"
 import { TrackerModule } from "@services/tracker/tracker.module"
 import { TransitModule } from "@services/transit/transit.module"
@@ -87,7 +92,14 @@ export class AppModule {
 				CitiesModule,
 				TrackerModule.forRoot(config),
 				VehiclesModule,
+				// Parquet archive and DuckDB analytics (P3).
+				DuckDbModule,
+				ArchiveModule.forRoot(),
+				AnalyticsModule,
 				WsModule,
+				// Mobile MVP support (P4).
+				FavouritesModule,
+				TelemetryModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],
@@ -119,6 +131,9 @@ export class AppModule {
 				ProvidersModule.forRoot({ persistTokens: true }),
 				NetworksCoreModule,
 				TrackerModule.forRoot(config, { http: false }),
+				// The process that writes vts.db runs the nightly export (plan 3.1).
+				DuckDbModule,
+				ArchiveModule.forRoot({ http: false }),
 			],
 		}
 	}

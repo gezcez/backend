@@ -51,6 +51,8 @@ export function testConfig(dataDir: string, env: Record<string, string> = {}): A
 		// Suites start the tracker and the static sync themselves when they need them.
 		TRACKER_RUNNER: "off",
 		TRANSIT_SYNC_AT: "off",
+		ARCHIVE_EXPORT_AT: "off",
+		AGGREGATES_AT: "off",
 		...env,
 	})
 }

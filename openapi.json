@@ -43,6 +43,65 @@
 				],
 				"type": "object"
 			},
+			"AlertDto": {
+				"properties": {
+					"active_from": {
+						"type": "string"
+					},
+					"active_to": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"body": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"route_ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"severity": {
+						"enum": [
+							"info",
+							"warning",
+							"severe"
+						],
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"url": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"network_id",
+					"title",
+					"body",
+					"severity",
+					"route_ids",
+					"active_from",
+					"active_to",
+					"url"
+				],
+				"type": "object"
+			},
 			"ApiError": {
 				"additionalProperties": false,
 				"properties": {
@@ -449,6 +508,176 @@
 					"confidential"
 				],
 				"type": "string"
+			},
+			"ArchiveStatusDto": {
+				"properties": {
+					"can_write": {
+						"type": "boolean"
+					},
+					"entries": {
+						"items": {
+							"properties": {
+								"binding_id": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"bytes": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"dataset": {
+									"enum": [
+										"positions",
+										"trip_runs",
+										"polls"
+									],
+									"type": "string"
+								},
+								"date": {
+									"type": "string"
+								},
+								"exported_at": {
+									"type": "string"
+								},
+								"path": {
+									"type": "string"
+								},
+								"rows": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"sha256": {
+									"type": "string"
+								},
+								"state": {
+									"enum": [
+										"failed",
+										"verified",
+										"uploaded"
+									],
+									"type": "string"
+								},
+								"uploaded_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"verified_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"binding_id",
+								"date",
+								"dataset",
+								"rows",
+								"bytes",
+								"sha256",
+								"path",
+								"exported_at",
+								"verified_at",
+								"uploaded_at",
+								"state"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"last_run": {
+						"anyOf": [
+							{
+								"properties": {
+									"days": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"failures": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"finished_at": {
+										"type": "string"
+									},
+									"pruned": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"started_at": {
+										"type": "string"
+									},
+									"uploads_retried": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									}
+								},
+								"required": [
+									"started_at",
+									"finished_at",
+									"days",
+									"failures",
+									"uploads_retried",
+									"pruned"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"schedules": {
+						"items": {
+							"properties": {
+								"key": {
+									"enum": [
+										"archive.export",
+										"analytics.aggregates"
+									],
+									"type": "string"
+								},
+								"next_run_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"key",
+								"next_run_at"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"uploader": {
+						"enum": [
+							"none",
+							"local",
+							"s3"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"uploader",
+					"can_write",
+					"schedules",
+					"last_run",
+					"entries"
+				],
+				"type": "object"
 			},
 			"AuditEntry": {
 				"properties": {
@@ -3299,6 +3528,81 @@
 				],
 				"type": "object"
 			},
+			"DayExportDto": {
+				"properties": {
+					"binding_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"datasets": {
+						"items": {
+							"properties": {
+								"bytes": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"dataset": {
+									"enum": [
+										"positions",
+										"trip_runs",
+										"polls"
+									],
+									"type": "string"
+								},
+								"error": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"rows": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"sha256": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"uploaded": {
+									"type": "boolean"
+								},
+								"verified": {
+									"type": "boolean"
+								}
+							},
+							"required": [
+								"dataset",
+								"rows",
+								"bytes",
+								"sha256",
+								"verified",
+								"uploaded",
+								"error"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"date": {
+						"type": "string"
+					},
+					"skipped": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"binding_id",
+					"date",
+					"skipped",
+					"datasets"
+				],
+				"type": "object"
+			},
 			"DeletedDto": {
 				"properties": {
 					"deleted": {
@@ -3877,6 +4181,181 @@
 				],
 				"type": "object"
 			},
+			"FavouritesDocDto": {
+				"properties": {
+					"groups": {
+						"items": {
+							"properties": {
+								"colour": {
+									"enum": [
+										"amber",
+										"navy",
+										"teal",
+										"rose",
+										"violet",
+										"green",
+										"orange",
+										"slate"
+									],
+									"type": "string"
+								},
+								"id": {
+									"maxLength": 64,
+									"minLength": 1,
+									"type": "string"
+								},
+								"items": {
+									"items": {
+										"properties": {
+											"added_at": {
+												"format": "date-time",
+												"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+												"type": "string"
+											},
+											"direction": {
+												"anyOf": [
+													{
+														"const": 0,
+														"type": "number"
+													},
+													{
+														"const": 1,
+														"type": "number"
+													}
+												]
+											},
+											"id": {
+												"maxLength": 64,
+												"minLength": 1,
+												"type": "string"
+											},
+											"kind": {
+												"enum": [
+													"stop",
+													"route"
+												],
+												"type": "string"
+											},
+											"label": {
+												"maxLength": 120,
+												"type": "string"
+											},
+											"network_id": {
+												"anyOf": [
+													{
+														"maxLength": 64,
+														"minLength": 1,
+														"type": "string"
+													},
+													{
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991,
+														"type": "integer"
+													}
+												],
+												"description": "Network slug (returned) or numeric id (accepted)"
+											},
+											"ref_id": {
+												"description": "Stable public stop or route id",
+												"maxLength": 200,
+												"minLength": 1,
+												"type": "string"
+											},
+											"updated_at": {
+												"format": "date-time",
+												"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+												"type": "string"
+											}
+										},
+										"required": [
+											"id",
+											"kind",
+											"network_id",
+											"ref_id",
+											"label",
+											"added_at"
+										],
+										"type": "object"
+									},
+									"maxItems": 500,
+									"type": "array"
+								},
+								"name": {
+									"maxLength": 60,
+									"type": "string"
+								},
+								"position": {
+									"maximum": 10000,
+									"minimum": 0,
+									"type": "integer"
+								},
+								"updated_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"name",
+								"colour",
+								"position",
+								"items"
+							],
+							"type": "object"
+						},
+						"maxItems": 50,
+						"type": "array"
+					},
+					"tombstones": {
+						"description": "Deletes from the last 30 days",
+						"items": {
+							"properties": {
+								"deleted_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+									"type": "string"
+								},
+								"id": {
+									"maxLength": 64,
+									"minLength": 1,
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"deleted_at"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"updated_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"version": {
+						"maximum": 9007199254740991,
+						"minimum": 0,
+						"type": "integer"
+					}
+				},
+				"required": [
+					"version",
+					"updated_at",
+					"groups",
+					"tombstones"
+				],
+				"type": "object"
+			},
 			"HealthDto": {
 				"properties": {
 					"status": {
@@ -4393,6 +4872,184 @@
 					"next_cursor",
 					"prev_cursor",
 					"total"
+				],
+				"type": "object"
+			},
+			"MetricCatalogDto": {
+				"properties": {
+					"archive": {
+						"properties": {
+							"first_date": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"last_date": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"first_date",
+							"last_date"
+						],
+						"type": "object"
+					},
+					"h3": {
+						"enum": [
+							"extension",
+							"js"
+						],
+						"type": "string"
+					},
+					"max_days": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"metrics": {
+						"items": {
+							"properties": {
+								"datasets": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"description": {
+									"type": "string"
+								},
+								"key": {
+									"enum": [
+										"fleet.hourly",
+										"fleet.vehicle-days",
+										"runs.runtime",
+										"runs.departures",
+										"headways.observed",
+										"adherence.departure",
+										"speed.heatmap",
+										"segments.travel-time",
+										"dwell.stops",
+										"quality.feed",
+										"coverage.routes",
+										"headways.marey"
+									],
+									"type": "string"
+								}
+							},
+							"required": [
+								"key",
+								"description",
+								"datasets"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"metrics",
+					"max_days",
+					"h3",
+					"archive"
+				],
+				"type": "object"
+			},
+			"MetricResultDto": {
+				"properties": {
+					"columns": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"meta": {
+						"properties": {
+							"binding_ids": {
+								"items": {
+									"maximum": 9007199254740991,
+									"minimum": -9007199254740991,
+									"type": "integer"
+								},
+								"type": "array"
+							},
+							"from": {
+								"type": "string"
+							},
+							"generated_at": {
+								"type": "string"
+							},
+							"metric": {
+								"enum": [
+									"fleet.hourly",
+									"fleet.vehicle-days",
+									"runs.runtime",
+									"runs.departures",
+									"headways.observed",
+									"adherence.departure",
+									"speed.heatmap",
+									"segments.travel-time",
+									"dwell.stops",
+									"quality.feed",
+									"coverage.routes",
+									"headways.marey"
+								],
+								"type": "string"
+							},
+							"n": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"source": {
+								"enum": [
+									"hot",
+									"archive",
+									"rollup"
+								],
+								"type": "string"
+							},
+							"timezone": {
+								"type": "string"
+							},
+							"to": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"metric",
+							"n",
+							"generated_at",
+							"source",
+							"timezone",
+							"from",
+							"to",
+							"binding_ids"
+						],
+						"type": "object"
+					},
+					"rows": {
+						"items": {
+							"items": {
+								"type": [
+									"number",
+									"string",
+									"boolean",
+									"null"
+								]
+							},
+							"type": "array"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"columns",
+					"rows",
+					"meta"
 				],
 				"type": "object"
 			},
@@ -5014,6 +5671,182 @@
 					"claims_supported",
 					"prompt_values_supported",
 					"ui_locales_supported"
+				],
+				"type": "object"
+			},
+			"PackDto": {
+				"properties": {
+					"built_at": {
+						"type": "string"
+					},
+					"network": {
+						"description": "Network slug",
+						"type": "string"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"pack_version": {
+						"description": "Same value as the manifest's pack_version",
+						"type": "string"
+					},
+					"routes": {
+						"items": {
+							"properties": {
+								"colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"directions": {
+									"items": {
+										"properties": {
+											"direction": {
+												"anyOf": [
+													{
+														"const": 0,
+														"type": "number"
+													},
+													{
+														"const": 1,
+														"type": "number"
+													}
+												]
+											},
+											"headsign": {
+												"type": "string"
+											},
+											"stop_ids": {
+												"description": "Ordered stops of the main pattern",
+												"items": {
+													"type": "string"
+												},
+												"type": "array"
+											}
+										},
+										"required": [
+											"direction",
+											"headsign",
+											"stop_ids"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"id": {
+									"type": "string"
+								},
+								"long_name": {
+									"type": "string"
+								},
+								"mode": {
+									"enum": [
+										"tram",
+										"metro",
+										"rail",
+										"bus",
+										"ferry",
+										"cable_tram",
+										"aerial_lift",
+										"funicular",
+										"trolleybus",
+										"monorail"
+									],
+									"type": "string"
+								},
+								"short_name": {
+									"type": "string"
+								},
+								"text_colour": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"id",
+								"short_name",
+								"long_name",
+								"mode",
+								"colour",
+								"text_colour",
+								"directions"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"stops": {
+						"items": {
+							"properties": {
+								"code": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"id": {
+									"type": "string"
+								},
+								"lat": {
+									"type": "number"
+								},
+								"lon": {
+									"type": "number"
+								},
+								"modes": {
+									"items": {
+										"enum": [
+											"tram",
+											"metro",
+											"rail",
+											"bus",
+											"ferry",
+											"cable_tram",
+											"aerial_lift",
+											"funicular",
+											"trolleybus",
+											"monorail"
+										],
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"name": {
+									"type": "string"
+								},
+								"route_ids": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								}
+							},
+							"required": [
+								"id",
+								"name",
+								"code",
+								"lat",
+								"lon",
+								"modes",
+								"route_ids"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"network",
+					"network_id",
+					"pack_version",
+					"built_at",
+					"stops",
+					"routes"
 				],
 				"type": "object"
 			},
@@ -5733,6 +6566,179 @@
 					"enabled",
 					"pulled_data",
 					"legal_note"
+				],
+				"type": "object"
+			},
+			"PutFavouritesDto": {
+				"properties": {
+					"groups": {
+						"items": {
+							"properties": {
+								"colour": {
+									"enum": [
+										"amber",
+										"navy",
+										"teal",
+										"rose",
+										"violet",
+										"green",
+										"orange",
+										"slate"
+									],
+									"type": "string"
+								},
+								"id": {
+									"maxLength": 64,
+									"minLength": 1,
+									"type": "string"
+								},
+								"items": {
+									"items": {
+										"properties": {
+											"added_at": {
+												"format": "date-time",
+												"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+												"type": "string"
+											},
+											"direction": {
+												"anyOf": [
+													{
+														"const": 0,
+														"type": "number"
+													},
+													{
+														"const": 1,
+														"type": "number"
+													}
+												]
+											},
+											"id": {
+												"maxLength": 64,
+												"minLength": 1,
+												"type": "string"
+											},
+											"kind": {
+												"enum": [
+													"stop",
+													"route"
+												],
+												"type": "string"
+											},
+											"label": {
+												"maxLength": 120,
+												"type": "string"
+											},
+											"network_id": {
+												"anyOf": [
+													{
+														"maxLength": 64,
+														"minLength": 1,
+														"type": "string"
+													},
+													{
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991,
+														"type": "integer"
+													}
+												],
+												"description": "Network slug (returned) or numeric id (accepted)"
+											},
+											"ref_id": {
+												"description": "Stable public stop or route id",
+												"maxLength": 200,
+												"minLength": 1,
+												"type": "string"
+											},
+											"updated_at": {
+												"format": "date-time",
+												"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+												"type": "string"
+											}
+										},
+										"required": [
+											"id",
+											"kind",
+											"network_id",
+											"ref_id",
+											"label",
+											"added_at"
+										],
+										"type": "object"
+									},
+									"maxItems": 500,
+									"type": "array"
+								},
+								"name": {
+									"maxLength": 60,
+									"type": "string"
+								},
+								"position": {
+									"maximum": 10000,
+									"minimum": 0,
+									"type": "integer"
+								},
+								"updated_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"name",
+								"colour",
+								"position",
+								"items"
+							],
+							"type": "object"
+						},
+						"maxItems": 50,
+						"type": "array"
+					},
+					"tombstones": {
+						"default": [],
+						"items": {
+							"properties": {
+								"deleted_at": {
+									"format": "date-time",
+									"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+									"type": "string"
+								},
+								"id": {
+									"maxLength": 64,
+									"minLength": 1,
+									"type": "string"
+								}
+							},
+							"required": [
+								"id",
+								"deleted_at"
+							],
+							"type": "object"
+						},
+						"maxItems": 2000,
+						"type": "array"
+					},
+					"updated_at": {
+						"anyOf": [
+							{
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"version": {
+						"maximum": 9007199254740991,
+						"minimum": 0,
+						"type": "integer"
+					}
+				},
+				"required": [
+					"groups"
 				],
 				"type": "object"
 			},
@@ -7402,6 +8408,73 @@
 					"next_cursor",
 					"prev_cursor",
 					"total"
+				],
+				"type": "object"
+			},
+			"TelemetryAcceptedDto": {
+				"properties": {
+					"accepted": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"accepted"
+				],
+				"type": "object"
+			},
+			"TelemetryCountersDto": {
+				"properties": {
+					"app_version": {
+						"maxLength": 32,
+						"minLength": 1,
+						"pattern": "^[0-9A-Za-z.+-]+$",
+						"type": "string"
+					},
+					"city": {
+						"anyOf": [
+							{
+								"maxLength": 64,
+								"minLength": 1,
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "City slug, or null before one is chosen"
+					},
+					"counters": {
+						"additionalProperties": {
+							"maximum": 10000,
+							"minimum": 0,
+							"type": "integer"
+						},
+						"propertyNames": {
+							"pattern": "^[a-z0-9_.]{1,64}$",
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"day": {
+						"description": "The app's local day, YYYY-MM-DD; within two days of today",
+						"format": "date",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+						"type": "string"
+					},
+					"platform": {
+						"enum": [
+							"ios",
+							"android"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"day",
+					"platform",
+					"app_version",
+					"city",
+					"counters"
 				],
 				"type": "object"
 			},
@@ -11723,6 +12796,173 @@
 				"x-gezcez-sudo": true
 			}
 		},
+		"/v1/dash/archive": {
+			"get": {
+				"operationId": "ArchiveAdmin_status",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "binding_id",
+						"required": false,
+						"schema": {
+							"exclusiveMinimum": 0,
+							"maximum": 9007199254740991,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 150,
+							"maximum": 1000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/ArchiveStatusDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: archive"
+				],
+				"x-gezcez-permission": {
+					"key": "archive.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/archive/{bindingId}/{date}/export": {
+			"post": {
+				"operationId": "ArchiveAdmin_export",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "bindingId",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
+						"name": "date",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DayExportDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: archive"
+				],
+				"x-gezcez-permission": {
+					"key": "archive.write",
+					"scope": "global"
+				}
+			}
+		},
 		"/v1/dash/audit": {
 			"get": {
 				"operationId": "Audit_list",
@@ -12177,6 +13417,560 @@
 				],
 				"x-gezcez-permission": {
 					"key": "catalog.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/analytics": {
+			"get": {
+				"operationId": "Analytics_catalog",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/MetricCatalogDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: analytics"
+				],
+				"x-gezcez-permission": {
+					"key": "analytics.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/analytics/{metric}": {
+			"get": {
+				"operationId": "Analytics_metric",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "metric",
+						"required": true,
+						"schema": {
+							"enum": [
+								"fleet.hourly",
+								"fleet.vehicle-days",
+								"runs.runtime",
+								"runs.departures",
+								"headways.observed",
+								"adherence.departure",
+								"speed.heatmap",
+								"segments.travel-time",
+								"dwell.stops",
+								"quality.feed",
+								"coverage.routes",
+								"headways.marey"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "First local date (default: 6 days before `to`)",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Last local date, inclusive (default: today)",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "One local day (sets from and to)",
+						"in": "query",
+						"name": "date",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Route id(s), comma separated: external or public `<binding>.<external>`",
+						"in": "query",
+						"name": "route_id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "direction",
+						"required": false,
+						"schema": {
+							"maximum": 1,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "day_type",
+						"required": false,
+						"schema": {
+							"default": "all",
+							"enum": [
+								"all",
+								"weekday",
+								"saturday",
+								"sunday"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "hour_from",
+						"required": false,
+						"schema": {
+							"default": 0,
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "hour_to",
+						"required": false,
+						"schema": {
+							"default": 23,
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "One binding of the network",
+						"in": "query",
+						"name": "binding_id",
+						"required": false,
+						"schema": {
+							"exclusiveMinimum": 0,
+							"maximum": 9007199254740991,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "fleet.hourly bucket size",
+						"in": "query",
+						"name": "granularity",
+						"required": false,
+						"schema": {
+							"default": "1h",
+							"enum": [
+								"5m",
+								"1h",
+								"1d"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "speed.heatmap H3 resolution",
+						"in": "query",
+						"name": "res",
+						"required": false,
+						"schema": {
+							"default": 8,
+							"maximum": 10,
+							"minimum": 5,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "speed.heatmap: one local hour",
+						"in": "query",
+						"name": "hour",
+						"required": false,
+						"schema": {
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "speed.heatmap: minimum samples per cell",
+						"in": "query",
+						"name": "min_samples",
+						"required": false,
+						"schema": {
+							"default": 30,
+							"maximum": 100000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "runs.runtime: minimum max_stop_seq of a run",
+						"in": "query",
+						"name": "min_stops",
+						"required": false,
+						"schema": {
+							"default": 5,
+							"maximum": 1000,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "dwell.stops: one stop, by hour",
+						"in": "query",
+						"name": "stop_id",
+						"required": false,
+						"schema": {
+							"pattern": "^[\\w.:-]{1,80}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "dwell.stops: top N",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 100,
+							"maximum": 5000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/MetricResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: analytics"
+				],
+				"x-gezcez-permission": {
+					"key": "analytics.read",
+					"scope": "network"
+				}
+			}
+		},
+		"/v1/dash/networks/{networkId}/analytics/{metric}/export": {
+			"get": {
+				"operationId": "Analytics_export",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "metric",
+						"required": true,
+						"schema": {
+							"enum": [
+								"fleet.hourly",
+								"fleet.vehicle-days",
+								"runs.runtime",
+								"runs.departures",
+								"headways.observed",
+								"adherence.departure",
+								"speed.heatmap",
+								"segments.travel-time",
+								"dwell.stops",
+								"quality.feed",
+								"coverage.routes",
+								"headways.marey"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "First local date (default: 6 days before `to`)",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Last local date, inclusive (default: today)",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "One local day (sets from and to)",
+						"in": "query",
+						"name": "date",
+						"required": false,
+						"schema": {
+							"pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Route id(s), comma separated: external or public `<binding>.<external>`",
+						"in": "query",
+						"name": "route_id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "direction",
+						"required": false,
+						"schema": {
+							"maximum": 1,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "day_type",
+						"required": false,
+						"schema": {
+							"default": "all",
+							"enum": [
+								"all",
+								"weekday",
+								"saturday",
+								"sunday"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "hour_from",
+						"required": false,
+						"schema": {
+							"default": 0,
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "hour_to",
+						"required": false,
+						"schema": {
+							"default": 23,
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "One binding of the network",
+						"in": "query",
+						"name": "binding_id",
+						"required": false,
+						"schema": {
+							"exclusiveMinimum": 0,
+							"maximum": 9007199254740991,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "fleet.hourly bucket size",
+						"in": "query",
+						"name": "granularity",
+						"required": false,
+						"schema": {
+							"default": "1h",
+							"enum": [
+								"5m",
+								"1h",
+								"1d"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "speed.heatmap H3 resolution",
+						"in": "query",
+						"name": "res",
+						"required": false,
+						"schema": {
+							"default": 8,
+							"maximum": 10,
+							"minimum": 5,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "speed.heatmap: one local hour",
+						"in": "query",
+						"name": "hour",
+						"required": false,
+						"schema": {
+							"maximum": 23,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "speed.heatmap: minimum samples per cell",
+						"in": "query",
+						"name": "min_samples",
+						"required": false,
+						"schema": {
+							"default": 30,
+							"maximum": 100000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "runs.runtime: minimum max_stop_seq of a run",
+						"in": "query",
+						"name": "min_stops",
+						"required": false,
+						"schema": {
+							"default": 5,
+							"maximum": 1000,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "dwell.stops: one stop, by hour",
+						"in": "query",
+						"name": "stop_id",
+						"required": false,
+						"schema": {
+							"pattern": "^[\\w.:-]{1,80}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "dwell.stops: top N",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 100,
+							"maximum": 5000,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "format",
+						"required": false,
+						"schema": {
+							"default": "csv",
+							"enum": [
+								"csv",
+								"parquet"
+							],
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The metric's rows as a file"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"tags": [
+					"dash: analytics"
+				],
+				"x-gezcez-permission": {
+					"key": "analytics.export",
 					"scope": "network"
 				}
 			}
@@ -15008,6 +16802,136 @@
 				]
 			}
 		},
+		"/v1/me/favourites": {
+			"get": {
+				"operationId": "Favourites_get",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/FavouritesDocDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "The favourites document, with ETag \"<version>\"",
+				"tags": [
+					"me"
+				]
+			},
+			"put": {
+				"operationId": "Favourites_put",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "if-match",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The version last read, e.g. \"3\"",
+						"in": "header",
+						"name": "If-Match",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PutFavouritesDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/FavouritesDocDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Replace the favourites document; 412 VERSION_CONFLICT when If-Match is stale",
+				"tags": [
+					"me"
+				]
+			}
+		},
 		"/v1/networks/{networkId}": {
 			"get": {
 				"operationId": "Cities_network",
@@ -15046,6 +16970,127 @@
 							}
 						},
 						"description": "One network's slice of the city manifest"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/alerts": {
+			"get": {
+				"operationId": "Transit_networkAlerts",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/AlertDto"
+											},
+											"type": "array"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Active service alerts; an empty list unless the network has the alerts capability"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit"
+				]
+			}
+		},
+		"/v1/networks/{networkId}/pack": {
+			"get": {
+				"operationId": "Pack_pack",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "header",
+						"name": "If-None-Match",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PackDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Offline pack of a network; re-download when the manifest's pack_version changes. Strong ETag, 304 on If-None-Match, gzip when accepted."
 					},
 					"default": {
 						"content": {
@@ -16605,6 +18650,63 @@
 				},
 				"tags": [
 					"system"
+				]
+			}
+		},
+		"/v1/telemetry/counters": {
+			"post": {
+				"operationId": "Telemetry_counters",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TelemetryCountersDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/TelemetryAcceptedDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Add a day's aggregate app counters (no identifiers)",
+				"tags": [
+					"telemetry"
 				]
 			}
 		},

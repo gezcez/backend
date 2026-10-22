@@ -174,3 +174,16 @@ export const SyncRunSchema = z.object({
 export class SyncRunPageDto extends createZodDto(pageSchema(SyncRunSchema)) {}
 
 export { ModeSchema }
+
+export const AlertSchema = z.object({
+	id: z.string(),
+	network_id: z.number().int(),
+	title: z.string(),
+	body: z.string(),
+	severity: z.enum(["info", "warning", "severe"]),
+	route_ids: z.array(z.string()),
+	active_from: z.string(),
+	active_to: z.string().nullable(),
+	url: z.string().nullable(),
+})
+export class AlertDto extends createZodDto(AlertSchema) {}

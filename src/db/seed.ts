@@ -138,7 +138,8 @@ export function seedApps(environment: SeedEnvironment): SeedApp[] {
 			refresh_cookie: false,
 			redirect_uris: ["http://localhost:4710/callback"],
 			post_logout_redirect_uris: ["http://localhost:4710/"],
-			allowed_scopes: FULL,
+			// `transit` for the rider routes (favourites) in e2e tests.
+			allowed_scopes: [...FULL, "transit"],
 			refresh_ttl_s: WEB_REFRESH_TTL,
 			environments: ["test"],
 		},
@@ -152,7 +153,8 @@ export function seedApps(environment: SeedEnvironment): SeedApp[] {
 			refresh_cookie: false,
 			redirect_uris: ["http://localhost:4710/callback"],
 			post_logout_redirect_uris: ["http://localhost:4710/"],
-			allowed_scopes: FULL,
+			// `transit` for the rider routes (favourites) in e2e tests.
+			allowed_scopes: [...FULL, "transit"],
 			refresh_ttl_s: WEB_REFRESH_TTL,
 			homepage_url: "http://localhost:4710/",
 			environments: ["test"],
