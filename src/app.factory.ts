@@ -63,6 +63,14 @@ export async function createApp(
 	app.disable("x-powered-by")
 	app.set("trust proxy", false)
 	app.set("query parser", "simple")
+	if (config.basePath) {
+		const base = config.basePath
+		app.use((req: Request, _res: Response, next: () => void) => {
+			if (req.url === base || req.url.startsWith(`${base}/`) || req.url.startsWith(`${base}?`))
+				req.url = req.url.slice(base.length) || "/"
+			next()
+		})
+	}
 	app.use(requestIdMiddleware(config.trustCfHeaders))
 	app.useBodyParser("json", { limit: "100kb" })
 	app.useBodyParser("urlencoded", { limit: "20kb", extended: false })

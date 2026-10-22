@@ -65,6 +65,11 @@ export const EnvSchema = z
 		DATA_DIR: z.string().default("./data"),
 		MIGRATIONS_DIR: z.string().default("./drizzle"),
 		PUBLIC_API_URL: z.url().default("http://localhost:8080"),
+		/** Path the API is mounted under (e.g. "/api" serves /api/v1/...); stripped before routing. */
+		BASE_PATH: z
+			.string()
+			.regex(/^(\/[\w-]+)*$/)
+			.default(""),
 		ISSUER: z.url().optional(),
 		OAUTH_UI_URL: z.url().default("http://localhost:5174"),
 		CORS_ORIGINS: csv,
@@ -217,6 +222,7 @@ export interface AppConfig {
 	dataDir: string
 	migrationsDir: string
 	publicApiUrl: string
+	basePath: string
 	issuer: string
 	oauthUiUrl: string
 	corsOrigins: string[]
@@ -321,6 +327,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 		dataDir: path.resolve(env.DATA_DIR),
 		migrationsDir: path.resolve(env.MIGRATIONS_DIR),
 		publicApiUrl,
+		basePath: env.BASE_PATH,
 		issuer: (env.ISSUER ?? publicApiUrl).replace(/\/$/, ""),
 		oauthUiUrl: env.OAUTH_UI_URL.replace(/\/$/, ""),
 		corsOrigins: env.CORS_ORIGINS,
