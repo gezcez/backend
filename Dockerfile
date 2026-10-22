@@ -20,6 +20,7 @@ ENV NODE_ENV=production \
     PORT=8080 \
     DATA_DIR=/app/data \
     MIGRATIONS_DIR=/app/drizzle \
+    DUCKDB_EXTENSION_DIR=/app/duckdb-ext \
     GIT_SHA=${GIT_SHA} \
     BUILD_TIME=${BUILD_TIME}
 WORKDIR /app
@@ -29,6 +30,13 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package.json tsconfig.json ./
 COPY src ./src
 COPY drizzle ./drizzle
+# DuckDB h3 community extension for analytics (plan 6.9). Installed at build time because the
+# runtime never downloads extensions; without it the app falls back to h3-js (same cell ids).
+RUN mkdir -p /app/duckdb-ext && \
+    bun -e "const { DuckDBInstance } = await import('@duckdb/node-api'); \
+      const i = await DuckDBInstance.create(':memory:', { extension_directory: '/app/duckdb-ext' }); \
+      const c = await i.connect(); await c.run('INSTALL h3 FROM community'); await c.run('LOAD h3')" \
+    || echo "h3 extension not installed; analytics uses h3-js"
 RUN mkdir -p /app/data && chown bun:bun /app/data
 USER bun
 VOLUME ["/app/data"]

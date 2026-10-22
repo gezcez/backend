@@ -181,6 +181,18 @@ export interface VehicleFeed {
 	invalid: number
 }
 
+export interface ServiceAlert {
+	externalId: string
+	title: string
+	body: string
+	severity: "info" | "warning" | "severe"
+	routeExts: string[]
+	/** Unix seconds. */
+	activeFrom: number
+	activeTo: number | null
+	url: string | null
+}
+
 export type DropReason = "staff" | "test"
 
 export type ProviderErrorKind =
@@ -216,6 +228,8 @@ export interface TransitProvider {
 	listRegions?(): Promise<ExternalRegion[]>
 	fetchStatic(binding: BindingContext, signal?: AbortSignal): AsyncIterable<StaticChunk>
 	fetchVehicles(binding: BindingContext, signal: AbortSignal): Promise<VehicleFeed>
+	/** Service alerts, only for providers declaring the `alerts` capability. */
+	fetchAlerts?(binding: BindingContext, signal: AbortSignal): Promise<ServiceAlert[]>
 	/** Upstream rules that drop a vehicle entirely (staff duty routes, test devices). */
 	classify?(vehicle: RawVehicle, binding: BindingContext): DropReason | null
 	/** Clears a sticky fallback URL (dashboard "clear fallback"). */

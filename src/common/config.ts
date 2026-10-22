@@ -125,6 +125,35 @@ export const EnvSchema = z
 			.regex(/^\d{2}:\d{2}$/)
 			.or(z.literal("off"))
 			.default("04:00"),
+		// ---- archive and analytics (P3, plan 5.4, 6.8, 6.9, 8.8) ----
+		/** Daily Parquet export of the previous UTC date (local Europe/Istanbul time) or "off". */
+		ARCHIVE_EXPORT_AT: z
+			.string()
+			.regex(/^\d{2}:\d{2}$/)
+			.or(z.literal("off"))
+			.default("03:30"),
+		/** Nightly materialised aggregates under data/agg (local time) or "off". */
+		AGGREGATES_AT: z
+			.string()
+			.regex(/^\d{2}:\d{2}$/)
+			.or(z.literal("off"))
+			.default("04:30"),
+		/** Days of Parquet partitions kept on local disk (uploaded ones only). */
+		ARCHIVE_LOCAL_DAYS: z.coerce.number().int().min(1).max(3650).default(90),
+		/** none: keep files local; local: copy to ARCHIVE_MIRROR_DIR; s3: R2 (S3 API). */
+		ARCHIVE_UPLOAD: z.enum(["none", "local", "s3"]).default("none"),
+		ARCHIVE_MIRROR_DIR: z.string().optional(),
+		R2_ENDPOINT: z.url().optional(),
+		R2_BUCKET: z.string().optional(),
+		R2_ACCESS_KEY_ID: z.string().optional(),
+		R2_SECRET_ACCESS_KEY: z.string().optional(),
+		R2_PREFIX: z.string().default(""),
+		DUCKDB_THREADS: z.coerce.number().int().min(1).max(64).default(2),
+		DUCKDB_MEMORY_LIMIT: z.string().default("1GB"),
+		/** Where the image preinstalls DuckDB extensions (h3); unset uses DuckDB's default. */
+		DUCKDB_EXTENSION_DIR: z.string().optional(),
+		ANALYTICS_TIMEOUT_MS: z.coerce.number().int().min(100).max(300_000).default(10_000),
+		ANALYTICS_MAX_CONCURRENT: z.coerce.number().int().min(1).max(16).default(2),
 	})
 	.superRefine((env, ctx) => {
 		const issue = (path: string, message: string) =>
@@ -136,6 +165,18 @@ export const EnvSchema = z
 			const why = deployed ? `NODE_ENV=${env.NODE_ENV}` : "PUBLIC_API_URL is not loopback"
 			for (const key of SECRET_KEYS) if (!env[key]) issue(key, `required when ${why}`)
 		}
+		if (env.ARCHIVE_UPLOAD === "s3") {
+			for (const key of [
+				"R2_ENDPOINT",
+				"R2_BUCKET",
+				"R2_ACCESS_KEY_ID",
+				"R2_SECRET_ACCESS_KEY",
+			] as const) {
+				if (!env[key]) issue(key, "required when ARCHIVE_UPLOAD=s3")
+			}
+		}
+		if (env.ARCHIVE_UPLOAD === "local" && !env.ARCHIVE_MIRROR_DIR)
+			issue("ARCHIVE_MIRROR_DIR", "required when ARCHIVE_UPLOAD=local")
 		if (deployed) {
 			if (!env.TURNSTILE_SECRET)
 				issue("TURNSTILE_SECRET", `required when NODE_ENV=${env.NODE_ENV}`)
@@ -192,6 +233,32 @@ export interface AppConfig {
 	alertWebhookUrl?: string
 	version: { gitSha: string; buildTime?: string; packageVersion: string }
 	transit: TransitConfig
+	analytics: AnalyticsConfig
+}
+
+export interface AnalyticsConfig {
+	/** data/archive: Parquet partitions region=<binding>/date=YYYY-MM-DD. */
+	archiveDir: string
+	/** data/agg: materialised aggregates. */
+	aggDir: string
+	/** Seconds after local midnight, or null when the schedule is off. */
+	exportAt: number | null
+	aggregatesAt: number | null
+	localDays: number
+	upload:
+		| { kind: "none" }
+		| { kind: "local"; dir: string }
+		| {
+				kind: "s3"
+				endpoint: string
+				bucket: string
+				accessKeyId: string
+				secretAccessKey: string
+				prefix: string
+		  }
+	duckdb: { threads: number; memoryLimit: string; extensionDir?: string }
+	timeoutMs: number
+	maxConcurrent: number
 }
 
 export interface TransitConfig {
@@ -296,6 +363,33 @@ export function loadConfig(source: Record<string, string | undefined> = process.
 			hotDays: env.VTS_HOT_DAYS,
 			retentionRequireArchive: env.VTS_RETENTION_REQUIRE_ARCHIVE,
 			syncAt: env.TRANSIT_SYNC_AT === "off" ? null : clockSeconds(env.TRANSIT_SYNC_AT),
+		},
+		analytics: {
+			archiveDir: path.join(path.resolve(env.DATA_DIR), "archive"),
+			aggDir: path.join(path.resolve(env.DATA_DIR), "agg"),
+			exportAt: env.ARCHIVE_EXPORT_AT === "off" ? null : clockSeconds(env.ARCHIVE_EXPORT_AT),
+			aggregatesAt: env.AGGREGATES_AT === "off" ? null : clockSeconds(env.AGGREGATES_AT),
+			localDays: env.ARCHIVE_LOCAL_DAYS,
+			upload:
+				env.ARCHIVE_UPLOAD === "s3"
+					? {
+							kind: "s3",
+							endpoint: env.R2_ENDPOINT!,
+							bucket: env.R2_BUCKET!,
+							accessKeyId: env.R2_ACCESS_KEY_ID!,
+							secretAccessKey: env.R2_SECRET_ACCESS_KEY!,
+							prefix: env.R2_PREFIX,
+						}
+					: env.ARCHIVE_UPLOAD === "local"
+						? { kind: "local", dir: path.resolve(env.ARCHIVE_MIRROR_DIR!) }
+						: { kind: "none" },
+			duckdb: {
+				threads: env.DUCKDB_THREADS,
+				memoryLimit: env.DUCKDB_MEMORY_LIMIT,
+				extensionDir: env.DUCKDB_EXTENSION_DIR,
+			},
+			timeoutMs: env.ANALYTICS_TIMEOUT_MS,
+			maxConcurrent: env.ANALYTICS_MAX_CONCURRENT,
 		},
 	}
 }

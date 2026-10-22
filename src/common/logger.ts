@@ -103,7 +103,9 @@ export function pinoHttpParams(config: AppConfig): Params {
 				ignore: (req: IncomingMessage) =>
 					req.url === "/health" ||
 					req.url === "/ready" ||
-					(req.url ?? "").startsWith("/v1/stops/nearby"),
+					(req.url ?? "").startsWith("/v1/stops/nearby") ||
+					// Telemetry is anonymous by design: no access log line with an IP for it.
+					(req.url ?? "").startsWith("/v1/telemetry"),
 			},
 			serializers: {
 				req: (req: { method: string; url: string; id: string }) => ({

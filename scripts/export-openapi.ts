@@ -25,6 +25,8 @@ try {
 		PUBLIC_API_URL: "https://api.gezcez.com",
 		TRACKER_RUNNER: "off",
 		TRANSIT_SYNC_AT: "off",
+		ARCHIVE_EXPORT_AT: "off",
+		AGGREGATES_AT: "off",
 	})
 	const app = await createApp(config, { quiet: true })
 	await app.init()

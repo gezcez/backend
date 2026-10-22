@@ -36,6 +36,13 @@
       "when": 1792684358780,
       "tag": "0004_dashboard",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792687169113,
+      "tag": "0005_favourites_telemetry",
+      "breakpoints": true
     }
   ]
 }

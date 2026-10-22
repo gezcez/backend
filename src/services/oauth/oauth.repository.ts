@@ -2,7 +2,7 @@
 // Clients, consent grants, authorization requests, authorization codes and refresh families.
 
 import { Injectable } from "@nestjs/common"
-import { and, eq, isNull, min } from "drizzle-orm"
+import { and, eq, isNull, sql } from "drizzle-orm"
 import { InjectCoreDb, type CoreDatabase } from "@db"
 import {
 	appsTable,
@@ -28,6 +28,28 @@ export type TokenUser = Pick<UserRow, "id" | "public_id" | "status">
 @Injectable()
 export class OAuthRepository {
 	constructor(@InjectCoreDb() private readonly db: CoreDatabase) {}
+
+	markSecretUsed(clientId: string, which: "current" | "previous", now: Date): void {
+		this.db
+			.update(appsTable)
+			.set(
+				which === "current"
+					? { secret_last_used_at: now }
+					: { previous_secret_last_used_at: now },
+			)
+			.where(eq(appsTable.client_id, clientId))
+			.run()
+	}
+
+	/** When a refresh family started (its first token). */
+	familyStartedAt(familyId: string): Date | undefined {
+		const row = this.db
+			.select({ started: sql<number | null>`min(${refreshTokensTable.created_at})` })
+			.from(refreshTokensTable)
+			.where(eq(refreshTokensTable.family_id, familyId))
+			.get()
+		return row?.started ? new Date(row.started) : undefined
+	}
 
 	findApp(clientId: string): AppRow | undefined {
 		return this.db.select().from(appsTable).where(eq(appsTable.client_id, clientId)).get()
@@ -157,17 +179,6 @@ export class OAuthRepository {
 			.from(refreshTokensTable)
 			.where(eq(refreshTokensTable.token_hash, tokenHash))
 			.get()
-	}
-
-	/** When the family's first token was issued (its age cap counts from here). */
-	familyStartedAt(familyId: string): Date | undefined {
-		return (
-			this.db
-				.select({ started: min(refreshTokensTable.created_at) })
-				.from(refreshTokensTable)
-				.where(eq(refreshTokensTable.family_id, familyId))
-				.get()?.started ?? undefined
-		)
 	}
 
 	findRefresh(id: string): RefreshTokenRow | undefined {
