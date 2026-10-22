@@ -13,6 +13,7 @@ import { RevokedSessionsService } from "./revoked-sessions.service"
 import {
 	SessionRepository,
 	type SessionRevokeReason,
+	type SessionRow,
 	type SessionWithUser,
 } from "./session.repository"
 
@@ -144,6 +145,16 @@ export class SessionService {
 
 	revokeAllForUser(userId: number, reason: SessionRevokeReason): string[] {
 		return this.revoke(this.repository.liveIdsForUser(userId), reason, false)
+	}
+
+	/** Every live session of the user except `exceptId` ("sign out everywhere else"). */
+	revokeOthers(userId: number, exceptId: string, reason: SessionRevokeReason): string[] {
+		const ids = this.repository.liveIdsForUser(userId).filter((id) => id !== exceptId)
+		return this.revoke(ids, reason, false)
+	}
+
+	listLive(userId: number): SessionRow[] {
+		return this.repository.listLiveForUser(userId, new Date())
 	}
 
 	liveIdsForDevice(deviceHash: string): string[] {

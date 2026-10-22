@@ -13,17 +13,22 @@ import { DeviceService } from "./device.service"
 import { PasswordController } from "./password.controller"
 import { PasswordService } from "./password.service"
 import { RevokedSessionsService } from "./revoked-sessions.service"
+import { SelfServiceController } from "./self-service.controller"
+import { SelfServiceRepository } from "./self-service.repository"
+import { SelfServiceService } from "./self-service.service"
 import { SessionRepository } from "./session.repository"
 import { SessionService } from "./session.service"
 import { TurnstileService } from "./turnstile.service"
 
 @Global()
 @Module({
-	controllers: [AccountController, PasswordController],
+	controllers: [AccountController, PasswordController, SelfServiceController],
 	providers: [
 		AccountService,
 		AccountRepository,
 		PasswordService,
+		SelfServiceService,
+		SelfServiceRepository,
 		BreachedPasswordService,
 		SessionService,
 		SessionRepository,

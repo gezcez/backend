@@ -28,4 +28,12 @@ export const tr: Record<LangKey, string> = {
 	"email.password_changed.title": "Şifre değiştirildi",
 	"email.password_changed.intro":
 		"gezcez hesabınızın şifresi az önce değiştirildi ve diğer tüm oturumlar kapatıldı. Bu işlemi siz yapmadıysanız hemen şifrenizi sıfırlayın ve info@gezcez.com adresine yazın.",
+	"email.change_email_code.subject": "Yeni gezcez e-postanızı onaylayın: {code}",
+	"email.change_email_code.title": "Yeni e-posta adresinizi onaylayın",
+	"email.change_email_code.intro":
+		"Bu adresi gezcez hesabınızın e-postası yapmak için bu kodu kullanın:",
+	"email.email_changed.subject": "gezcez e-posta adresiniz değiştirildi",
+	"email.email_changed.title": "E-posta adresi değiştirildi",
+	"email.email_changed.intro":
+		"gezcez hesabınızın e-posta adresi {email} olarak değiştirildi. Bu işlemi siz yapmadıysanız {security_url} adresinden hesap güvenliğinizi kontrol edin ve info@gezcez.com ile iletişime geçin.",
 }

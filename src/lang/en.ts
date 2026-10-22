@@ -26,6 +26,14 @@ export const en = {
 	"email.password_changed.title": "Password changed",
 	"email.password_changed.intro":
 		"The password of your gezcez account was just changed and every other session was signed out. If this wasn't you, reset your password right away and contact info@gezcez.com.",
+	"email.change_email_code.subject": "Confirm your new gezcez email: {code}",
+	"email.change_email_code.title": "Confirm your new email address",
+	"email.change_email_code.intro":
+		"Use this code to make this address the email of your gezcez account:",
+	"email.email_changed.subject": "Your gezcez email address was changed",
+	"email.email_changed.title": "Email address changed",
+	"email.email_changed.intro":
+		"The email address of your gezcez account was changed to {email}. If this wasn't you, review your account security at {security_url} and contact info@gezcez.com.",
 } as const
 
 export type LangKey = keyof typeof en

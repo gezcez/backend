@@ -29,6 +29,8 @@ import { AccountRepository, type EmailCodeRow, type UserRow } from "./account.re
 import type {
 	AccountSummaryDto,
 	DeviceAccountsDto,
+	EmailChangeDto,
+	EmailChangeResultDto,
 	EmailFlowDto,
 	EmailResendResultDto,
 	EmailStartDto,
@@ -222,6 +224,14 @@ export class AccountService {
 					live: true,
 					locale,
 				}
+			case "change_email":
+				return {
+					intent: "change_email",
+					template: "change_email_code",
+					userId: flow.user_id,
+					live: true,
+					locale,
+				}
 			default:
 				return {
 					intent: flow.intent,
@@ -352,25 +362,8 @@ export class AccountService {
 		flowId: string,
 		code: string,
 	): Promise<EmailVerifyResultDto> {
-		const flow = this.repository.findFlow(flowId)
-		const now = new Date()
-		if (!flow || flow.consumed_at || flow.expires_at <= now)
-			throw new GezcezError("AUTH_CODE_EXPIRED")
-		if (flow.attempts >= flow.max_attempts) throw new GezcezError("AUTH_CODE_ATTEMPTS")
-
-		if (!safeEqual(this.codeHash(flow.flow_id, flow.email, code), flow.code_hash)) {
-			const attempts = this.repository.incrementAttempts(flowId) ?? flow.max_attempts
-			this.audit.record("auth.code_failed", {
-				req,
-				actorUserId: flow.user_id,
-				data: { intent: flow.intent },
-			})
-			if (attempts >= flow.max_attempts) throw new GezcezError("AUTH_CODE_ATTEMPTS")
-			throw new GezcezError("AUTH_CODE_INVALID", undefined, {
-				attempts_left: flow.max_attempts - attempts,
-			})
-		}
-		if (!this.repository.consumeFlow(flowId, now)) throw new GezcezError("AUTH_CODE_EXPIRED")
+		// Email change flows are confirmed only through /email/change/verify.
+		const flow = this.consumeCode(req, flowId, code, (row) => row.intent !== "change_email")
 
 		switch (flow.intent) {
 			case "reauth": {
@@ -455,6 +448,133 @@ export class AccountService {
 			target: { type: "user", id: user.id },
 		})
 		return { account: this.summary(user, true) }
+	}
+
+	/**
+	 * Checks a code against a live flow (attempt counting, single use) and consumes it.
+	 * `accept` rejects flows of the wrong kind as if they did not exist.
+	 */
+	private consumeCode(
+		req: Request,
+		flowId: string,
+		code: string,
+		accept: (flow: EmailCodeRow) => boolean,
+	): EmailCodeRow {
+		const flow = this.repository.findFlow(flowId)
+		const now = new Date()
+		if (!flow || !accept(flow) || flow.consumed_at || flow.expires_at <= now)
+			throw new GezcezError("AUTH_CODE_EXPIRED")
+		if (flow.attempts >= flow.max_attempts) throw new GezcezError("AUTH_CODE_ATTEMPTS")
+
+		if (!safeEqual(this.codeHash(flow.flow_id, flow.email, code), flow.code_hash)) {
+			const attempts = this.repository.incrementAttempts(flowId) ?? flow.max_attempts
+			this.audit.record("auth.code_failed", {
+				req,
+				actorUserId: flow.user_id,
+				data: { intent: flow.intent },
+			})
+			if (attempts >= flow.max_attempts) throw new GezcezError("AUTH_CODE_ATTEMPTS")
+			throw new GezcezError("AUTH_CODE_INVALID", undefined, {
+				attempts_left: flow.max_attempts - attempts,
+			})
+		}
+		if (!this.repository.consumeFlow(flowId, now)) throw new GezcezError("AUTH_CODE_EXPIRED")
+		return flow
+	}
+
+	// ---------------------------------------------------------------- email change
+
+	/** POST /v1/account/email/change (step-up): a code to the new address. */
+	async startEmailChange(req: Request, body: EmailChangeDto): Promise<EmailFlowDto> {
+		const user = this.repository.findUserById(req.session!.userId)!
+		const email = normaliseEmail(body.new_email)
+		if (email === user.email || this.repository.findUserByEmail(email))
+			throw new GezcezError("EMAIL_TAKEN")
+		await this.checkTurnstile(body.turnstile_token, "email_change", req, email)
+		await this.limits.consume("email-code-send", { email }, { only: ["email"] })
+		const now = new Date()
+		const flowId = newId("fl")
+		const code = this.newCode(email)
+		const expiresAt = new Date(now.getTime() + CODE_TTL_MS)
+		const resendAt = new Date(now.getTime() + RESEND_AFTER_MS)
+		const locale = body.locale ?? user.locale
+		this.repository.insertFlow({
+			flow_id: flowId,
+			email,
+			intent: "change_email",
+			user_id: user.id,
+			auth_request_id: null,
+			locale,
+			code_hash: this.codeHash(flowId, email, code),
+			resend_available_at: resendAt,
+			expires_at: expiresAt,
+			ip_hash: hashIp(
+				clientIp(req, this.config.trustCfHeaders),
+				this.config.secrets.codePepper,
+			),
+			created_at: now,
+		})
+		this.sendCode(
+			{
+				intent: "change_email",
+				template: "change_email_code",
+				userId: user.id,
+				live: true,
+				locale,
+			},
+			email,
+			code,
+		)
+		this.audit.record("auth.code_sent", {
+			req,
+			target: { type: "user", id: user.id },
+			data: { intent: "change_email" },
+		})
+		return {
+			flow_id: flowId,
+			expires_at: expiresAt.toISOString(),
+			resend_available_at: resendAt.toISOString(),
+			code_length: CODE_LENGTH,
+		}
+	}
+
+	/** POST /v1/account/email/change/verify (step-up): switches the address, notifies the old one. */
+	verifyEmailChange(req: Request, flowId: string, code: string): EmailChangeResultDto {
+		const userId = req.session!.userId
+		const flow = this.consumeCode(
+			req,
+			flowId,
+			code,
+			(row) => row.intent === "change_email" && row.user_id === userId,
+		)
+		const user = this.repository.findUserById(userId)!
+		const taken = this.repository.findUserByEmail(flow.email)
+		if (taken && taken.id !== user.id) throw new GezcezError("EMAIL_TAKEN")
+		let updated: UserRow | undefined
+		try {
+			updated = this.repository.updateUser(user.id, {
+				email: flow.email,
+				email_verified_at: new Date(),
+				updated_at: new Date(),
+			})
+		} catch {
+			throw new GezcezError("EMAIL_TAKEN")
+		}
+		this.email.send(
+			"email_changed",
+			user.email,
+			user.locale,
+			{
+				email: maskEmail(flow.email),
+				security_url: `${this.config.oauthUiUrl}/account/security`,
+			},
+			{ userId: user.id },
+		)
+		this.audit.record("auth.email_changed", {
+			req,
+			target: { type: "user", id: user.id },
+		})
+		return { email: updated!.email }
 	}
 
 	// ---------------------------------------------------------------- sign-in
