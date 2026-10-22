@@ -1,0 +1,32 @@
+{
+	"name": "gezcez-tiles",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"description": "tiles.gezcez.com: Protomaps basemap from R2 behind a Cloudflare Worker, plus the gezcez map styles",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"types": "mkdir -p node_modules/.types && wrangler types --strict-vars=false node_modules/.types/worker-configuration.d.ts",
+		"typecheck": "bun run types >/dev/null && tsc --noEmit && tsc --noEmit -p scripts",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"styles:build": "bun scripts/build-styles.ts",
+		"styles:check": "bun scripts/build-styles.ts --check",
+		"archive:build": "sh scripts/build-archive.sh",
+		"archive:upload": "sh scripts/upload-archive.sh",
+		"assets:upload": "sh scripts/upload-assets.sh"
+	},
+	"dependencies": {
+		"pmtiles": "^4.5.0"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-plugin": "^1.4.7",
+		"@protomaps/basemaps": "^5.7.2",
+		"@types/bun": "1.4.3",
+		"prettier": "^3.9.10",
+		"typescript": "~5.9.3",
+		"vitest": "^4.1.0",
+		"wrangler": "^4.152.0"
+	}
+}
