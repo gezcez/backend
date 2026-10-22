@@ -81,6 +81,23 @@ Every environment variable is listed with a comment in `.env.example` and valida
 boot (`src/common/config.ts`). Staging and production refuse to start without
 `KEY_ENCRYPTION_SECRET`, `SEAL_SECRET`, `CODE_PEPPER` and `CSRF_SECRET`.
 
+## Archive and analytics
+
+- Nightly at 03:30 (Europe/Istanbul) the process that owns `vts.db` exports the previous UTC
+  date of every binding to `data/archive/region=<binding>/date=YYYY-MM-DD/{positions,trip_runs,polls}.parquet`.
+  Each file is read back and compared with SQLite (count, min/max) before it replaces the old
+  one, then hashed, recorded in `archive_manifest` and uploaded (`ARCHIVE_UPLOAD`: `none`,
+  `local` mirror folder, or `s3` for R2). Tracker retention deletes hot positions only for days
+  that are verified and uploaded. Re-run a day with `POST /v1/dash/archive/:bindingId/:date/export`.
+- At 04:30 materialised aggregates go to `data/agg/` (`fleet_hourly`, `headways` per day,
+  `segment_times` per ISO week).
+- `GET /v1/dash/networks/:networkId/analytics/:metric` runs one of the 12 metrics of plan 6.9 in
+  DuckDB (`@duckdb/node-api`, in process) over the archive plus not-yet-archived hot rows, and
+  returns `{ columns, rows, meta }`; `.../:metric/export?format=csv|parquet` streams a file.
+  `GET .../analytics` lists the metrics. SQLite is read with `bun:sqlite` and appended into
+  DuckDB, so no DuckDB extension is needed; `h3` is loaded from the image when present and
+  otherwise provided by `h3-js`.
+
 ## Docker
 
 ```sh
