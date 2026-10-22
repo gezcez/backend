@@ -2,3 +2,4 @@
 
 export * from "./crypto.utils"
 export * from "./ip.utils"
+export * from "./text.utils"

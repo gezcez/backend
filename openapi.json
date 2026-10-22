@@ -1,6 +1,48 @@
 {
 	"components": {
 		"schemas": {
+			"AccountResultDto": {
+				"properties": {
+					"account": {
+						"properties": {
+							"avatar_initials": {
+								"type": "string"
+							},
+							"display_name": {
+								"type": "string"
+							},
+							"email": {
+								"type": "string"
+							},
+							"email_masked": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"locale": {
+								"enum": [
+									"tr",
+									"en"
+								],
+								"type": "string"
+							}
+						},
+						"required": [
+							"id",
+							"display_name",
+							"email_masked",
+							"avatar_initials",
+							"locale"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"account"
+				],
+				"type": "object"
+			},
 			"ApiError": {
 				"additionalProperties": false,
 				"properties": {
@@ -27,6 +69,296 @@
 					"request_id"
 				],
 				"type": "object"
+			},
+			"CsrfDto": {
+				"properties": {
+					"token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"token"
+				],
+				"type": "object"
+			},
+			"DeviceAccountsDto": {
+				"properties": {
+					"accounts": {
+						"items": {
+							"properties": {
+								"account": {
+									"properties": {
+										"avatar_initials": {
+											"type": "string"
+										},
+										"display_name": {
+											"type": "string"
+										},
+										"email": {
+											"type": "string"
+										},
+										"email_masked": {
+											"type": "string"
+										},
+										"id": {
+											"type": "string"
+										},
+										"locale": {
+											"enum": [
+												"tr",
+												"en"
+											],
+											"type": "string"
+										}
+									},
+									"required": [
+										"id",
+										"display_name",
+										"email_masked",
+										"avatar_initials",
+										"locale"
+									],
+									"type": "object"
+								},
+								"active": {
+									"type": "boolean"
+								},
+								"session_id": {
+									"type": "string"
+								},
+								"signed_out": {
+									"type": "boolean"
+								}
+							},
+							"required": [
+								"session_id",
+								"account",
+								"active",
+								"signed_out"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"accounts"
+				],
+				"type": "object"
+			},
+			"EmailFlowDto": {
+				"properties": {
+					"code_length": {
+						"const": 6,
+						"type": "number"
+					},
+					"expires_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"flow_id": {
+						"type": "string"
+					},
+					"resend_available_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					}
+				},
+				"required": [
+					"flow_id",
+					"expires_at",
+					"resend_available_at",
+					"code_length"
+				],
+				"type": "object"
+			},
+			"EmailResendDto": {
+				"properties": {
+					"flow_id": {
+						"maxLength": 64,
+						"minLength": 1,
+						"type": "string"
+					},
+					"turnstile_token": {
+						"maxLength": 4096,
+						"type": "string"
+					}
+				},
+				"required": [
+					"flow_id"
+				],
+				"type": "object"
+			},
+			"EmailResendResultDto": {
+				"properties": {
+					"expires_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"resend_available_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					}
+				},
+				"required": [
+					"resend_available_at",
+					"expires_at"
+				],
+				"type": "object"
+			},
+			"EmailStartDto": {
+				"properties": {
+					"email": {
+						"format": "email",
+						"maxLength": 254,
+						"pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+						"type": "string"
+					},
+					"intent": {
+						"enum": [
+							"signin",
+							"signup",
+							"reauth",
+							"reset"
+						],
+						"type": "string"
+					},
+					"locale": {
+						"default": "tr",
+						"enum": [
+							"tr",
+							"en"
+						],
+						"type": "string"
+					},
+					"request_id": {
+						"maxLength": 64,
+						"type": "string"
+					},
+					"turnstile_token": {
+						"maxLength": 4096,
+						"type": "string"
+					}
+				},
+				"required": [
+					"intent"
+				],
+				"type": "object"
+			},
+			"EmailVerifyDto": {
+				"properties": {
+					"code": {
+						"pattern": "^\\d{6}$",
+						"type": "string"
+					},
+					"flow_id": {
+						"maxLength": 64,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"flow_id",
+					"code"
+				],
+				"type": "object"
+			},
+			"EmailVerifyResultDto": {
+				"oneOf": [
+					{
+						"properties": {
+							"account": {
+								"properties": {
+									"avatar_initials": {
+										"type": "string"
+									},
+									"display_name": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"email_masked": {
+										"type": "string"
+									},
+									"id": {
+										"type": "string"
+									},
+									"locale": {
+										"enum": [
+											"tr",
+											"en"
+										],
+										"type": "string"
+									}
+								},
+								"required": [
+									"id",
+									"display_name",
+									"email_masked",
+									"avatar_initials",
+									"locale"
+								],
+								"type": "object"
+							},
+							"auth_time": {
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							"status": {
+								"const": "signed_in",
+								"type": "string"
+							}
+						},
+						"required": [
+							"status",
+							"account",
+							"auth_time"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"email": {
+								"type": "string"
+							},
+							"profile_token": {
+								"type": "string"
+							},
+							"status": {
+								"const": "needs_profile",
+								"type": "string"
+							}
+						},
+						"required": [
+							"status",
+							"profile_token",
+							"email"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"reset_token": {
+								"type": "string"
+							},
+							"status": {
+								"const": "reset_ready",
+								"type": "string"
+							}
+						},
+						"required": [
+							"status",
+							"reset_token"
+						],
+						"type": "object"
+					}
+				]
 			},
 			"ErrorCode": {
 				"enum": [
@@ -291,6 +623,136 @@
 				],
 				"type": "object"
 			},
+			"SessionInfoDto": {
+				"properties": {
+					"account": {
+						"properties": {
+							"avatar_initials": {
+								"type": "string"
+							},
+							"display_name": {
+								"type": "string"
+							},
+							"email": {
+								"type": "string"
+							},
+							"email_masked": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"locale": {
+								"enum": [
+									"tr",
+									"en"
+								],
+								"type": "string"
+							}
+						},
+						"required": [
+							"id",
+							"display_name",
+							"email_masked",
+							"avatar_initials",
+							"locale"
+						],
+						"type": "object"
+					},
+					"session": {
+						"properties": {
+							"amr": {
+								"items": {
+									"enum": [
+										"otp",
+										"pwd",
+										"webauthn"
+									],
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"auth_time": {
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							"expires_at": {
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"id",
+							"auth_time",
+							"amr",
+							"expires_at"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"account",
+					"session"
+				],
+				"type": "object"
+			},
+			"SignupCompleteDto": {
+				"properties": {
+					"display_name": {
+						"maxLength": 40,
+						"minLength": 1,
+						"type": "string"
+					},
+					"locale": {
+						"enum": [
+							"tr",
+							"en"
+						],
+						"type": "string"
+					},
+					"privacy_version": {
+						"maxLength": 32,
+						"minLength": 1,
+						"type": "string"
+					},
+					"profile_token": {
+						"maxLength": 2048,
+						"minLength": 1,
+						"type": "string"
+					},
+					"tos_version": {
+						"maxLength": 32,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"profile_token",
+					"display_name",
+					"tos_version",
+					"privacy_version",
+					"locale"
+				],
+				"type": "object"
+			},
+			"SwitchSessionDto": {
+				"properties": {
+					"session_id": {
+						"maxLength": 64,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"session_id"
+				],
+				"type": "object"
+			},
 			"VersionDto": {
 				"properties": {
 					"build_time": {
@@ -475,6 +937,517 @@
 				},
 				"tags": [
 					"system"
+				]
+			}
+		},
+		"/v1/account/csrf": {
+			"get": {
+				"operationId": "Account_getCsrf",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/CsrfDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "CSRF token for X-CSRF-Token (also issues the device cookie)",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/device-accounts": {
+			"get": {
+				"operationId": "Account_deviceAccounts",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DeviceAccountsDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Accounts remembered on this browser (max 5)",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/email/resend": {
+			"post": {
+				"operationId": "Account_resendEmail",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EmailResendDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailResendResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Send a new code for a flow (after resend_available_at)",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/email/start": {
+			"post": {
+				"operationId": "Account_startEmail",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EmailStartDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"202": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailFlowDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Send an email code (same answer for known and unknown addresses)",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/email/verify": {
+			"post": {
+				"operationId": "Account_verifyEmail",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EmailVerifyDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailVerifyResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Verify a code: signed_in, needs_profile or reset_ready",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/session": {
+			"get": {
+				"operationId": "Account_getSession",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SessionInfoDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"session": []
+					}
+				],
+				"summary": "Current session and account (UI bootstrap)",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/session/switch": {
+			"post": {
+				"operationId": "Account_switchSession",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SwitchSessionDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AccountResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Make another live session of this device the active one",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/signup/complete": {
+			"post": {
+				"operationId": "Account_completeSignup",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SignupCompleteDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/AccountResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Create the account after a sign-up code (no username)",
+				"tags": [
+					"account"
 				]
 			}
 		},

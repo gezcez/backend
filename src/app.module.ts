@@ -17,6 +17,8 @@ import {
 import { RATE_LIMIT_PRESETS, RateLimitModule } from "@common/rate-limits"
 import { clientIp } from "@common/utils"
 import { DatabaseModule } from "@db"
+import { AccountModule } from "@services/account/account.module"
+import { AuditModule } from "@services/audit/audit.module"
 import { EmailModule } from "@services/email/email.module"
 import { TestMailboxModule } from "@services/email/test-mailbox.controller"
 import { KeysModule } from "@services/oauth/keys.module"
@@ -47,6 +49,8 @@ export class AppModule {
 				SystemModule,
 				KeysModule,
 				EmailModule,
+				AuditModule,
+				AccountModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],

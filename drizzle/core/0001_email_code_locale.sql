@@ -1,0 +1,1 @@
+ALTER TABLE `email_codes` ADD `locale` text DEFAULT 'tr' NOT NULL;
