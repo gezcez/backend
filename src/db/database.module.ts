@@ -17,6 +17,7 @@ import { InjectConfig, type AppConfig } from "@common/config"
 import * as coreSchema from "@schemas/core"
 import { runMigrations } from "./migrate"
 import { openSqlite } from "./open-sqlite"
+import { runSeed } from "./seed"
 
 export type CoreSchema = typeof coreSchema
 export type CoreDatabase = BunSQLiteDatabase<CoreSchema> & { $client: Database }
@@ -50,6 +51,8 @@ export class DatabaseService implements OnApplicationShutdown {
 		)
 		this.core = drizzle({ client: sqlite, schema: coreSchema })
 		this.handles.push({ name: "core", file, sqlite, migrated: true })
+		// The test image seeds itself so client repos' e2e suites get the e2e clients and fixtures.
+		if (config.isTest) runSeed(this.core, { environment: "test", config })
 	}
 
 	/** Cheap liveness query per database for /ready. */
