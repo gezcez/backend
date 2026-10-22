@@ -95,4 +95,31 @@ export class DashClient {
 			config.stepUpMaxAgeS = previous
 		}
 	}
+
+	/**
+	 * Creates a global role holding exactly `permissions` (as admin) and grants it to `email`.
+	 * Returns the role id.
+	 */
+	async grantCustomRole(email: string, key: string, permissions: string[]): Promise<number> {
+		const created = await this.call<{ id: number }>(FIXTURE.admin, "POST", "/v1/dash/roles", {
+			key,
+			name: key,
+			level: 50,
+		})
+		if (created.status !== 201 && created.status !== 200)
+			throw new Error(`role ${key}: ${JSON.stringify(created.body)}`)
+		const roleId = created.body.data.id
+		const put = await this.call(FIXTURE.admin, "PUT", `/v1/dash/roles/${roleId}/permissions`, {
+			permissions,
+		})
+		if (put.status !== 200) throw new Error(`role ${key}: ${JSON.stringify(put.body)}`)
+		const assign = await this.call(
+			FIXTURE.admin,
+			"POST",
+			`/v1/dash/users/${this.publicId(email)}/roles`,
+			{ operations: [{ role_id: roleId, op: "grant" }] },
+		)
+		if (assign.status !== 200) throw new Error(`role ${key}: ${JSON.stringify(assign.body)}`)
+		return roleId
+	}
 }

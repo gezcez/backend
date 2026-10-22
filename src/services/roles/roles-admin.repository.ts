@@ -5,6 +5,7 @@
 import { Injectable } from "@nestjs/common"
 import { and, asc, eq, inArray, isNull, sql, type SQL } from "drizzle-orm"
 import type { Page, PageQuery } from "@common/response"
+import { escapeLike } from "@common/utils"
 import { InjectCoreDb, paginate, type CoreDatabase } from "@db"
 import {
 	permissionRoutesTable,
@@ -224,7 +225,7 @@ export class RolesAdminRepository {
 		]
 		const q = query.q?.trim().toLowerCase()
 		if (q) {
-			const pattern = q.replace(/[\\%_]/g, (c) => `\\${c}`)
+			const pattern = escapeLike(q)
 			conditions.push(
 				sql`(lower("users"."display_name") like ${`%${pattern}%`} escape '\\' or lower("users"."username") like ${`${pattern}%`} escape '\\')`,
 			)

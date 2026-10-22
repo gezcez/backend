@@ -34,6 +34,14 @@ export const en = {
 	"email.email_changed.title": "Email address changed",
 	"email.email_changed.intro":
 		"The email address of your gezcez account was changed to {email}. If this wasn't you, review your account security at {security_url} and contact info@gezcez.com.",
+	"email.deletion_scheduled.subject": "Your gezcez account will be deleted",
+	"email.deletion_scheduled.title": "Account deletion scheduled",
+	"email.deletion_scheduled.intro":
+		"Your gezcez account and its data will be deleted on {delete_at}. Every session was signed out. Changed your mind? Sign in and cancel the deletion before then at {cancel_url}.",
+	"email.export_ready.subject": "Your gezcez data export is ready",
+	"email.export_ready.title": "Your data export is ready",
+	"email.export_ready.intro":
+		"The copy of your gezcez data you asked for is ready. Download it at {download_url} before {expires_at}; after that it is deleted.",
 } as const
 
 export type LangKey = keyof typeof en

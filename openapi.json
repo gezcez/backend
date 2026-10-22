@@ -4277,6 +4277,126 @@
 				],
 				"type": "object"
 			},
+			"EmailDelivery": {
+				"properties": {
+					"attempts": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"last_error": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"locale": {
+						"$ref": "#/components/schemas/Locale"
+					},
+					"status": {
+						"$ref": "#/components/schemas/EmailStatus"
+					},
+					"subject": {
+						"type": "string"
+					},
+					"template": {
+						"type": "string"
+					},
+					"to_masked": {
+						"type": "string"
+					},
+					"updated_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"user": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/UserRef"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"template",
+					"subject",
+					"to_masked",
+					"locale",
+					"status",
+					"user",
+					"attempts",
+					"last_error",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object"
+			},
+			"EmailDeliveryPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/EmailDelivery"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prev_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
 			"EmailFlowDto": {
 				"properties": {
 					"code_length": {
@@ -4302,6 +4422,47 @@
 					"expires_at",
 					"resend_available_at",
 					"code_length"
+				],
+				"type": "object"
+			},
+			"EmailPreviewDto": {
+				"properties": {
+					"html": {
+						"type": "string"
+					},
+					"subject": {
+						"type": "string"
+					},
+					"text": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"subject",
+					"text",
+					"html"
+				],
+				"type": "object"
+			},
+			"EmailPreviewRequestDto": {
+				"properties": {
+					"locale": {
+						"$ref": "#/components/schemas/Locale"
+					},
+					"variables": {
+						"additionalProperties": {
+							"maxLength": 500,
+							"type": "string"
+						},
+						"default": {},
+						"propertyNames": {
+							"type": "string"
+						},
+						"type": "object"
+					}
+				},
+				"required": [
+					"locale"
 				],
 				"type": "object"
 			},
@@ -4377,6 +4538,195 @@
 				},
 				"required": [
 					"intent"
+				],
+				"type": "object"
+			},
+			"EmailStatus": {
+				"enum": [
+					"queued",
+					"sent",
+					"delivered",
+					"bounced",
+					"complained",
+					"failed"
+				],
+				"type": "string"
+			},
+			"EmailSuppression": {
+				"properties": {
+					"created_at": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"detail": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"email_masked": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"reason": {
+						"enum": [
+							"bounce",
+							"complaint",
+							"manual"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"email_masked",
+					"reason",
+					"detail",
+					"created_at"
+				],
+				"type": "object"
+			},
+			"EmailSuppressionPageDto": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/EmailSuppression"
+						},
+						"type": "array"
+					},
+					"next_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"prev_cursor": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"total": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				},
+				"required": [
+					"items",
+					"next_cursor",
+					"prev_cursor",
+					"total"
+				],
+				"type": "object"
+			},
+			"EmailTemplate": {
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"key": {
+						"type": "string"
+					},
+					"locales": {
+						"items": {
+							"$ref": "#/components/schemas/Locale"
+						},
+						"type": "array"
+					},
+					"variables": {
+						"items": {
+							"properties": {
+								"description": {
+									"type": "string"
+								},
+								"example": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"name",
+								"description",
+								"example"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"key",
+					"description",
+					"locales",
+					"variables"
+				],
+				"type": "object"
+			},
+			"EmailTemplateListDto": {
+				"items": {
+					"$ref": "#/components/schemas/EmailTemplate"
+				},
+				"type": "array"
+			},
+			"EmailTestRequestDto": {
+				"properties": {
+					"locale": {
+						"$ref": "#/components/schemas/Locale"
+					},
+					"template": {
+						"maxLength": 64,
+						"type": "string"
+					},
+					"to": {
+						"format": "email",
+						"maxLength": 254,
+						"pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+						"type": "string"
+					}
+				},
+				"required": [
+					"template",
+					"locale"
+				],
+				"type": "object"
+			},
+			"EmailTestResultDto": {
+				"properties": {
+					"delivery_id": {
+						"type": "string"
+					},
+					"to_masked": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"delivery_id",
+					"to_masked"
 				],
 				"type": "object"
 			},
@@ -4946,6 +5296,13 @@
 					"keys"
 				],
 				"type": "object"
+			},
+			"Locale": {
+				"enum": [
+					"tr",
+					"en"
+				],
+				"type": "string"
 			},
 			"LogoutDto": {
 				"properties": {
@@ -6976,6 +7333,270 @@
 				],
 				"type": "object"
 			},
+			"PublicFleetDto": {
+				"properties": {
+					"generated_at": {
+						"type": "string"
+					},
+					"networks": {
+						"items": {
+							"properties": {
+								"city": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"timezone": {
+									"type": "string"
+								},
+								"today": {
+									"properties": {
+										"date": {
+											"type": "string"
+										},
+										"hours": {
+											"items": {
+												"items": false,
+												"maxItems": 2,
+												"minItems": 2,
+												"prefixItems": [
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													},
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													}
+												],
+												"type": "array"
+											},
+											"type": "array"
+										},
+										"peak_vehicles": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"vehicle_hours": {
+											"type": "number"
+										},
+										"vehicles": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										}
+									},
+									"required": [
+										"date",
+										"vehicles",
+										"peak_vehicles",
+										"vehicle_hours",
+										"hours"
+									],
+									"type": "object"
+								},
+								"yesterday": {
+									"properties": {
+										"date": {
+											"type": "string"
+										},
+										"hours": {
+											"items": {
+												"items": false,
+												"maxItems": 2,
+												"minItems": 2,
+												"prefixItems": [
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													},
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													}
+												],
+												"type": "array"
+											},
+											"type": "array"
+										},
+										"peak_vehicles": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"vehicle_hours": {
+											"type": "number"
+										},
+										"vehicles": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										}
+									},
+									"required": [
+										"date",
+										"vehicles",
+										"peak_vehicles",
+										"vehicle_hours",
+										"hours"
+									],
+									"type": "object"
+								}
+							},
+							"required": [
+								"id",
+								"name",
+								"city",
+								"timezone",
+								"today",
+								"yesterday"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"generated_at",
+					"networks"
+				],
+				"type": "object"
+			},
+			"PublicQualityDto": {
+				"properties": {
+					"cities": {
+						"items": {
+							"properties": {
+								"name": {
+									"properties": {
+										"en": {
+											"type": "string"
+										},
+										"tr": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"tr",
+										"en"
+									],
+									"type": "object"
+								},
+								"networks": {
+									"items": {
+										"properties": {
+											"days": {
+												"items": {
+													"properties": {
+														"coverage": {
+															"type": [
+																"number",
+																"null"
+															]
+														},
+														"date": {
+															"type": "string"
+														},
+														"gap_minutes": {
+															"type": "number"
+														},
+														"lag_p95_s": {
+															"type": [
+																"number",
+																"null"
+															]
+														},
+														"score": {
+															"type": [
+																"number",
+																"null"
+															]
+														},
+														"success_rate": {
+															"type": [
+																"number",
+																"null"
+															]
+														}
+													},
+													"required": [
+														"date",
+														"score",
+														"success_rate",
+														"lag_p95_s",
+														"coverage",
+														"gap_minutes"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											},
+											"id": {
+												"type": "string"
+											},
+											"name": {
+												"type": "string"
+											},
+											"score": {
+												"type": [
+													"number",
+													"null"
+												]
+											}
+										},
+										"required": [
+											"id",
+											"name",
+											"score",
+											"days"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"score": {
+									"type": [
+										"number",
+										"null"
+									]
+								},
+								"slug": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"slug",
+								"name",
+								"score",
+								"networks"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"from",
+					"to",
+					"cities"
+				],
+				"type": "object"
+			},
 			"PutFavouritesDto": {
 				"properties": {
 					"groups": {
@@ -8636,6 +9257,19 @@
 					"next_cursor",
 					"prev_cursor",
 					"total"
+				],
+				"type": "object"
+			},
+			"SuppressionDeleteDto": {
+				"properties": {
+					"reason": {
+						"maxLength": 500,
+						"minLength": 3,
+						"type": "string"
+					}
+				},
+				"required": [
+					"reason"
 				],
 				"type": "object"
 			},
@@ -13771,6 +14405,501 @@
 				}
 			}
 		},
+		"/v1/dash/email/deliveries": {
+			"get": {
+				"description": "`q` matches the id, a subject substring or a template prefix. Sort: created_at, updated_at.",
+				"operationId": "EmailAdmin_deliveries",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/EmailStatus"
+						}
+					},
+					{
+						"in": "query",
+						"name": "template",
+						"required": false,
+						"schema": {
+							"maxLength": 64,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailDeliveryPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Email log, recipients masked",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "email.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/email/suppressions": {
+			"get": {
+				"operationId": "EmailAdmin_suppressions",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "reason",
+						"required": false,
+						"schema": {
+							"enum": [
+								"bounce",
+								"complaint",
+								"manual"
+							],
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailSuppressionPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Suppressed addresses (masked); `q` matches the masked address",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "email.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/email/suppressions/{id}": {
+			"delete": {
+				"operationId": "EmailAdmin_removeSuppression",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SuppressionDeleteDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DeletedDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Remove a suppression with a reason (audited)",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "settings.write",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/email/templates": {
+			"get": {
+				"operationId": "EmailAdmin_templates",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailTemplateListDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Template keys, locales and variables with sample values",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "email.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/email/templates/{key}/preview": {
+			"post": {
+				"description": "Variables left out take the template's sample values. Nothing is sent.",
+				"operationId": "EmailAdmin_preview",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "key",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EmailPreviewRequestDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailPreviewDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Render a template server-side",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "email.read",
+					"scope": "global"
+				}
+			}
+		},
+		"/v1/dash/email/test": {
+			"post": {
+				"description": "Goes to the caller's own address unless `to` is given, which needs email.test.send.any. The subject starts with [TEST].",
+				"operationId": "EmailAdmin_sendTest",
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EmailTestRequestDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailTestResultDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Send a test email with sample variables",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "email.test.send",
+					"scope": "global"
+				}
+			}
+		},
 		"/v1/dash/moderation": {
 			"get": {
 				"operationId": "Moderation_list",
@@ -16835,6 +17964,109 @@
 				"x-gezcez-sudo": true
 			}
 		},
+		"/v1/dash/users/{userId}/emails": {
+			"get": {
+				"operationId": "EmailAdmin_userEmails",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"maximum": 200,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"maxLength": 512,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"maxLength": 200,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/EmailDeliveryPageDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Deliveries to one user (metadata only)",
+				"tags": [
+					"dash"
+				],
+				"x-gezcez-permission": {
+					"key": "email.read",
+					"scope": "global"
+				}
+			}
+		},
 		"/v1/dash/users/{userId}/reveal-email": {
 			"post": {
 				"operationId": "DashUsers_revealEmail",
@@ -18763,6 +19995,132 @@
 				},
 				"tags": [
 					"transit"
+				]
+			}
+		},
+		"/v1/public/analytics/fleet": {
+			"get": {
+				"operationId": "PublicAnalytics_fleet",
+				"parameters": [
+					{
+						"description": "City slug (default: every public city)",
+						"in": "query",
+						"name": "city",
+						"required": false,
+						"schema": {
+							"pattern": "^[a-z0-9-]{1,64}$",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PublicFleetDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Fleet in service today and yesterday"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"public: analytics"
+				]
+			}
+		},
+		"/v1/public/analytics/quality": {
+			"get": {
+				"operationId": "PublicAnalytics_quality",
+				"parameters": [
+					{
+						"description": "City slug (default: every public city)",
+						"in": "query",
+						"name": "city",
+						"required": false,
+						"schema": {
+							"pattern": "^[a-z0-9-]{1,64}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Closed days back",
+						"in": "query",
+						"name": "days",
+						"required": false,
+						"schema": {
+							"default": 7,
+							"maximum": 30,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PublicQualityDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Daily data reliability score per city"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"public: analytics"
 				]
 			}
 		},

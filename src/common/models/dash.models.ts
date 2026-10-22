@@ -34,3 +34,6 @@ export const DateTime = z.iso.datetime()
 
 /** ErrorCode as a named component, for error codes inside success bodies (batch results). */
 export const ErrorCodeRef = ErrorCodeSchema.meta({ id: "ErrorCode" })
+
+/** Locale as a named component (the dashboard's generated types use `Locale`). */
+export const LocaleRef = z.enum(["tr", "en"]).meta({ id: "Locale" })

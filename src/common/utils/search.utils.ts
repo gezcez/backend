@@ -44,3 +44,8 @@ export function ftsQuery(input: string): string | null {
 	if (!tokens.length) return null
 	return tokens.map((token) => `"${token.replace(/"/g, "")}"*`).join(" ")
 }
+
+/** Escapes LIKE wildcards; use with `escape '\\'`. */
+export function escapeLike(value: string): string {
+	return value.replace(/[\\%_]/g, (c) => `\\${c}`)
+}

@@ -25,6 +25,9 @@ export interface TemplateVars {
 	password_changed: Record<string, never>
 	/** Sent to the old address; `email` is the new one, masked. */
 	email_changed: { email: string; security_url: string }
+	/** `delete_at` is a date in the user's locale. */
+	deletion_scheduled: { delete_at: string; cancel_url: string }
+	export_ready: { download_url: string; expires_at: string }
 }
 
 export type TemplateKey = keyof TemplateVars
@@ -37,7 +40,93 @@ export const TEMPLATE_KEYS = [
 	"reset_unavailable",
 	"password_changed",
 	"email_changed",
+	"deletion_scheduled",
+	"export_ready",
 ] as const satisfies TemplateKey[]
+
+export interface TemplateVariable {
+	name: string
+	description: string
+	example: string
+}
+
+const CODE_VARIABLES: TemplateVariable[] = [
+	{ name: "code", description: "One-time code", example: "482913" },
+	{ name: "minutes", description: "Minutes until the code expires", example: "10" },
+]
+
+/** What the dashboard lists: purpose and variables with sample values for previews. */
+export const TEMPLATE_CATALOG: Record<
+	TemplateKey,
+	{ description: string; variables: TemplateVariable[] }
+> = {
+	signin_code: { description: "Sign-in code", variables: CODE_VARIABLES },
+	signup_code: { description: "Sign-up code", variables: CODE_VARIABLES },
+	reauth_code: { description: "Code to confirm a sensitive action", variables: CODE_VARIABLES },
+	reset_code: { description: "Password reset code", variables: CODE_VARIABLES },
+	change_email_code: {
+		description: "Code sent to a new address during an email change",
+		variables: CODE_VARIABLES,
+	},
+	reset_unavailable: {
+		description: "Reset asked for an account without a password",
+		variables: [],
+	},
+	password_changed: { description: "Notice after a password change", variables: [] },
+	email_changed: {
+		description: "Notice to the old address after an email change",
+		variables: [
+			{ name: "email", description: "New address, masked", example: "e****@example.com" },
+			{
+				name: "security_url",
+				description: "Account security page",
+				example: "https://oauth.gezcez.com/account/security",
+			},
+		],
+	},
+	deletion_scheduled: {
+		description: "Account deletion scheduled (14 day grace)",
+		variables: [
+			{ name: "delete_at", description: "Deletion date", example: "5 November 2026" },
+			{
+				name: "cancel_url",
+				description: "Page to cancel the deletion",
+				example: "https://oauth.gezcez.com/account/privacy",
+			},
+		],
+	},
+	export_ready: {
+		description: "Data export ready to download",
+		variables: [
+			{
+				name: "download_url",
+				description: "Export page",
+				example: "https://oauth.gezcez.com/account/privacy",
+			},
+			{ name: "expires_at", description: "Last download date", example: "29 October 2026" },
+		],
+	},
+}
+
+export function isTemplateKey(value: string): value is TemplateKey {
+	return (TEMPLATE_KEYS as readonly string[]).includes(value)
+}
+
+/**
+ * Template variables from strings (dashboard previews and test sends): sample values fill the
+ * gaps and numeric variables are converted.
+ */
+export function templateVarsFrom<K extends TemplateKey>(
+	key: K,
+	given: Record<string, string> = {},
+): TemplateVars[K] {
+	const vars: Record<string, string | number> = {}
+	for (const variable of TEMPLATE_CATALOG[key].variables) {
+		const value = given[variable.name] ?? variable.example
+		vars[variable.name] = variable.name === "minutes" ? Number(value) || 0 : value
+	}
+	return vars as TemplateVars[K]
+}
 
 function escapeHtml(value: string): string {
 	return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
@@ -84,7 +173,12 @@ function codeEmail(
 
 function noticeEmail(
 	locale: Locale,
-	prefix: "reset_unavailable" | "password_changed" | "email_changed",
+	prefix:
+		| "reset_unavailable"
+		| "password_changed"
+		| "email_changed"
+		| "deletion_scheduled"
+		| "export_ready",
 	vars: Record<string, string> = {},
 ): RenderedEmail {
 	const title = t(locale, `email.${prefix}.title` as LangKey)
@@ -112,7 +206,9 @@ export function renderTemplate<K extends TemplateKey>(
 		case "password_changed":
 			return noticeEmail(locale, key)
 		case "email_changed":
-			return noticeEmail(locale, key, vars as TemplateVars["email_changed"])
+		case "deletion_scheduled":
+		case "export_ready":
+			return noticeEmail(locale, key, vars as Record<string, string>)
 		default:
 			throw new Error(`Unknown email template ${String(key)}`)
 	}
