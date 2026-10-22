@@ -2386,6 +2386,197 @@
 				],
 				"type": "object"
 			},
+			"DeparturesDto": {
+				"properties": {
+					"generated_at": {
+						"type": "string"
+					},
+					"items": {
+						"items": {
+							"properties": {
+								"cancelled": {
+									"type": "boolean"
+								},
+								"headsign": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"predicted_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"route": {
+									"properties": {
+										"agency": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"colour": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"id": {
+											"description": "Stable public id, e.g. 1.42041",
+											"type": "string"
+										},
+										"long_name": {
+											"type": "string"
+										},
+										"mode": {
+											"enum": [
+												"tram",
+												"metro",
+												"rail",
+												"bus",
+												"ferry",
+												"cable_tram",
+												"aerial_lift",
+												"funicular",
+												"trolleybus",
+												"monorail"
+											],
+											"type": "string"
+										},
+										"network_id": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"route_type": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"short_name": {
+											"type": "string"
+										},
+										"text_colour": {
+											"type": [
+												"string",
+												"null"
+											]
+										}
+									},
+									"required": [
+										"id",
+										"network_id",
+										"short_name",
+										"long_name",
+										"mode",
+										"route_type",
+										"colour",
+										"text_colour",
+										"agency"
+									],
+									"type": "object"
+								},
+								"scheduled_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"source": {
+									"enum": [
+										"schedule",
+										"live",
+										"live_eta"
+									],
+									"type": "string"
+								},
+								"stops_away": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"trip_id": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"vehicle_id": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"route",
+								"headsign",
+								"trip_id",
+								"scheduled_at",
+								"predicted_at",
+								"vehicle_id",
+								"stops_away",
+								"source",
+								"cancelled"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"stop": {
+						"properties": {
+							"code": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"id": {
+								"description": "Stable public id, e.g. 1.41003",
+								"type": "string"
+							},
+							"lat": {
+								"type": "number"
+							},
+							"lon": {
+								"type": "number"
+							},
+							"name": {
+								"type": "string"
+							},
+							"network_id": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							}
+						},
+						"required": [
+							"id",
+							"network_id",
+							"name",
+							"code",
+							"lat",
+							"lon"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"stop",
+					"generated_at",
+					"items"
+				],
+				"type": "object"
+			},
 			"DeviceAccountsDto": {
 				"properties": {
 					"accounts": {
@@ -2771,6 +2962,166 @@
 				},
 				"required": [
 					"status"
+				],
+				"type": "object"
+			},
+			"HistoryDeparturesDto": {
+				"properties": {
+					"date": {
+						"type": "string"
+					},
+					"items": {
+						"items": {
+							"properties": {
+								"clock": {
+									"type": "string"
+								},
+								"direction": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"end_reason": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"ended_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"scheduled_clock": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"start_delay_s": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"started_at": {
+									"type": "string"
+								},
+								"trip_id": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"started_at",
+								"clock",
+								"direction",
+								"trip_id",
+								"scheduled_clock",
+								"start_delay_s",
+								"ended_at",
+								"end_reason"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"route": {
+						"properties": {
+							"agency": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"colour": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"id": {
+								"description": "Stable public id, e.g. 1.42041",
+								"type": "string"
+							},
+							"long_name": {
+								"type": "string"
+							},
+							"mode": {
+								"enum": [
+									"tram",
+									"metro",
+									"rail",
+									"bus",
+									"ferry",
+									"cable_tram",
+									"aerial_lift",
+									"funicular",
+									"trolleybus",
+									"monorail"
+								],
+								"type": "string"
+							},
+							"network_id": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"route_type": {
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							"short_name": {
+								"type": "string"
+							},
+							"text_colour": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"id",
+							"network_id",
+							"short_name",
+							"long_name",
+							"mode",
+							"route_type",
+							"colour",
+							"text_colour",
+							"agency"
+						],
+						"type": "object"
+					},
+					"weekday": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					}
+				},
+				"required": [
+					"route",
+					"date",
+					"weekday",
+					"items"
 				],
 				"type": "object"
 			},
@@ -5767,6 +6118,495 @@
 					"runner",
 					"running",
 					"bindings"
+				],
+				"type": "object"
+			},
+			"VehicleDetailDto": {
+				"properties": {
+					"accessible": {
+						"items": {
+							"type": "boolean"
+						},
+						"type": "array"
+					},
+					"current_run": {
+						"anyOf": [
+							{
+								"properties": {
+									"direction": {
+										"anyOf": [
+											{
+												"maximum": 9007199254740991,
+												"minimum": -9007199254740991,
+												"type": "integer"
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"end_reason": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"ended_at": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"first_stop_seq": {
+										"anyOf": [
+											{
+												"maximum": 9007199254740991,
+												"minimum": -9007199254740991,
+												"type": "integer"
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"last_stop_seq": {
+										"anyOf": [
+											{
+												"maximum": 9007199254740991,
+												"minimum": -9007199254740991,
+												"type": "integer"
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"route_id": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"scheduled_start": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"start_delay_s": {
+										"anyOf": [
+											{
+												"maximum": 9007199254740991,
+												"minimum": -9007199254740991,
+												"type": "integer"
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"started_at": {
+										"type": "string"
+									},
+									"trip_id": {
+										"type": [
+											"string",
+											"null"
+										]
+									}
+								},
+								"required": [
+									"route_id",
+									"direction",
+									"trip_id",
+									"started_at",
+									"ended_at",
+									"end_reason",
+									"first_stop_seq",
+									"last_stop_seq",
+									"scheduled_start",
+									"start_delay_s"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"direction": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"id": {
+						"type": "string"
+					},
+					"label": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"last_seen_at": {
+						"type": "string"
+					},
+					"live": {
+						"type": "boolean"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"plate": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"position": {
+						"anyOf": [
+							{
+								"properties": {
+									"bearing": {
+										"type": [
+											"number",
+											"null"
+										]
+									},
+									"feed_ts": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"lat": {
+										"type": "number"
+									},
+									"lon": {
+										"type": "number"
+									},
+									"speed_ms": {
+										"type": [
+											"number",
+											"null"
+										]
+									},
+									"stale": {
+										"type": "boolean"
+									},
+									"vehicle_ts": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									}
+								},
+								"required": [
+									"lat",
+									"lon",
+									"bearing",
+									"speed_ms",
+									"vehicle_ts",
+									"feed_ts",
+									"stale"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"route": {
+						"anyOf": [
+							{
+								"properties": {
+									"agency": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"colour": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"id": {
+										"description": "Stable public id, e.g. 1.42041",
+										"type": "string"
+									},
+									"long_name": {
+										"type": "string"
+									},
+									"mode": {
+										"enum": [
+											"tram",
+											"metro",
+											"rail",
+											"bus",
+											"ferry",
+											"cable_tram",
+											"aerial_lift",
+											"funicular",
+											"trolleybus",
+											"monorail"
+										],
+										"type": "string"
+									},
+									"network_id": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"route_type": {
+										"maximum": 9007199254740991,
+										"minimum": -9007199254740991,
+										"type": "integer"
+									},
+									"short_name": {
+										"type": "string"
+									},
+									"text_colour": {
+										"type": [
+											"string",
+											"null"
+										]
+									}
+								},
+								"required": [
+									"id",
+									"network_id",
+									"short_name",
+									"long_name",
+									"mode",
+									"route_type",
+									"colour",
+									"text_colour",
+									"agency"
+								],
+								"type": "object"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"runs_today": {
+						"items": {
+							"properties": {
+								"direction": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"end_reason": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"ended_at": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"first_stop_seq": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"last_stop_seq": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"route_id": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"scheduled_start": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"start_delay_s": {
+									"anyOf": [
+										{
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										{
+											"type": "null"
+										}
+									]
+								},
+								"started_at": {
+									"type": "string"
+								},
+								"trip_id": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"route_id",
+								"direction",
+								"trip_id",
+								"started_at",
+								"ended_at",
+								"end_reason",
+								"first_stop_seq",
+								"last_stop_seq",
+								"scheduled_start",
+								"start_delay_s"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"stop_id": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"stop_seq": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"trip_id": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"network_id",
+					"plate",
+					"label",
+					"live",
+					"accessible",
+					"last_seen_at",
+					"position",
+					"route",
+					"direction",
+					"trip_id",
+					"stop_id",
+					"stop_seq",
+					"current_run",
+					"runs_today"
+				],
+				"type": "object"
+			},
+			"VehicleSnapshotDto": {
+				"properties": {
+					"feed_ts": {
+						"anyOf": [
+							{
+								"maximum": 9007199254740991,
+								"minimum": -9007199254740991,
+								"type": "integer"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "Unix seconds of the newest poll"
+					},
+					"fields": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"message": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"network_id": {
+						"maximum": 9007199254740991,
+						"minimum": -9007199254740991,
+						"type": "integer"
+					},
+					"status": {
+						"enum": [
+							"active",
+							"degraded",
+							"disabled"
+						],
+						"type": "string"
+					},
+					"vehicles": {
+						"items": {
+							"description": "Values in the order given by `fields`",
+							"items": {
+								"type": [
+									"string",
+									"number",
+									"null"
+								]
+							},
+							"type": "array"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"network_id",
+					"feed_ts",
+					"status",
+					"message",
+					"fields",
+					"vehicles"
 				],
 				"type": "object"
 			},
@@ -9028,6 +9868,90 @@
 				]
 			}
 		},
+		"/v1/networks/{networkId}/vehicles": {
+			"get": {
+				"operationId": "Vehicles_snapshot",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "networkId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Comma separated stable route ids (max 12)",
+						"in": "query",
+						"name": "routes",
+						"required": false,
+						"schema": {
+							"maxLength": 2000,
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "direction",
+						"required": false,
+						"schema": {
+							"maximum": 9007199254740991,
+							"minimum": -9007199254740991,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "w,s,e,n; max 0.5 degree span, snapped to z12 tiles",
+						"in": "query",
+						"name": "bbox",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/VehicleSnapshotDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Live vehicles as compact arrays in the order of `fields` (same as the WS snapshot)"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit: live"
+				]
+			}
+		},
 		"/v1/oauth/apps/{clientId}": {
 			"get": {
 				"operationId": "OAuth_app",
@@ -9713,6 +10637,82 @@
 				]
 			}
 		},
+		"/v1/routes/{routeId}/history/departures": {
+			"get": {
+				"operationId": "Vehicles_history",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routeId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "direction",
+						"required": false,
+						"schema": {
+							"maximum": 1,
+							"minimum": 0,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "0 = Monday",
+						"in": "query",
+						"name": "weekday",
+						"required": false,
+						"schema": {
+							"maximum": 6,
+							"minimum": 0,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/HistoryDeparturesDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Observed trip starts on the same weekday last week"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit: live"
+				]
+			}
+		},
 		"/v1/routes/{routeId}/shape": {
 			"get": {
 				"operationId": "Transit_shape",
@@ -10007,6 +11007,72 @@
 				]
 			}
 		},
+		"/v1/stops/{stopId}/departures": {
+			"get": {
+				"operationId": "Vehicles_departures",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stopId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 20,
+							"maximum": 50,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/DeparturesDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Scheduled departures merged with live vehicles"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit: live"
+				]
+			}
+		},
 		"/v1/stops/nearby": {
 			"get": {
 				"operationId": "Transit_nearby",
@@ -10148,6 +11214,61 @@
 				},
 				"tags": [
 					"system"
+				]
+			}
+		},
+		"/v1/vehicles/{vehicleId}": {
+			"get": {
+				"operationId": "Vehicles_vehicle",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "vehicleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/VehicleDetailDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Live state, current run and runs today"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"transit: live"
 				]
 			}
 		}

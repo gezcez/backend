@@ -34,6 +34,7 @@ import { trackerRunner } from "@services/tracker/tracker-host.service"
 import { TrackerModule } from "@services/tracker/tracker.module"
 import { TransitModule } from "@services/transit/transit.module"
 import { UsersModule } from "@services/users/users.module"
+import { VehiclesModule } from "@services/vehicles/vehicles.module"
 
 @Module({})
 export class AppModule {
@@ -78,6 +79,7 @@ export class AppModule {
 				TransitModule,
 				CitiesModule,
 				TrackerModule.forRoot(config),
+				VehiclesModule,
 				// Test-only routes are not even registered outside NODE_ENV=test.
 				...(config.isTest ? [TestMailboxModule] : []),
 			],
