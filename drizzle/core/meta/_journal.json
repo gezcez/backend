@@ -8,6 +8,13 @@
       "when": 1792679699790,
       "tag": "0000_identity_and_rbac",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792681200384,
+      "tag": "0001_catalog_providers",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 // catalog.ts
-// Cities and networks. Roles and audit rows are network scoped, so they live in core.db.
-// Providers and bindings join in P2/P3.
+// Cities, networks, providers and provider bindings (plan sections 5.1 and 6.5). Roles and audit
+// rows are network scoped, so the catalog lives in core.db with real foreign keys.
 
 import { index, int, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 import { auditColumns } from "../_audit"
@@ -47,3 +47,58 @@ export const networksTable = sqliteTable(
 
 export type CityRow = typeof citiesTable.$inferSelect
 export type NetworkRow = typeof networksTable.$inferSelect
+
+/** What a provider declares it collects, shown on the public privacy page. */
+export interface PulledDataItem {
+	key: string
+	is_collected: boolean
+	can_optout: boolean
+	details: string
+}
+
+export const providersTable = sqliteTable("providers", {
+	key: text().primaryKey(),
+	name: text().notNull(),
+	url: text(),
+	image_url: text(),
+	/** Global kill switch (dashboard level). The env hard kill sits above it. */
+	enabled: int({ mode: "boolean" }).notNull().default(true),
+	disabled_reason: text(),
+	pulled_data: text({ mode: "json" }).$type<PulledDataItem[]>().notNull().default([]),
+	legal_note: text(),
+	...auditColumns(),
+})
+
+export type BindingStatus = "active" | "paused" | "disabled"
+
+export const providerBindingsTable = sqliteTable(
+	"provider_bindings",
+	{
+		/** The "region id" used everywhere in vts.db, transit.db and the archive. */
+		id: int().primaryKey({ autoIncrement: true }),
+		network_id: int()
+			.notNull()
+			.references(() => networksTable.id),
+		provider_key: text()
+			.notNull()
+			.references(() => providersTable.key),
+		/** Upstream reference, for Kentkart the 3-digit region ("004"). */
+		external_ref: text().notNull(),
+		/** Non-secret adapter config (base URL variants, filter rules); validated by the adapter. */
+		config: text({ mode: "json" }).$type<Record<string, unknown>>().notNull().default({}),
+		/** Capability overrides on top of the provider declaration. */
+		capabilities: text({ mode: "json" }).$type<Record<string, unknown>>().notNull().default({}),
+		poll_interval_s: int().notNull().default(30),
+		idle_poll_interval_s: int().notNull().default(60),
+		status: text().$type<BindingStatus>().notNull().default("active"),
+		disabled_reason: text(),
+		...auditColumns(),
+	},
+	(t) => [
+		uniqueIndex("provider_bindings_provider_ref_unique").on(t.provider_key, t.external_ref),
+		index("provider_bindings_network_idx").on(t.network_id),
+	],
+)
+
+export type ProviderRow = typeof providersTable.$inferSelect
+export type ProviderBindingRow = typeof providerBindingsTable.$inferSelect
