@@ -1,0 +1,99 @@
+# gezcez backend
+
+The gezcez API: OAuth 2.1 authorization server, dashboard API, mobile API and public transit API.
+NestJS 11 on Bun, SQLite through Drizzle (`bun:sqlite`), zod validation, OpenAPI 3.1.
+
+This repository stands alone. It shares no package with the client repos (`gezcez/oauth`,
+`gezcez/dashboard`, `gezcez/mobile`); they consume it through the published `openapi.json` and the
+`ghcr.io/gezcez/backend` Docker image.
+
+## Quick start
+
+```sh
+bun install
+cp .env.example .env   # optional, every value has a development default
+bun run dev            # http://localhost:8080
+```
+
+- `GET /health` process is up, `GET /ready` databases open and migrated (503 otherwise)
+- `GET /docs` API reference (Scalar), `GET /openapi.json` the contract clients generate from
+- Everything else lives under `/v1`
+
+Migrations run at boot. `bun run db:seed` loads the idempotent seed for the current environment
+(`--env production|staging|local|test` to override).
+
+## Scripts
+
+| Script                             | What it does                                                     |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| `dev`                              | Run `src/main.ts` with watch                                     |
+| `build` / `start`                  | Bundle to `dist/main.js` (packages stay external) and run it     |
+| `typecheck`                        | `tsc --noEmit`                                                   |
+| `lint` / `format`                  | ESLint (with the rules in `eslint-rules/`) and Prettier          |
+| `test`                             | Unit specs (`src/**/*.spec.ts`) then e2e (`test/e2e/*.e2e.ts`)   |
+| `db:generate`                      | Generate a migration from `src/schemas/core` into `drizzle/core` |
+| `db:migrate` / `db:seed`           | Apply migrations / seed without starting the server              |
+| `openapi:export` / `openapi:check` | Write `openapi.json` / fail if the committed copy is stale       |
+
+## Layout
+
+```
+src/
+  main.ts               bootstrap only
+  app.factory.ts        builds the configured app (used by main, tests and scripts)
+  app.module.ts         root module
+  common/               config, errors, response envelope, logger, OpenAPI builder
+    middlewares/        guards, decorators, filters, interceptors
+    utils/              small helpers without global state
+  db/                   database module, SQLite opener, boot migrations
+  schemas/core/         core.db tables (one file per table group, barrel in index.ts)
+  services/<domain>/    <domain>.module|controller|service|repository|dto|spec.ts
+  lang/                 tr/en strings for emails
+  ws/                   WebSocket gateways
+drizzle/core/           generated SQL migrations (committed)
+eslint-rules/           repositories-only, no-orm-in-controllers, drizzle imports-only
+scripts/                seed, migrate, export-openapi
+test/helpers/app.ts     boots the real app on a temp DATA_DIR for e2e tests
+```
+
+Rules enforced by lint: only `*.repository.ts` files import the database module (`@db`);
+controllers and services never import `drizzle-orm` or `@schemas`; only SQLite flavoured drizzle
+entry points are allowed.
+
+## Responses and errors
+
+Handlers return plain data and the response interceptor wraps it:
+
+```json
+{ "ok": true, "data": { "...": "..." } }
+{ "ok": false, "error": { "code": "VALIDATION_FAILED", "message": "...", "details": {}, "request_id": "01J..." } }
+```
+
+Error codes and their HTTP statuses live in `src/common/errors.ts` and are published as the
+`ErrorCode` enum in `openapi.json`. `request_id` equals the `x-request-id` response header. The
+OAuth protocol endpoints (`/v1/oauth/token`, `/v1/oauth/revoke`, `/.well-known/*`) and the probes
+return their standard shapes without the envelope.
+
+## Configuration
+
+Every environment variable is listed with a comment in `.env.example` and validated by zod at
+boot (`src/common/config.ts`). Staging and production refuse to start without
+`KEY_ENCRYPTION_SECRET`, `SEAL_SECRET`, `CODE_PEPPER` and `CSRF_SECRET`.
+
+## Docker
+
+```sh
+docker build -t gezcez-backend .
+docker run --rm -p 8080:8080 -v gezcez-data:/app/data \
+  -e NODE_ENV=development gezcez-backend
+```
+
+The image runs as a non-root user, keeps all state in `/app/data` and has a health check on
+`/health`. `compose.yml` runs the same image locally (`docker compose up --build`).
+
+## Contract publishing
+
+- `openapi.json` is committed at the root; CI fails when it is stale (`bun run openapi:export`).
+- CI on `main` pushes `ghcr.io/gezcez/backend:main` and `:sha-<sha>`.
+- A `v*` tag attaches `openapi.json` to the GitHub release and pushes `:v<x.y.z>` and `:latest`,
+  so client repos can pin an exact contract version for `api:gen` and their e2e suites.

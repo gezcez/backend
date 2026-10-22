@@ -1,0 +1,27 @@
+# Local run of the production image: `docker compose up --build`.
+# Production and staging use deploy/compose.yml (with Litestream and cloudflared).
+services:
+    backend:
+        build:
+            context: .
+            args:
+                GIT_SHA: ${GIT_SHA:-dev}
+        image: ghcr.io/gezcez/backend:local
+        ports:
+            - "8080:8080"
+        env_file:
+            - path: .env
+              required: false
+        environment:
+            NODE_ENV: ${NODE_ENV:-development}
+            PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+            LOG_LEVEL: ${LOG_LEVEL:-info}
+        volumes:
+            - backend-data:/app/data
+        restart: unless-stopped
+        read_only: true
+        tmpfs:
+            - /tmp
+
+volumes:
+    backend-data:
