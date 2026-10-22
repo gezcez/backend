@@ -229,4 +229,31 @@ describe("tracker engine with the fake provider", () => {
 			await h.t.close()
 		}
 	})
+
+	test("retention keeps unarchived days unless the archive guard is off", async () => {
+		const dir = dataDir()
+		const now = Math.floor(Date.now() / 1000)
+		const old = now - 10 * 86400
+		let h = await boot(dir)
+		h.script([feed(old, [vehicle("R", old)]), feed(now - 20, [vehicle("R", now - 20)])])
+		await h.engine.pollOnce(h.bindingId)
+		await h.engine.pollOnce(h.bindingId)
+		expect(h.repository.positionCount(h.bindingId)).toBe(2)
+		expect(h.engine.runRetention(now).positions).toBe(0)
+		expect(h.repository.positionCount(h.bindingId)).toBe(2)
+		await h.t.close()
+
+		const t = await createTestApp({
+			TRACKER_RUNNER: "manual",
+			DATA_DIR: dir,
+			VTS_RETENTION_REQUIRE_ARCHIVE: "false",
+		})
+		try {
+			const engine = t.app.get(TrackerHostService).inlineEngine()!
+			expect(engine.runRetention(now).positions).toBe(1)
+			expect(t.app.get(TrackerRepository).positionCount(h.bindingId)).toBe(1)
+		} finally {
+			await t.close()
+		}
+	})
 })
