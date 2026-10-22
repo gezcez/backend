@@ -6169,6 +6169,270 @@
 				],
 				"type": "object"
 			},
+			"PublicFleetDto": {
+				"properties": {
+					"generated_at": {
+						"type": "string"
+					},
+					"networks": {
+						"items": {
+							"properties": {
+								"city": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"timezone": {
+									"type": "string"
+								},
+								"today": {
+									"properties": {
+										"date": {
+											"type": "string"
+										},
+										"hours": {
+											"items": {
+												"items": false,
+												"maxItems": 2,
+												"minItems": 2,
+												"prefixItems": [
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													},
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													}
+												],
+												"type": "array"
+											},
+											"type": "array"
+										},
+										"peak_vehicles": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"vehicle_hours": {
+											"type": "number"
+										},
+										"vehicles": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										}
+									},
+									"required": [
+										"date",
+										"vehicles",
+										"peak_vehicles",
+										"vehicle_hours",
+										"hours"
+									],
+									"type": "object"
+								},
+								"yesterday": {
+									"properties": {
+										"date": {
+											"type": "string"
+										},
+										"hours": {
+											"items": {
+												"items": false,
+												"maxItems": 2,
+												"minItems": 2,
+												"prefixItems": [
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													},
+													{
+														"maximum": 9007199254740991,
+														"minimum": -9007199254740991,
+														"type": "integer"
+													}
+												],
+												"type": "array"
+											},
+											"type": "array"
+										},
+										"peak_vehicles": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										},
+										"vehicle_hours": {
+											"type": "number"
+										},
+										"vehicles": {
+											"maximum": 9007199254740991,
+											"minimum": -9007199254740991,
+											"type": "integer"
+										}
+									},
+									"required": [
+										"date",
+										"vehicles",
+										"peak_vehicles",
+										"vehicle_hours",
+										"hours"
+									],
+									"type": "object"
+								}
+							},
+							"required": [
+								"id",
+								"name",
+								"city",
+								"timezone",
+								"today",
+								"yesterday"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"generated_at",
+					"networks"
+				],
+				"type": "object"
+			},
+			"PublicQualityDto": {
+				"properties": {
+					"cities": {
+						"items": {
+							"properties": {
+								"name": {
+									"properties": {
+										"en": {
+											"type": "string"
+										},
+										"tr": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"tr",
+										"en"
+									],
+									"type": "object"
+								},
+								"networks": {
+									"items": {
+										"properties": {
+											"days": {
+												"items": {
+													"properties": {
+														"coverage": {
+															"type": [
+																"number",
+																"null"
+															]
+														},
+														"date": {
+															"type": "string"
+														},
+														"gap_minutes": {
+															"type": "number"
+														},
+														"lag_p95_s": {
+															"type": [
+																"number",
+																"null"
+															]
+														},
+														"score": {
+															"type": [
+																"number",
+																"null"
+															]
+														},
+														"success_rate": {
+															"type": [
+																"number",
+																"null"
+															]
+														}
+													},
+													"required": [
+														"date",
+														"score",
+														"success_rate",
+														"lag_p95_s",
+														"coverage",
+														"gap_minutes"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											},
+											"id": {
+												"type": "string"
+											},
+											"name": {
+												"type": "string"
+											},
+											"score": {
+												"type": [
+													"number",
+													"null"
+												]
+											}
+										},
+										"required": [
+											"id",
+											"name",
+											"score",
+											"days"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"score": {
+									"type": [
+										"number",
+										"null"
+									]
+								},
+								"slug": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"slug",
+								"name",
+								"score",
+								"networks"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"from",
+					"to",
+					"cities"
+				],
+				"type": "object"
+			},
 			"PutFavouritesDto": {
 				"properties": {
 					"groups": {
@@ -16918,6 +17182,132 @@
 				},
 				"tags": [
 					"transit"
+				]
+			}
+		},
+		"/v1/public/analytics/fleet": {
+			"get": {
+				"operationId": "PublicAnalytics_fleet",
+				"parameters": [
+					{
+						"description": "City slug (default: every public city)",
+						"in": "query",
+						"name": "city",
+						"required": false,
+						"schema": {
+							"pattern": "^[a-z0-9-]{1,64}$",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PublicFleetDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Fleet in service today and yesterday"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"public: analytics"
+				]
+			}
+		},
+		"/v1/public/analytics/quality": {
+			"get": {
+				"operationId": "PublicAnalytics_quality",
+				"parameters": [
+					{
+						"description": "City slug (default: every public city)",
+						"in": "query",
+						"name": "city",
+						"required": false,
+						"schema": {
+							"pattern": "^[a-z0-9-]{1,64}$",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Closed days back",
+						"in": "query",
+						"name": "days",
+						"required": false,
+						"schema": {
+							"default": 7,
+							"maximum": 30,
+							"minimum": 1,
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/PublicQualityDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Daily data reliability score per city"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"tags": [
+					"public: analytics"
 				]
 			}
 		},
