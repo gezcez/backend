@@ -1046,6 +1046,66 @@
 				],
 				"type": "object"
 			},
+			"PasswordLoginDto": {
+				"properties": {
+					"email": {
+						"format": "email",
+						"maxLength": 254,
+						"pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+						"type": "string"
+					},
+					"password": {
+						"maxLength": 1024,
+						"minLength": 1,
+						"type": "string"
+					},
+					"request_id": {
+						"maxLength": 64,
+						"type": "string"
+					},
+					"turnstile_token": {
+						"maxLength": 4096,
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"password"
+				],
+				"type": "object"
+			},
+			"PasswordResetDto": {
+				"properties": {
+					"new_password": {
+						"maxLength": 1024,
+						"minLength": 1,
+						"type": "string"
+					},
+					"reset_token": {
+						"maxLength": 2048,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"reset_token",
+					"new_password"
+				],
+				"type": "object"
+			},
+			"PasswordSetDto": {
+				"properties": {
+					"new_password": {
+						"maxLength": 1024,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"new_password"
+				],
+				"type": "object"
+			},
 			"PatchMeDto": {
 				"properties": {
 					"display_name": {
@@ -1225,6 +1285,19 @@
 				],
 				"type": "object"
 			},
+			"ReauthDto": {
+				"properties": {
+					"password": {
+						"maxLength": 1024,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"password"
+				],
+				"type": "object"
+			},
 			"RevokeRequestDto": {
 				"properties": {
 					"client_id": {
@@ -1343,6 +1416,59 @@
 				"required": [
 					"account",
 					"session"
+				],
+				"type": "object"
+			},
+			"SignedInDto": {
+				"properties": {
+					"account": {
+						"properties": {
+							"avatar_initials": {
+								"type": "string"
+							},
+							"display_name": {
+								"type": "string"
+							},
+							"email": {
+								"type": "string"
+							},
+							"email_masked": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"locale": {
+								"enum": [
+									"tr",
+									"en"
+								],
+								"type": "string"
+							}
+						},
+						"required": [
+							"id",
+							"display_name",
+							"email_masked",
+							"avatar_initials",
+							"locale"
+						],
+						"type": "object"
+					},
+					"auth_time": {
+						"format": "date-time",
+						"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+						"type": "string"
+					},
+					"status": {
+						"const": "signed_in",
+						"type": "string"
+					}
+				},
+				"required": [
+					"status",
+					"account",
+					"auth_time"
 				],
 				"type": "object"
 			},
@@ -1957,6 +2083,344 @@
 					}
 				},
 				"summary": "Verify a code: signed_in, needs_profile or reset_ready",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/password": {
+			"delete": {
+				"operationId": "Password_remove",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"type": "null"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"session": []
+					}
+				],
+				"summary": "Remove the password, back to email codes only (step-up)",
+				"tags": [
+					"account"
+				]
+			},
+			"put": {
+				"operationId": "Password_set",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PasswordSetDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"type": "null"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"session": []
+					}
+				],
+				"summary": "Set or change the password (step-up)",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/password/login": {
+			"post": {
+				"operationId": "Password_login",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PasswordLoginDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SignedInDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Password login (optional method, Turnstile, fails closed)",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/password/reset": {
+			"post": {
+				"operationId": "Password_reset",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PasswordResetDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SignedInDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"summary": "Set a new password with reset_token; revokes every session",
+				"tags": [
+					"account"
+				]
+			}
+		},
+		"/v1/account/reauth": {
+			"post": {
+				"operationId": "Password_reauth",
+				"parameters": [
+					{
+						"description": "Required on writes; from GET /v1/account/csrf",
+						"in": "header",
+						"name": "X-CSRF-Token",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ReauthDto"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"$ref": "#/components/schemas/SignedInDto"
+										},
+										"ok": {
+											"enum": [
+												true
+											],
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"ok",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						},
+						"description": "Success"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error envelope"
+					}
+				},
+				"security": [
+					{
+						"session": []
+					}
+				],
+				"summary": "Re-verify with the password; refreshes auth_time and amr",
 				"tags": [
 					"account"
 				]

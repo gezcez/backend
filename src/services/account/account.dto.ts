@@ -109,3 +109,34 @@ export const SignupCompleteBody = z.object({
 	locale: Locale,
 })
 export class SignupCompleteDto extends createZodDto(SignupCompleteBody) {}
+
+// Passwords (optional method, plan section 6.1.1). Length rules are checked by the service so
+// a too-short password is AUTH_PASSWORD_WEAK, not a validation error.
+const Password = z.string().min(1).max(1024)
+
+export const PasswordLoginBody = z.object({
+	email: Email,
+	password: Password,
+	request_id: z.string().max(64).optional(),
+	turnstile_token: z.string().max(4096).optional(),
+})
+export class PasswordLoginDto extends createZodDto(PasswordLoginBody) {}
+
+export const PasswordResetBody = z.object({
+	reset_token: z.string().min(1).max(2048),
+	new_password: Password,
+})
+export class PasswordResetDto extends createZodDto(PasswordResetBody) {}
+
+export const ReauthBody = z.object({ password: Password })
+export class ReauthDto extends createZodDto(ReauthBody) {}
+
+export const PasswordSetBody = z.object({ new_password: Password })
+export class PasswordSetDto extends createZodDto(PasswordSetBody) {}
+
+export const SignedInSchema = z.object({
+	status: z.literal("signed_in"),
+	account: AccountSummarySchema,
+	auth_time: z.iso.datetime(),
+})
+export class SignedInDto extends createZodDto(SignedInSchema) {}

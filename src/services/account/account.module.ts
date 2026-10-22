@@ -6,9 +6,12 @@ import { COOKIE_AUTH } from "@common/auth.types"
 import { AccountController } from "./account.controller"
 import { AccountRepository } from "./account.repository"
 import { AccountService } from "./account.service"
+import { BreachedPasswordService } from "./breached-password.service"
 import { AccountCookieAuth } from "./cookie-auth.provider"
 import { CsrfService } from "./csrf.service"
 import { DeviceService } from "./device.service"
+import { PasswordController } from "./password.controller"
+import { PasswordService } from "./password.service"
 import { RevokedSessionsService } from "./revoked-sessions.service"
 import { SessionRepository } from "./session.repository"
 import { SessionService } from "./session.service"
@@ -16,10 +19,12 @@ import { TurnstileService } from "./turnstile.service"
 
 @Global()
 @Module({
-	controllers: [AccountController],
+	controllers: [AccountController, PasswordController],
 	providers: [
 		AccountService,
 		AccountRepository,
+		PasswordService,
+		BreachedPasswordService,
 		SessionService,
 		SessionRepository,
 		RevokedSessionsService,
